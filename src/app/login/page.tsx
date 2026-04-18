@@ -17,6 +17,8 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (searchParams.get('tab') === 'signup') setIsSignUp(true);
@@ -28,9 +30,23 @@ function LoginForm() {
     }
   }, [user, isLoading, isAdmin, router]);
 
+  // Animate the loading dots
+  useEffect(() => {
+    if (!loading) return;
+    const base = isSignUp ? 'Creating your account' : 'Signing you in';
+    let dots = 0;
+    setLoadingText(base);
+    const interval = setInterval(() => {
+      dots = (dots + 1) % 4;
+      setLoadingText(base + '.'.repeat(dots));
+    }, 400);
+    return () => clearInterval(interval);
+  }, [loading, isSignUp]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess(false);
     setLoading(true);
 
     const result = isSignUp
@@ -39,8 +55,11 @@ function LoginForm() {
 
     if (!result.success) {
       setError(result.error || 'Something went wrong');
+      setLoading(false);
+    } else {
+      setSuccess(true);
+      setLoadingText(isSignUp ? 'Account created! Redirecting...' : 'Welcome back! Redirecting...');
     }
-    setLoading(false);
   };
 
   if (isLoading) {
@@ -117,12 +136,36 @@ function LoginForm() {
               <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
             )}
 
+            {/* Loading / Success state overlay */}
+            {loading && (
+              <div className="flex flex-col items-center gap-3 py-2">
+                {!success ? (
+                  <div className="w-8 h-8 border-[3px] border-primary border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <div className="w-8 h-8 flex items-center justify-center rounded-full bg-primary animate-[scaleIn_0.3s_ease-out]">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+                <p className="text-sm text-zinc-400 min-w-[200px] text-center">{loadingText}</p>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition disabled:opacity-50"
+              className="w-full py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Please wait...' : isSignUp ? 'Create Account' : 'Sign In'}
+              {loading
+                ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    {isSignUp ? 'Signing Up...' : 'Signing In...'}
+                  </span>
+                )
+                : isSignUp ? 'Create Account' : 'Sign In'
+              }
             </button>
           </form>
         </div>
