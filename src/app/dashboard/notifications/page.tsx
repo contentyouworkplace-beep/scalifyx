@@ -3,11 +3,20 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../context/AuthContext';
-import type { Notification } from '@shared/types';
+interface AppNotification {
+  id: string;
+  title: string;
+  body: string;
+  target: string;
+  target_user_ids?: string[];
+  status: string;
+  type?: string;
+  created_at: string;
+}
 
 export default function NotificationsPage() {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +27,7 @@ export default function NotificationsPage() {
       .order('created_at', { ascending: false })
       .then(({ data }) => {
         // Filter to notifications relevant to this user
-        const filtered = (data || []).filter((n: Notification) => {
+        const filtered = (data || []).filter((n: AppNotification) => {
           if (n.target === 'all') return true;
           if (n.target === 'pro' && user?.plan === 'pro') return true;
           if (n.target === 'free' && user?.plan !== 'pro') return true;

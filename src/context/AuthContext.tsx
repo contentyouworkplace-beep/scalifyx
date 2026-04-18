@@ -3,7 +3,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
-import type { User } from '@shared/types';
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  role?: string;
+  plan?: string;
+  business_name?: string;
+  business_type?: string;
+  referral_code?: string;
+  created_at?: string;
+  [key: string]: any;
+}
+
+export type { User };
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.scalifyx.com/api';
 

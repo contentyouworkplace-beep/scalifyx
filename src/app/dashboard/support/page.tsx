@@ -2,7 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { apiFetch } from '../../../lib/api';
-import type { Message } from '@shared/types';
+interface Message {
+  id: string;
+  conversation_id?: string;
+  sender_id?: string;
+  sender_type: 'user' | 'ai' | 'admin';
+  content: string;
+  created_at: string;
+}
 
 export default function SupportPage() {
   const [messages, setMessages] = useState<Message[]>([]);
