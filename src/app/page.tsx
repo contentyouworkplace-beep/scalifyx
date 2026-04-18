@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PLANS, BUSINESS_TYPES, WEBSITE_TEMPLATES } from '@shared/constants';
+import { PLANS, BUSINESS_TYPES, WEBSITE_TEMPLATES } from '@/lib/constants';
 import { Logo } from '@/components/Logo';
 import {
   ChatBotIcon, PaletteIcon, PhoneIcon, SearchIcon, GlobeIcon,

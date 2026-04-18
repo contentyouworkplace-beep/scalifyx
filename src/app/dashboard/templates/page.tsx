@@ -1,6 +1,6 @@
 'use client';
 
-import { WEBSITE_TEMPLATES } from '@shared/constants';
+import { WEBSITE_TEMPLATES } from '@/lib/constants';
 
 export default function TemplatesPage() {
   return (

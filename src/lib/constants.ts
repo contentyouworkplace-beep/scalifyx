@@ -1,0 +1,57 @@
+export const PLANS = [
+  {
+    id: 'pro',
+    name: 'ScalifyX Pro',
+    price: 749,
+    originalPrice: 1999,
+    period: 'month',
+    features: [
+      'Website + Search Engine Optimization',
+      'Unlimited Pages Professional Website',
+      'Add Your Custom Domain',
+      'Free Hosting',
+      'Website Maintenance',
+      'On-Page & Technical SEO',
+      'Google Search Console Setup',
+      'Mobile Responsive Design',
+      'SSL Certificate',
+      'Priority Chat Support',
+      'WhatsApp Chat Button',
+      'Contact Form',
+      'Social Media Integration',
+      'Monthly Analytics & SEO Report',
+    ],
+    popular: true,
+    color: '#6C5CE7',
+  },
+];
+
+export const BUSINESS_TYPES = [
+  { id: 'restaurant', label: 'Restaurant / Cafe', icon: '🍽️' },
+  { id: 'salon', label: 'Salon / Spa', icon: '💇' },
+  { id: 'doctor', label: 'Doctor / Clinic', icon: '🏥' },
+  { id: 'lawyer', label: 'Lawyer / CA', icon: '⚖️' },
+  { id: 'shop', label: 'Retail Shop', icon: '🛍️' },
+  { id: 'tutor', label: 'Tutor / Coaching', icon: '📚' },
+  { id: 'gym', label: 'Gym / Fitness', icon: '💪' },
+  { id: 'realestate', label: 'Real Estate', icon: '🏠' },
+  { id: 'freelancer', label: 'Freelancer', icon: '💻' },
+  { id: 'photographer', label: 'Photographer', icon: '📸' },
+  { id: 'ngo', label: 'NGO / Trust', icon: '🤝' },
+  { id: 'other', label: 'Other', icon: '🏢' },
+];
+
+export const WEBSITE_TEMPLATES = [
+  { id: 'modern-business', name: 'Modern Business', category: 'business', icon: '🏢', preview: 'Clean corporate look with hero section' },
+  { id: 'restaurant-menu', name: 'Restaurant & Menu', category: 'restaurant', icon: '🍽️', preview: 'Menu cards, gallery, reservation CTA' },
+  { id: 'portfolio', name: 'Creative Portfolio', category: 'freelancer', icon: '🎨', preview: 'Project grid, about me, contact form' },
+  { id: 'medical', name: 'Doctor / Clinic', category: 'doctor', icon: '🏥', preview: 'Appointments, services, trust badges' },
+  { id: 'salon-beauty', name: 'Salon & Spa', category: 'salon', icon: '💇', preview: 'Services menu, before/after gallery' },
+  { id: 'ecommerce', name: 'Product Catalog', category: 'shop', icon: '🛒', preview: 'Product grid with prices and Buy Now' },
+  { id: 'education', name: 'Coaching Center', category: 'tutor', icon: '📚', preview: 'Courses, testimonials, enrollment' },
+  { id: 'gym-fitness', name: 'Gym & Fitness', category: 'gym', icon: '💪', preview: 'Plans, trainers, class schedule' },
+  { id: 'realestate-listing', name: 'Real Estate', category: 'realestate', icon: '🏠', preview: 'Property listings with filters' },
+  { id: 'event-landing', name: 'Event / Landing', category: 'other', icon: '🎉', preview: 'Countdown, ticket CTA, speaker list' },
+  { id: 'ngo-charity', name: 'NGO / Charity', category: 'ngo', icon: '🤝', preview: 'Cause, donation CTA, impact stats' },
+  { id: 'dark-minimal', name: 'Dark Minimal', category: 'freelancer', icon: '🖤', preview: 'Dark theme, minimal text, bold imagery' },
+];
