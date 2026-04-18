@@ -3,7 +3,14 @@
 import { useAuth } from '../../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { apiFetch } from '../../../lib/api';
-import type { Message } from '@shared/types';
+interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  sender_type: 'user' | 'ai' | 'admin';
+  content: string;
+  created_at: string;
+}
 
 export default function ChatPage() {
   const { user } = useAuth();
