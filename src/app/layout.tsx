@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: 'ScalifyX — Professional Website in 60 Seconds',
   description: 'Get a professional, SEO-optimized website for your business in 60 seconds. Just chat with our AI and go live. Starting at ₹199/month.',
   keywords: 'website builder, AI website, business website, SEO, cheap website',
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/favicon.png',
+    apple: '/icon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
