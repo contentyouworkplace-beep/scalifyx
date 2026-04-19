@@ -48,6 +48,9 @@ export default function AdminUsersPage() {
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<UserItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -125,12 +128,18 @@ export default function AdminUsersPage() {
   };
 
   // Delete
-  const handleDelete = async (user: UserItem) => {
-    if (!confirm(`Delete ${user.name || user.email}? This will remove their account, websites, and all data.`)) return;
+  const openDeleteConfirm = (user: UserItem) => {
+    setDeleteTarget(user);
+    setDeleteModal(true);
+  };
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await apiFetch(`/user/admin/${user.id}`, { method: 'DELETE' });
-      toast.success('User deleted'); fetchUsers();
+      await apiFetch(`/user/admin/${deleteTarget.id}`, { method: 'DELETE' });
+      toast.success('User deleted'); setDeleteModal(false); setDeleteTarget(null); fetchUsers();
     } catch (e: any) { toast.error(e.message || 'Failed to delete'); }
+    finally { setDeleting(false); }
   };
 
   if (loading) {
@@ -217,7 +226,7 @@ export default function AdminUsersPage() {
                 <button onClick={() => openResetPassword(user)} className="p-2 rounded-lg bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20 transition" title="Reset Password">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
                 </button>
-                <button onClick={() => handleDelete(user)} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" title="Delete">
+                <button onClick={() => openDeleteConfirm(user)} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" title="Delete">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
                 <button onClick={() => window.location.href = `/admin/chats?userId=${user.id}&userName=${user.name}`} className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition ml-auto" title="Chat">
@@ -307,6 +316,45 @@ export default function AdminUsersPage() {
             <button onClick={handleResetPassword} disabled={saving} className="w-full mt-4 py-3.5 bg-primary text-white rounded-xl font-bold text-sm disabled:opacity-50">
               {saving ? 'Resetting...' : 'Reset Password'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && deleteTarget && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end md:items-center justify-center" onClick={() => { if (!deleting) { setDeleteModal(false); setDeleteTarget(null); } }}>
+          <div className="bg-bg rounded-t-3xl md:rounded-2xl w-full max-w-sm p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-red-400">
+                  <path d="M12 9v4M12 17h.01" strokeLinecap="round" />
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-bold mb-1">Delete User?</h2>
+              <p className="text-sm text-zinc-400 mb-1">
+                Are you sure you want to delete <span className="text-white font-semibold">{deleteTarget.name || deleteTarget.email}</span>?
+              </p>
+              <p className="text-xs text-red-400/80 mb-5">
+                This will permanently remove their account, websites, and all data. This action cannot be undone.
+              </p>
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => { setDeleteModal(false); setDeleteTarget(null); }}
+                  disabled={deleting}
+                  className="flex-1 py-3 bg-surface border border-border text-zinc-300 rounded-xl font-semibold text-sm hover:bg-surface/80 transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1 py-3 bg-red-500 text-white rounded-xl font-semibold text-sm hover:bg-red-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {deleting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Delete'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
