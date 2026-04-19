@@ -12,13 +12,26 @@ interface Message {
   created_at: string;
 }
 
+// Simple markdown-like rendering for bold text
+function formatMessage(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="font-semibold text-white">{part.slice(2, -2)}</strong>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 export default function ChatPage() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isPro = user?.plan === 'pro' || user?.plan === 'trial';
 
   useEffect(() => {
     // Load existing conversations
@@ -44,24 +57,25 @@ export default function ChatPage() {
     } catch {}
   };
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  const sendMessage = async (directMessage?: string) => {
+    const msg = directMessage || input.trim();
+    if (!msg || loading) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
       conversation_id: conversationId || '',
       sender_id: user?.id || '',
       sender_type: 'user',
-      content: input.trim(),
+      content: msg,
       created_at: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setLoading(true);
+    setSuggestions([]);
 
     try {
-      const isPro = user?.plan === 'pro' || user?.plan === 'trial';
       const endpoint = isPro ? '/chat/message' : '/chat/sales';
       const body = isPro
         ? { message: userMsg.content, conversationId }
@@ -73,6 +87,7 @@ export default function ChatPage() {
       });
 
       if (data?.conversationId) setConversationId(data.conversationId);
+      if (data?.suggestions) setSuggestions(data.suggestions);
 
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -111,25 +126,43 @@ export default function ChatPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto rounded-xl bg-card border border-border p-4 space-y-4">
         {messages.length === 0 && (
-          <div className="text-center py-20">
+          <div className="text-center py-12">
             <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><circle cx="9" cy="13" r="1.5" fill="currentColor"/><circle cx="15" cy="13" r="1.5" fill="currentColor"/><path d="M8 3v3M16 3v3"/><path d="M9 17h6"/></svg></div>
-            <h3 className="text-lg font-semibold mb-2">Start a conversation</h3>
-            <p className="text-sm text-zinc-500 max-w-md mx-auto">
-              Tell me about your business and I&apos;ll create a professional website for you in seconds.
+            <h3 className="text-lg font-semibold mb-2">
+              {isPro ? 'Start building your website' : 'Hey! 👋 Ask me anything'}
+            </h3>
+            <p className="text-sm text-zinc-500 max-w-md mx-auto mb-6">
+              {isPro
+                ? "Tell me about your business and I'll create a professional website for you in seconds."
+                : 'Learn about ScalifyX, pricing, features, and how we can help your business grow online.'}
             </p>
+            <div className="flex flex-wrap justify-center gap-2 max-w-lg mx-auto">
+              {(isPro
+                ? ['I want to create a website', 'I have a restaurant', 'I run a salon', 'Help me edit my site']
+                : ['How much does it cost?', 'What do I get in the plan?', 'How does it work?', 'Will my site rank on Google?']
+              ).map((q) => (
+                <button
+                  key={q}
+                  onClick={() => sendMessage(q)}
+                  className="px-3 py-1.5 text-xs rounded-full bg-surface border border-border text-zinc-300 hover:border-primary hover:text-primary transition"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {messages.map((msg) => (
           <div key={msg.id} className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
-              className={`max-w-[70%] px-4 py-3 rounded-xl text-sm leading-relaxed ${
+              className={`max-w-[80%] md:max-w-[70%] px-4 py-3 rounded-xl text-sm leading-relaxed ${
                 msg.sender_type === 'user'
                   ? 'bg-primary text-white rounded-br-sm'
                   : 'bg-surface text-zinc-200 rounded-bl-sm border border-border'
               }`}
             >
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              <div className="whitespace-pre-wrap">{msg.sender_type === 'ai' ? formatMessage(msg.content) : msg.content}</div>
               <div className={`text-xs mt-1 ${msg.sender_type === 'user' ? 'text-primary-light' : 'text-zinc-600'}`}>
                 {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
@@ -148,6 +181,22 @@ export default function ChatPage() {
             </div>
           </div>
         )}
+
+        {/* Suggestion chips after AI response */}
+        {!loading && suggestions.length > 0 && messages.length > 0 && (
+          <div className="flex flex-wrap gap-2 pl-1">
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                onClick={() => sendMessage(s)}
+                className="px-3 py-1.5 text-xs rounded-full bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div ref={scrollRef} />
       </div>
 
