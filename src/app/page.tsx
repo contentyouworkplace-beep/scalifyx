@@ -26,7 +26,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="px-4 py-2 text-sm text-zinc-300 hover:text-white transition">Login</Link>
-            <Link href="/login?tab=signup" className="px-5 py-2 text-sm bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition">Get Started</Link>
+            <a href="#pricing" className="px-5 py-2 text-sm bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition">Get Started</a>
           </div>
         </div>
       </nav>
@@ -45,9 +45,9 @@ export default function LandingPage() {
             Get a mobile-responsive website with AI-driven SEO — meta tags, sitemaps, Google indexing — all monitored by our human support team. No coding required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login?tab=signup" className="px-8 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-semibold text-lg transition pulse-glow">
+            <a href="#pricing" className="px-8 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-semibold text-lg transition pulse-glow">
               Get Started
-            </Link>
+            </a>
             <a href="#features" className="px-8 py-4 bg-card hover:bg-surface border border-border text-white rounded-xl font-semibold text-lg transition">
               See How It Works
             </a>
@@ -73,7 +73,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Pricing */}
+      <section id="pricing" className="py-20 px-4 bg-surface/50">
+        <div className="max-w-lg mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-zinc-400">No hidden fees. Cancel anytime.</p>
+          </div>
+          <div className="p-8 rounded-2xl bg-card border-2 border-primary relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-white text-xs font-bold rounded-full">
+              MOST POPULAR
+            </div>
+            <h3 className="text-2xl font-bold mt-2">{plan.name}</h3>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-4xl font-extrabold gradient-text">₹{plan.price}</span>
+              <span className="text-zinc-500 line-through">₹{plan.originalPrice}</span>
+              <span className="text-zinc-400">/ {plan.period}</span>
+            </div>
+            <ul className="mt-6 space-y-3">
+              {plan.features.map((f) => (
+                <li key={f} className="flex items-start gap-3 text-sm">
+                  <span className="text-primary mt-0.5">✓</span>
+                  <span className="text-zinc-300">{f}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/login?tab=signup" className="mt-8 block w-full py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-semibold text-center transition">
+              Get 30 Days Free Trial
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */
       <section id="features" className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
@@ -154,46 +186,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20 px-4 bg-surface/50">
-        <div className="max-w-lg mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-zinc-400">No hidden fees. Cancel anytime.</p>
-          </div>
-          <div className="p-8 rounded-2xl bg-card border-2 border-primary relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-white text-xs font-bold rounded-full">
-              MOST POPULAR
-            </div>
-            <h3 className="text-2xl font-bold mt-2">{plan.name}</h3>
-            <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold gradient-text">₹{plan.price}</span>
-              <span className="text-zinc-500 line-through">₹{plan.originalPrice}</span>
-              <span className="text-zinc-400">/ {plan.period}</span>
-            </div>
-            <ul className="mt-6 space-y-3">
-              {plan.features.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-sm">
-                  <span className="text-primary mt-0.5">✓</span>
-                  <span className="text-zinc-300">{f}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/login?tab=signup" className="mt-8 block w-full py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-semibold text-center transition">
-              Get Started Now
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
+      {/* CTA */
       <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to Take Your Business Online?</h2>
           <p className="text-zinc-400 mb-8 text-lg">Create your professional website in 60 seconds.</p>
-          <Link href="/login?tab=signup" className="inline-block px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-semibold text-lg transition pulse-glow">
+          <a href="#pricing" className="inline-block px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-semibold text-lg transition pulse-glow">
             Get Started Now
-          </Link>
+          </a>
         </div>
       </section>
 
