@@ -186,7 +186,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */
+      {/* CTA */}
       <section className="py-20 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to Take Your Business Online?</h2>
