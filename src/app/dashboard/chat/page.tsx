@@ -211,7 +211,7 @@ export default function ChatPage() {
           className="flex-1 px-4 py-3 bg-card border border-border rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-primary transition"
         />
         <button
-          onClick={sendMessage}
+          onClick={() => sendMessage()}
           disabled={loading || !input.trim()}
           className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-medium transition disabled:opacity-50"
         >
