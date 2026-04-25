@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Script from 'next/script';
 import { BUSINESS_TYPES, WEBSITE_TEMPLATES } from '@/lib/constants';
 import { Logo } from '@/components/Logo';
 import {
@@ -221,6 +222,19 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-bg">
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-K97W1RGBXV"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-K97W1RGBXV');
+        `}
+      </Script>
+
       {showSignup && <SignupPopup onClose={() => setShowSignup(false)} spotsLeft={spotsLeft} />}
 
       {/* ── SCARCITY ANNOUNCEMENT BAR ── */}
