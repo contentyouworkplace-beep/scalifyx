@@ -32,12 +32,19 @@ function useSpotsTaken() {
 /* ─────────────────────────────────────────
    SIGNUP POPUP
 ───────────────────────────────────────── */
+function generatePassword() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+  let pwd = '';
+  for (let i = 0; i < 10; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
+  return pwd;
+}
+
 function SignupPopup({ onClose, spotsLeft }: { onClose: () => void; spotsLeft: number }) {
   const { signUp } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
@@ -62,8 +69,11 @@ function SignupPopup({ onClose, spotsLeft }: { onClose: () => void; spotsLeft: n
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!name.trim()) return setError('Please enter your name.');
+    if (!email.trim()) return setError('Please enter your email.');
     setLoading(true);
-    const result = await signUp(email, password, name);
+    const autoPassword = generatePassword();
+    const result = await signUp(email, autoPassword, name, phone);
     if (!result.success) {
       setError(result.error || 'Something went wrong. Please try again.');
       setLoading(false);
@@ -122,9 +132,21 @@ function SignupPopup({ onClose, spotsLeft }: { onClose: () => void; spotsLeft: n
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
               className="w-full px-4 py-3 bg-inputBg border border-border rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-green-500 transition"
               placeholder="Your full name"
             />
+            {/* Phone */}
+            <div className="flex items-center bg-inputBg border border-border rounded-xl overflow-hidden focus-within:border-green-500 transition">
+              <span className="px-3 text-zinc-500 text-sm font-medium select-none">🇮🇳 +91</span>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                className="flex-1 py-3 pr-4 bg-transparent text-white placeholder-zinc-600 focus:outline-none text-sm"
+                placeholder="Phone number"
+              />
+            </div>
             <input
               type="email"
               value={email}
@@ -132,15 +154,6 @@ function SignupPopup({ onClose, spotsLeft }: { onClose: () => void; spotsLeft: n
               required
               className="w-full px-4 py-3 bg-inputBg border border-border rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-green-500 transition"
               placeholder="Email address"
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-4 py-3 bg-inputBg border border-border rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-green-500 transition"
-              placeholder="Create a password (min. 6 chars)"
             />
 
             {error && (
@@ -212,20 +225,20 @@ export default function LandingPage() {
 
       {/* ── SCARCITY ANNOUNCEMENT BAR ── */}
       <div className="fixed top-0 w-full z-[60] bg-gradient-to-r from-violet-700 via-indigo-700 to-violet-700 py-2 px-4 text-center">
-        <p className="text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 flex-wrap">
+        <p className="text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 flex-nowrap sm:flex-wrap overflow-hidden">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-yellow-300 flex-shrink-0">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/>
           </svg>
-          <span>
+          <span className="truncate sm:whitespace-normal">
             <span className="hidden sm:inline">LIMITED OFFER — </span>
             FREE for First 1,000 Businesses Only.
           </span>
-          <span className="bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 text-white font-extrabold text-xs">
+          <span className="bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 text-white font-extrabold text-xs flex-shrink-0">
             {spotsLeft} spots left
           </span>
           <button
             onClick={() => openSignup()}
-            className="bg-white text-indigo-700 font-extrabold text-xs rounded-full px-3 py-1 hover:bg-indigo-50 transition"
+            className="hidden sm:block bg-white text-indigo-700 font-extrabold text-xs rounded-full px-3 py-1 hover:bg-indigo-50 transition flex-shrink-0"
           >
             Claim Yours →
           </button>
@@ -235,7 +248,7 @@ export default function LandingPage() {
       {/* ── NAVBAR ── */}
       <nav className="fixed top-[36px] w-full z-50 bg-bg/90 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/"><Logo size={36} /></Link>
+          <Link href="/"><Logo size={32} /></Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-zinc-400 hover:text-white transition text-sm">Features</a>
             <a href="#templates" className="text-zinc-400 hover:text-white transition text-sm">Templates</a>
@@ -254,7 +267,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-44 pb-24 px-4">
+      <section className="pt-36 sm:pt-44 pb-24 px-4">
         <div className="max-w-4xl mx-auto text-center">
           {/* Free badge */}
           <div className="inline-flex items-center gap-2 px-5 py-2 mb-6 bg-green-500/10 border border-green-500/40 rounded-full text-green-400 text-sm font-bold">
