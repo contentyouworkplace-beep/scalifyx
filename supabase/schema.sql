@@ -235,7 +235,37 @@ CREATE TABLE public.referral_ledger (
 );
 
 -- ============================================
--- 10. OFFERS (admin-managed packages/deals)
+-- 10. APP SETTINGS (global key-value config)
+-- ============================================
+CREATE TABLE public.app_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+-- Seed default AI setting
+INSERT INTO public.app_settings (key, value) VALUES ('ai_chat_enabled', 'true') ON CONFLICT (key) DO NOTHING;
+
+-- ============================================
+-- 11. USER OFFERS (admin-sent custom offers per user)
+-- ============================================
+CREATE TABLE public.user_offers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  created_by UUID REFERENCES public.profiles(id),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  plan_type TEXT NOT NULL DEFAULT 'pro' CHECK (plan_type IN ('trial', 'pro')),
+  price INTEGER NOT NULL DEFAULT 0,
+  original_price INTEGER NOT NULL DEFAULT 0,
+  trial_days INTEGER DEFAULT 0,
+  features JSONB DEFAULT '[]',
+  is_active BOOLEAN DEFAULT TRUE,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 12. OFFERS (admin-managed packages/deals)
 -- ============================================
 CREATE TABLE public.offers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -267,6 +297,8 @@ ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.analytics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referral_ledger ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.offers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_offers ENABLE ROW LEVEL SECURITY;
 
 -- Offers: anyone can read active offers. Admins can manage all.
 CREATE POLICY "Anyone can view active offers"
