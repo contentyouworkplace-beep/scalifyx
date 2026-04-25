@@ -26,7 +26,7 @@ interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   isAdmin: boolean;
-  signUp: (email: string, password: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, name?: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
@@ -122,12 +122,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = async (email: string, password: string, name?: string, phone?: string) => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name: name || '' }),
+        body: JSON.stringify({ email, password, name: name || '', phone: phone || '' }),
       });
 
       const result = await res.json();
