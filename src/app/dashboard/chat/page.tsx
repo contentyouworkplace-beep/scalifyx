@@ -30,6 +30,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [aiDisabled, setAiDisabled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPro = user?.plan === 'pro' || user?.plan === 'trial';
 
@@ -88,6 +89,7 @@ export default function ChatPage() {
 
       if (data?.conversationId) setConversationId(data.conversationId);
       if (data?.suggestions) setSuggestions(data.suggestions);
+      if (data?.ai_disabled) setAiDisabled(true);
 
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -121,7 +123,20 @@ export default function ChatPage() {
           <h1 className="text-lg md:text-xl font-bold">AI Chat</h1>
           <p className="text-xs md:text-sm text-zinc-500">Chat with our AI to create or edit your website</p>
         </div>
+        {aiDisabled && (
+          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-400/10 border border-yellow-400/30 rounded-full text-yellow-400 text-xs font-bold">
+            🧑‍💼 Human Support
+          </span>
+        )}
       </div>
+
+      {/* Human-only notice */}
+      {aiDisabled && (
+        <div className="flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/30 rounded-xl px-4 py-2.5 mb-3 text-yellow-400">
+          <span className="text-base">🧑‍💼</span>
+          <p className="text-xs">Our support team will reply to your messages manually. Response time: a few hours.</p>
+        </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto rounded-xl bg-card border border-border p-4 space-y-4">

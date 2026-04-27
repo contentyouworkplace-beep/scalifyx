@@ -51,6 +51,10 @@ export default function AdminChatsPage() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // AI toggle state
+  const [aiEnabled, setAiEnabled] = useState(true);
+  const [aiToggling, setAiToggling] = useState(false);
+
   // Detail state
   const [selected, setSelected] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -77,6 +81,8 @@ export default function AdminChatsPage() {
 
   useEffect(() => {
     fetchConversations();
+    // Fetch AI setting
+    apiFetch('/admin/ai-settings').then((d) => setAiEnabled(d.ai_chat_enabled ?? true)).catch(() => {});
     const channel = supabase
       .channel('admin-conversations')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => fetchConversations())
@@ -96,6 +102,18 @@ export default function AdminChatsPage() {
     if (filter === 'resolved') return matchesSearch && c.status === 'resolved';
     return matchesSearch;
   });
+
+  const toggleAiChat = async () => {
+    if (aiToggling) return;
+    setAiToggling(true);
+    const next = !aiEnabled;
+    try {
+      await apiFetch('/admin/ai-settings', { method: 'PUT', body: JSON.stringify({ ai_chat_enabled: next }) });
+      setAiEnabled(next);
+      toast.success(next ? '🤖 AI Chat enabled' : '🧑‍💼 AI disabled — Human only mode');
+    } catch { toast.error('Failed to update AI setting'); }
+    finally { setAiToggling(false); }
+  };
 
   // Select conversation
   const selectConversation = async (conv: Conversation) => {
@@ -291,10 +309,39 @@ export default function AdminChatsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-3">
-        <h1 className="text-xl font-extrabold">💬 All Conversations</h1>
-        <p className="text-[13px] text-zinc-500 mt-1">{conversations.length} total · {conversations.filter(c => c.unread_count > 0).length} unread</p>
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h1 className="text-xl font-extrabold">💬 All Conversations</h1>
+          <p className="text-[13px] text-zinc-500 mt-1">{conversations.length} total · {conversations.filter(c => c.unread_count > 0).length} unread</p>
+        </div>
+        {/* AI Toggle */}
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={toggleAiChat}
+            disabled={aiToggling}
+            className={`relative flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition ${aiEnabled ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-400' : 'bg-yellow-400/10 border-yellow-400/40 text-yellow-400'}`}
+          >
+            <span>{aiEnabled ? '🤖' : '🧑‍💼'}</span>
+            <span>{aiEnabled ? 'AI Active' : 'Human Only'}</span>
+            {/* Toggle pill */}
+            <span className={`w-8 h-4 rounded-full relative transition-colors ${aiEnabled ? 'bg-indigo-500' : 'bg-zinc-600'}`}>
+              <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-all ${aiEnabled ? 'left-4' : 'left-0.5'}`} />
+            </span>
+          </button>
+          <span className="text-[10px] text-zinc-600">{aiEnabled ? 'AI replies automatically' : 'Only admin can reply'}</span>
+        </div>
       </div>
+
+      {/* AI Disabled Banner */}
+      {!aiEnabled && (
+        <div className="flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/30 rounded-xl px-4 py-2.5 mb-3">
+          <span className="text-yellow-400 text-lg">🧑‍💼</span>
+          <div>
+            <p className="text-yellow-400 text-xs font-bold">Human-Only Mode Active</p>
+            <p className="text-yellow-400/70 text-[11px]">AI chatbot is disabled. All user messages will wait for your manual reply.</p>
+          </div>
+        </div>
+      )}
 
       {/* Search */}
       <div className="flex items-center bg-surface border border-border rounded-[14px] px-3 mb-3">

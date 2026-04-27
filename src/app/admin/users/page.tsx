@@ -52,6 +52,12 @@ export default function AdminUsersPage() {
   const [deleteTarget, setDeleteTarget] = useState<UserItem | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Custom Offer modal
+  const [offerModal, setOfferModal] = useState(false);
+  const [offerTarget, setOfferTarget] = useState<UserItem | null>(null);
+  const [offerForm, setOfferForm] = useState({ name: 'Special Offer', description: '', plan_type: 'pro' as 'pro' | 'trial', price: 499, original_price: 749, trial_days: 0, expires_at: '' });
+  const [offerSaving, setOfferSaving] = useState(false);
+
   const fetchUsers = useCallback(async () => {
     try {
       const data = await apiFetch('/user/admin/all');
@@ -142,6 +148,37 @@ export default function AdminUsersPage() {
     finally { setDeleting(false); }
   };
 
+  // Custom Offer
+  const openOfferModal = (user: UserItem) => {
+    setOfferTarget(user);
+    setOfferForm({ name: 'Special Offer', description: '', plan_type: 'pro', price: 499, original_price: 749, trial_days: 0, expires_at: '' });
+    setOfferModal(true);
+  };
+  const handleSendOffer = async () => {
+    if (!offerTarget) return;
+    if (!offerForm.name.trim()) return toast.error('Offer name required');
+    setOfferSaving(true);
+    try {
+      await apiFetch('/admin/user-offers', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: offerTarget.id,
+          name: offerForm.name.trim(),
+          description: offerForm.description.trim(),
+          plan_type: offerForm.plan_type,
+          price: Number(offerForm.price),
+          original_price: Number(offerForm.original_price),
+          trial_days: Number(offerForm.trial_days),
+          features: [],
+          expires_at: offerForm.expires_at || null,
+        }),
+      });
+      toast.success(`🎁 Offer sent to ${offerTarget.name || offerTarget.email}`);
+      setOfferModal(false);
+    } catch (e: any) { toast.error(e.message || 'Failed to send offer'); }
+    finally { setOfferSaving(false); }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
@@ -228,6 +265,9 @@ export default function AdminUsersPage() {
                 </button>
                 <button onClick={() => openDeleteConfirm(user)} className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" title="Delete">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+                <button onClick={() => openOfferModal(user)} className="p-2 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition" title="Send Custom Offer">
+                  🎁
                 </button>
                 <button onClick={() => window.location.href = `/admin/chats?userId=${user.id}&userName=${user.name}`} className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition ml-auto" title="Chat">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -355,6 +395,127 @@ export default function AdminUsersPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🎁 Send Custom Offer Modal */}
+      {offerModal && offerTarget && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end md:items-center justify-center" onClick={() => setOfferModal(false)}>
+          <div className="bg-bg rounded-t-3xl md:rounded-2xl w-full max-w-md max-h-[92vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-bold">🎁 Send Custom Offer</h2>
+              <button onClick={() => setOfferModal(false)} className="text-zinc-400 hover:text-white">✕</button>
+            </div>
+            <p className="text-xs text-zinc-500 mb-4">
+              Sending to <span className="text-white font-semibold">{offerTarget.name || offerTarget.email}</span>
+              {offerTarget.plan !== 'free' && <span className="ml-1 text-primary">({offerTarget.plan})</span>}
+            </p>
+
+            <div className="space-y-3">
+              {/* Offer Name */}
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 mb-1 block">Offer Name *</label>
+                <input
+                  className="w-full px-3.5 py-3 bg-surface border border-border rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary"
+                  placeholder="e.g. Special Diwali Offer"
+                  value={offerForm.name}
+                  onChange={(e) => setOfferForm({ ...offerForm, name: e.target.value })}
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 mb-1 block">Description</label>
+                <input
+                  className="w-full px-3.5 py-3 bg-surface border border-border rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary"
+                  placeholder="e.g. Exclusive 1-month deal just for you"
+                  value={offerForm.description}
+                  onChange={(e) => setOfferForm({ ...offerForm, description: e.target.value })}
+                />
+              </div>
+
+              {/* Plan Type */}
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 mb-1 block">Plan Type</label>
+                <div className="flex gap-2">
+                  {(['pro', 'trial'] as const).map((p) => (
+                    <button key={p} onClick={() => setOfferForm({ ...offerForm, plan_type: p })}
+                      className={`flex-1 py-2 rounded-xl text-sm font-medium border transition ${offerForm.plan_type === p ? 'bg-primary/20 border-primary text-primary' : 'bg-surface border-border text-zinc-400'}`}>
+                      {p === 'pro' ? '⭐ Pro' : '🆓 Trial'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price row */}
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="text-xs font-semibold text-zinc-500 mb-1 block">Offer Price (₹)</label>
+                  <input type="number" min="0"
+                    className="w-full px-3.5 py-3 bg-surface border border-border rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary"
+                    value={offerForm.price}
+                    onChange={(e) => setOfferForm({ ...offerForm, price: Number(e.target.value) })}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs font-semibold text-zinc-500 mb-1 block">Original Price (₹)</label>
+                  <input type="number" min="0"
+                    className="w-full px-3.5 py-3 bg-surface border border-border rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary"
+                    value={offerForm.original_price}
+                    onChange={(e) => setOfferForm({ ...offerForm, original_price: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+
+              {/* Trial days (if trial plan) */}
+              {offerForm.plan_type === 'trial' && (
+                <div>
+                  <label className="text-xs font-semibold text-zinc-500 mb-1 block">Trial Days</label>
+                  <input type="number" min="0"
+                    className="w-full px-3.5 py-3 bg-surface border border-border rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary"
+                    value={offerForm.trial_days}
+                    onChange={(e) => setOfferForm({ ...offerForm, trial_days: Number(e.target.value) })}
+                  />
+                </div>
+              )}
+
+              {/* Expiry */}
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 mb-1 block">Offer Expires At (optional)</label>
+                <input type="datetime-local"
+                  className="w-full px-3.5 py-3 bg-surface border border-border rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary"
+                  value={offerForm.expires_at}
+                  onChange={(e) => setOfferForm({ ...offerForm, expires_at: e.target.value })}
+                />
+              </div>
+
+              {/* Preview */}
+              <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-3">
+                <p className="text-xs text-zinc-500 mb-1">Preview for user</p>
+                <p className="text-sm font-bold text-white">{offerForm.name || 'Offer Name'}</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-green-400 font-extrabold text-lg">₹{offerForm.price}</span>
+                  {offerForm.original_price > offerForm.price && (
+                    <span className="text-zinc-500 line-through text-sm">₹{offerForm.original_price}</span>
+                  )}
+                  {offerForm.original_price > offerForm.price && (
+                    <span className="text-green-400 text-xs font-bold bg-green-500/10 px-1.5 py-0.5 rounded-full">
+                      {Math.round((1 - offerForm.price / offerForm.original_price) * 100)}% OFF
+                    </span>
+                  )}
+                </div>
+                {offerForm.description && <p className="text-xs text-zinc-500 mt-1">{offerForm.description}</p>}
+              </div>
+            </div>
+
+            <button
+              onClick={handleSendOffer}
+              disabled={offerSaving}
+              className="w-full mt-5 py-3.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 transition"
+            >
+              {offerSaving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : '🎁 Send Offer to User'}
+            </button>
           </div>
         </div>
       )}

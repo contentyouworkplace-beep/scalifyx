@@ -16,6 +16,8 @@ interface Offer {
   trial_days: number;
   features: string[];
   is_active: boolean;
+  is_user_offer?: boolean;
+  expires_at?: string | null;
 }
 
 interface SubStatus {
@@ -68,8 +70,9 @@ export default function PlansPage() {
     } catch {}
   };
 
-  const trialOffer = offers.find(o => o.plan_type === 'trial');
-  const paidOffers = offers.filter(o => o.plan_type === 'pro');
+  const trialOffer = offers.find(o => o.plan_type === 'trial' && !o.is_user_offer);
+  const paidOffers = offers.filter(o => o.plan_type === 'pro' && !o.is_user_offer);
+  const userOffers = offers.filter((o: any) => o.is_user_offer);
 
   const isActive = subStatus?.status === 'active';
   const isTrial = subStatus?.status === 'trial';
@@ -235,6 +238,69 @@ export default function PlansPage() {
             {trialLoading ? <div className="w-5 h-5 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /> :
               <>Start Free Trial <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>}
           </button>
+        </div>
+      )}
+
+      {/* 🎁 Custom Offers (sent by admin specifically for this user) */}
+      {userOffers.length > 0 && (
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base">🎁</span>
+            <h2 className="text-sm font-extrabold text-green-400 uppercase tracking-wider">Special Offer Just For You</h2>
+          </div>
+          <div className="space-y-3">
+            {userOffers.map((offer: any) => {
+              const discount = offer.original_price > offer.price
+                ? Math.round(((offer.original_price - offer.price) / offer.original_price) * 100)
+                : 0;
+              const expiring = offer.expires_at ? new Date(offer.expires_at) : null;
+              const hoursLeft = expiring ? Math.max(0, Math.ceil((expiring.getTime() - Date.now()) / 3600000)) : null;
+
+              return (
+                <div key={offer.id} className="relative rounded-2xl p-5 bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/40 overflow-hidden">
+                  {/* Glow */}
+                  <div className="absolute -top-6 -right-6 w-24 h-24 bg-green-500/20 rounded-full blur-2xl pointer-events-none" />
+
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500/20 text-green-400 text-[10px] font-extrabold tracking-wider rounded-full mb-2">
+                        🎁 EXCLUSIVE OFFER
+                      </span>
+                      <div className="text-lg font-bold">{offer.name}</div>
+                      {offer.description && <p className="text-sm text-zinc-400 mt-0.5">{offer.description}</p>}
+                    </div>
+                    {discount > 0 && (
+                      <span className="flex-shrink-0 px-2 py-1 bg-red-500 text-white text-xs font-extrabold rounded-lg">{discount}% OFF</span>
+                    )}
+                  </div>
+
+                  <div className="flex items-baseline gap-2 mt-3">
+                    <span className="text-4xl font-extrabold text-green-400">₹{offer.price}</span>
+                    {offer.original_price > offer.price && (
+                      <span className="text-zinc-500 line-through text-lg">₹{offer.original_price}</span>
+                    )}
+                    <span className="text-zinc-500 text-sm">/month</span>
+                  </div>
+
+                  {hoursLeft !== null && (
+                    <div className="flex items-center gap-1.5 mt-2 text-xs text-yellow-400 font-semibold">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                      Expires in {hoursLeft < 24 ? `${hoursLeft}h` : `${Math.ceil(hoursLeft / 24)}d`}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handlePayNow}
+                    disabled={loading}
+                    className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-extrabold text-sm transition disabled:opacity-50 shadow-lg shadow-green-500/25"
+                  >
+                    {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> :
+                      <>Claim This Offer <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

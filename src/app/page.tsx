@@ -6,7 +6,7 @@ import { BUSINESS_TYPES, WEBSITE_TEMPLATES } from '@/lib/constants';
 import { Logo } from '@/components/Logo';
 import {
   ChatBotIcon, PaletteIcon, PhoneIcon, SearchIcon, GlobeIcon,
-  ChartIcon, WhatsAppIcon, ShieldIcon, HeadsetIcon, RocketIcon,
+  ChartIcon, WhatsAppIcon, ShieldIcon, HeadsetIcon,
   RestaurantIcon, ScissorsIcon, HospitalIcon, ScaleIcon, ShoppingBagIcon,
   DumbbellIcon, BookIcon, CameraIcon, CarIcon, HomeOutlineIcon, BriefcaseIcon, WrenchIcon,
 } from '@/components/Icons';
@@ -14,8 +14,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
-/* ─── FREE SPOTS COUNTER (starts at 1000, counts down) ─── */
-const TOTAL_FREE_SPOTS = 1000;
+const TOTAL_LAUNCH_SEATS = 1000;
 const SPOTS_TAKEN_KEY = 'sxSpotsTaken';
 
 function useSpotsTaken() {
@@ -27,12 +26,9 @@ function useSpotsTaken() {
     localStorage.setItem(SPOTS_TAKEN_KEY, String(val));
     setTaken(val);
   }, []);
-  return TOTAL_FREE_SPOTS - taken;
+  return TOTAL_LAUNCH_SEATS - taken;
 }
 
-/* ─────────────────────────────────────────
-   SIGNUP POPUP
-───────────────────────────────────────── */
 function generatePassword() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
   let pwd = '';
@@ -40,7 +36,7 @@ function generatePassword() {
   return pwd;
 }
 
-function SignupPopup({ onClose, spotsLeft }: { onClose: () => void; spotsLeft: number }) {
+function SignupForm({ spotsLeft }: { spotsLeft: number }) {
   const { signUp } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
@@ -51,13 +47,8 @@ function SignupPopup({ onClose, spotsLeft }: { onClose: () => void; spotsLeft: n
   const [loadingText, setLoadingText] = useState('');
 
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
-
-  useEffect(() => {
     if (!loading) return;
-    const base = 'Creating your free account';
+    const base = 'Launching your account';
     let dots = 0;
     setLoadingText(base);
     const interval = setInterval(() => {
@@ -70,426 +61,474 @@ function SignupPopup({ onClose, spotsLeft }: { onClose: () => void; spotsLeft: n
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) return setError('Please enter your name.');
-    if (!email.trim()) return setError('Please enter your email.');
+    if (!name.trim()) { setError('Please enter your name.'); return; }
+    if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
+      setError('Please enter a valid phone number.'); return;
+    }
+    if (!email.trim()) { setError('Please enter your email.'); return; }
+
     setLoading(true);
     const autoPassword = generatePassword();
     const result = await signUp(email, autoPassword, name, phone);
+
     if (!result.success) {
       setError(result.error || 'Something went wrong. Please try again.');
       setLoading(false);
-    } else {
-      router.replace('/dashboard');
+      return;
     }
+
+    const waMessage = encodeURIComponent(
+      `Hi ScalifyX! I just signed up. 🚀\n\nName: ${name}\nPhone: +91${phone}\nEmail: ${email}\n\nReady to launch my business website!`
+    );
+    window.open(`https://wa.me/916353583148?text=${waMessage}`, '_blank');
+    router.replace('/dashboard');
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Scarcity banner inside popup */}
-        <div className="bg-gradient-to-r from-violet-700 to-indigo-700 px-4 py-2.5 text-center flex items-center justify-center gap-2">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-yellow-300 flex-shrink-0">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/>
-          </svg>
-          <span className="text-white text-xs font-bold">
-            Only <span className="underline font-extrabold">{spotsLeft} spots left</span> at ₹0 — Free forever for first 1,000 businesses
-          </span>
+    <div id="signup-form" className="rounded-2xl border border-border bg-card p-7 sm:p-8">
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="h-px w-5 bg-green-500" />
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-green-400">Live in 60 seconds</span>
         </div>
+        <h2 className="text-2xl sm:text-[26px] font-extrabold text-white leading-[1.15]">
+          Your next customer is already searching. Be there.
+        </h2>
+        <p className="mt-2 text-sm text-zinc-500 leading-relaxed">
+          Create your account — we send your enquiry to WhatsApp instantly.
+        </p>
+      </div>
 
-        <div className="p-7">
-          {/* Close */}
-          <button
-            onClick={onClose}
-            className="absolute top-[52px] right-5 w-7 h-7 flex items-center justify-center rounded-full bg-surface hover:bg-border text-zinc-400 hover:text-white transition"
-            aria-label="Close"
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-          </button>
-
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-xs font-bold">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              100% FREE — ₹0 Forever. No Credit Card.
-            </div>
-            <h2 className="text-2xl font-extrabold text-white leading-tight">
-              Claim Your Free Website Now
-            </h2>
-            <p className="text-zinc-400 text-sm mt-1">Takes 60 seconds. No tech skills needed.</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="w-full px-4 py-3 bg-inputBg border border-border rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-green-500 transition"
-              placeholder="Your full name"
-            />
-            {/* Phone */}
-            <div className="flex items-center bg-inputBg border border-border rounded-xl overflow-hidden focus-within:border-green-500 transition">
-              <span className="px-3 text-zinc-500 text-sm font-medium select-none">🇮🇳 +91</span>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                className="flex-1 py-3 pr-4 bg-transparent text-white placeholder-zinc-600 focus:outline-none text-sm"
-                placeholder="Phone number"
-              />
-            </div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 bg-inputBg border border-border rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-green-500 transition"
-              placeholder="Email address"
-            />
-
-            {error && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-base transition disabled:opacity-60 shadow-lg shadow-green-500/20"
-            >
-              {loading ? loadingText : 'Get My Free Website'}
-            </button>
-          </form>
-
-          <p className="text-center text-xs text-zinc-600 mt-3">
-            By signing up you agree to our Terms & Privacy Policy.
-          </p>
-
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            {[
-              {
-                icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#6C5CE7" strokeWidth="2"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" stroke="#6C5CE7" strokeWidth="2"/></svg>,
-                text: 'Free Website',
-              },
-              {
-                icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#6C5CE7" strokeWidth="2"/><circle cx="12" cy="9" r="2.5" stroke="#6C5CE7" strokeWidth="2"/></svg>,
-                text: 'Local SEO',
-              },
-              {
-                icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#25D366"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.979-1.418A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" stroke="#25D366" strokeWidth="1.8"/></svg>,
-                text: 'Leads on WhatsApp',
-              },
-              {
-                icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#6C5CE7" strokeWidth="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="#6C5CE7" strokeWidth="2" strokeLinecap="round"/></svg>,
-                text: 'Free Hosting',
-              },
-            ].map((item) => (
-              <div key={item.text} className="flex items-center gap-2 bg-surface/60 rounded-lg px-3 py-2">
-                <span className="flex-shrink-0">{item.icon}</span>
-                <span className="text-xs text-zinc-300 font-medium">{item.text}</span>
-                <span className="ml-auto text-xs text-green-400 font-bold">FREE</span>
-              </div>
-            ))}
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+          placeholder="Full name"
+        />
+        <div className="flex rounded-xl border border-border bg-inputBg overflow-hidden focus-within:border-green-500/50 transition">
+          <span className="flex items-center px-4 text-zinc-500 text-sm border-r border-border select-none">+91</span>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+            required
+            className="flex-1 py-3 px-4 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
+            placeholder="Phone number"
+          />
         </div>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+          placeholder="Email address"
+        />
+        {error && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-xl bg-green-500 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-green-400 active:scale-[0.99] disabled:opacity-50"
+        >
+          {loading ? loadingText : 'Create Account & Go Live →'}
+        </button>
+      </form>
+
+      <div className="mt-5 pt-5 border-t border-border flex items-center justify-between text-xs text-zinc-700">
+        <span>No setup fee</span>
+        <span>·</span>
+        <span>{spotsLeft} spots left</span>
+        <span>·</span>
+        <span>Cancel anytime</span>
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────
-   LANDING PAGE
-───────────────────────────────────────── */
 export default function LandingPage() {
-  const [showSignup, setShowSignup] = useState(false);
   const spotsLeft = useSpotsTaken();
 
-  const openSignup = (e?: React.MouseEvent) => {
-    e?.preventDefault();
-    setShowSignup(true);
+  const scrollToForm = () => {
+    const target = document.getElementById('signup-form');
+    if (!target) return;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - 120;
+    window.scrollTo({ top: y, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-bg">
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-K97W1RGBXV"
-        strategy="afterInteractive"
-      />
+    <div className="min-h-screen bg-bg text-white">
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-K97W1RGBXV" strategy="afterInteractive" />
       <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-K97W1RGBXV');
-        `}
+        {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-K97W1RGBXV');`}
       </Script>
 
-      {showSignup && <SignupPopup onClose={() => setShowSignup(false)} spotsLeft={spotsLeft} />}
-
-      {/* ── SCARCITY ANNOUNCEMENT BAR ── */}
-      <div className="fixed top-0 w-full z-[60] bg-gradient-to-r from-violet-700 via-indigo-700 to-violet-700 py-2 px-4 text-center">
-        <p className="text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 flex-nowrap sm:flex-wrap overflow-hidden">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" className="text-yellow-300 flex-shrink-0">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/>
-          </svg>
-          <span className="truncate sm:whitespace-normal">
-            <span className="hidden sm:inline">LIMITED OFFER — </span>
-            FREE for First 1,000 Businesses Only.
-          </span>
-          <span className="bg-white/15 border border-white/20 rounded-full px-2.5 py-0.5 text-white font-extrabold text-xs flex-shrink-0">
-            {spotsLeft} spots left
-          </span>
+      {/* ── ANNOUNCEMENT BAR ── */}
+      <div className="fixed top-0 w-full z-[60] bg-gradient-to-r from-indigo-950 via-violet-950 to-indigo-950 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 h-9 flex items-center justify-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
+          <p className="text-white/70 text-xs font-medium flex items-center gap-3 overflow-hidden">
+            <span className="truncate">Your customers are searching right now — is your business showing up?</span>
+            <span className="flex-shrink-0 bg-white/10 border border-white/10 rounded-full px-2.5 py-0.5 text-white font-bold text-xs">
+              {spotsLeft} spots left
+            </span>
+          </p>
           <button
-            onClick={() => openSignup()}
-            className="hidden sm:block bg-white text-indigo-700 font-extrabold text-xs rounded-full px-3 py-1 hover:bg-indigo-50 transition flex-shrink-0"
+            onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            className="hidden sm:block flex-shrink-0 text-white/40 hover:text-white text-xs transition ml-1"
           >
-            Claim Yours →
+            See how →
           </button>
-        </p>
+        </div>
       </div>
 
-      {/* ── NAVBAR ── */}
-      <nav className="fixed top-[36px] w-full z-50 bg-bg/90 backdrop-blur-xl border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/"><Logo size={32} /></Link>
+      {/* ── NAV ── */}
+      <nav className="fixed top-9 w-full z-50 bg-bg/85 backdrop-blur-xl border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/"><Logo size={30} /></Link>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-zinc-400 hover:text-white transition text-sm">Features</a>
-            <a href="#templates" className="text-zinc-400 hover:text-white transition text-sm">Templates</a>
-            <a href="#business" className="text-zinc-400 hover:text-white transition text-sm">For Your Business</a>
+            <a href="#features" className="text-zinc-500 hover:text-white text-sm transition">Features</a>
+            <a href="#how-it-works" className="text-zinc-500 hover:text-white text-sm transition">How It Works</a>
+            <a href="#templates" className="text-zinc-500 hover:text-white text-sm transition">Templates</a>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login" className="px-3 sm:px-4 py-2 text-sm text-zinc-400 hover:text-white transition">Login</Link>
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-sm text-zinc-500 hover:text-white transition px-3 py-2">Login</Link>
             <button
-              onClick={() => openSignup()}
-              className="px-4 sm:px-5 py-2 text-xs sm:text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition whitespace-nowrap"
+              onClick={scrollToForm}
+              className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-lg transition"
             >
-              Get Free Website
+              Get Started
             </button>
           </div>
         </div>
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-36 sm:pt-44 pb-24 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Free badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2 mb-6 bg-green-500/10 border border-green-500/40 rounded-full text-green-400 text-sm font-bold">
-            <RocketIcon size={15} />
-            Free Website + Local SEO — Live in 60 Seconds
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] mb-6 tracking-tight">
-            Free Website. Free Local SEO.{' '}
-            <br className="hidden sm:block" />
-            <span className="gradient-text">Get Found on Google</span>{' '}
-            <span className="text-green-400">— ₹0 Forever.</span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-4 leading-relaxed">
-            Get a professional website + Local SEO that puts you on Google + leads delivered directly on your WhatsApp — all at{' '}
-            <span className="text-white font-bold">₹0</span>. No agency. No coding. No credit card.
-          </p>
-
-          <p className="text-violet-400 font-bold text-sm sm:text-base mb-10 flex items-center justify-center gap-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/></svg>
-            Free only for the first 1,000 businesses — {spotsLeft} spots remaining
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => openSignup()}
-              className="px-10 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-extrabold text-lg transition shadow-xl shadow-green-500/30 flex items-center justify-center gap-2"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white"/></svg>
-              Claim My Free Website Now
-            </button>
-            <a
-              href="#features"
-              className="px-8 py-4 bg-card hover:bg-surface border border-border text-white rounded-xl font-semibold text-lg transition"
-            >
-              See How It Works ↓
-            </a>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-500">
-            {['No credit card', 'No hidden charges', 'Setup in 60 seconds', 'Free forever'].map((t) => (
-              <span key={t} className="flex items-center gap-1.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHAT YOU GET FREE ── */}
-      <section className="py-14 px-4 border-y border-border bg-surface/40">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8">
-            <span className="text-5xl sm:text-6xl font-black text-green-400 tracking-tight">FREE</span>
-            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mt-1">Everything below — ₹0 for the first 1,000 businesses</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              {
-                icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#6C5CE7" strokeWidth="1.8"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" stroke="#6C5CE7" strokeWidth="1.8"/></svg>,
-                label: 'Professional Website', sub: '₹0 forever',
-              },
-              {
-                icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="#6C5CE7" strokeWidth="1.8"/><circle cx="12" cy="9" r="2.5" stroke="#6C5CE7" strokeWidth="1.8"/></svg>,
-                label: 'Local SEO Setup', sub: '₹0 forever',
-              },
-              {
-                icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" fill="#25D366"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.979-1.418A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" stroke="#25D366" strokeWidth="1.6"/></svg>,
-                label: 'Leads Directly on WhatsApp', sub: 'Customers message you live',
-              },
-              {
-                icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#6C5CE7" strokeWidth="1.8"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="#6C5CE7" strokeWidth="1.8" strokeLinecap="round"/></svg>,
-                label: 'SSL Hosting', sub: '99.9% uptime',
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="flex flex-col items-center text-center p-5 rounded-2xl bg-card border border-green-500/20 hover:border-green-500/50 transition"
+      <section className="pt-40 sm:pt-48 pb-28 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto grid gap-14 lg:grid-cols-[1.15fr_0.85fr] items-start">
+          <div className="order-2 lg:order-1">
+            <div className="flex items-center gap-3 mb-8">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">India&apos;s Growth Platform for Small Businesses</span>
+            </div>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-tight mb-8">
+              The Business<br />
+              That Shows Up<br />
+              <span className="text-green-400">Gets the Customer.</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-zinc-400 max-w-lg leading-relaxed mb-10">
+              We build your website, set up Local SEO, and connect every lead directly to your WhatsApp — in 60 seconds.
+            </p>
+            <div className="mb-10">
+              <a
+                href="#features"
+                className="inline-block px-7 py-3.5 rounded-xl border border-border text-white text-sm font-semibold hover:border-white/25 transition"
               >
-                <div className="mb-3">{item.icon}</div>
-                <span className="text-white font-semibold text-sm leading-snug">{item.label}</span>
-                <span className="text-green-400 text-xs font-bold mt-1.5 bg-green-500/10 px-2 py-0.5 rounded-full">{item.sub}</span>
-              </div>
-            ))}
+                See How It Works ↓
+              </a>
+            </div>
+            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600">
+              {['No agency needed', 'No tech skills required', 'Live in 60 seconds', 'Leads on WhatsApp daily'].map((t) => (
+                <span key={t} className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-green-500" />
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="order-1 lg:order-2">
+            <SignupForm spotsLeft={spotsLeft} />
           </div>
         </div>
       </section>
 
-      {/* ── LOCAL SEO HIGHLIGHT ── */}
+      {/* ── MEMBERSHIP PLAN ── */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="rounded-3xl bg-card border border-border p-8 md:p-14 flex flex-col md:flex-row items-center gap-10">
-            <div className="flex-shrink-0 w-24 h-24 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <SearchIcon size={44} className="text-primary" />
+          <div className="flex items-center gap-3 justify-center mb-5">
+            <span className="h-px w-8 bg-zinc-800" />
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Membership</span>
+            <span className="h-px w-8 bg-zinc-800" />
+          </div>
+          <h2 className="text-center text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
+            One plan. Everything included.
+          </h2>
+          <p className="text-center text-zinc-500 text-sm mb-12 max-w-md mx-auto">
+            No hidden fees. No setup cost. Just your business online — from day one.
+          </p>
+
+          <div className="max-w-sm mx-auto relative">
+            {/* Best value badge */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+              <span className="bg-green-500 text-black text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-green-500/30">
+                Best Value
+              </span>
             </div>
-            <div className="flex-1 text-center md:text-left">
-              <div className="inline-block px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold mb-4 uppercase tracking-widest">
-                Your #1 Growth Engine
+
+            <div className="rounded-3xl border border-green-500/20 bg-gradient-to-b from-zinc-900 to-zinc-950 p-8 shadow-2xl shadow-green-500/5">
+              {/* Plan name */}
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400 mb-4">Growth Plan</p>
+
+              {/* Price */}
+              <div className="flex items-end gap-1 mb-2">
+                <span className="text-4xl font-extrabold text-white leading-none">₹1,499</span>
+                <span className="text-zinc-500 text-sm mb-1">/month</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 leading-snug">
-                Show Up on Google When Customers Search for{' '}
-                <span className="gradient-text">Your Business.</span>
-              </h2>
-              <p className="text-zinc-400 text-base leading-relaxed mb-4">
-                When someone searches <span className="text-white font-medium">&ldquo;best salon near me&rdquo;</span> or <span className="text-white font-medium">&ldquo;doctor in Pune&rdquo;</span> — your business shows up. We set up your complete Local SEO: Google Search Console, meta tags, sitemaps, page speed, structured data — all done for you, automatically.
-              </p>
-              <p className="text-zinc-400 text-base leading-relaxed mb-6">
-                This alone is worth <span className="text-white font-semibold">₹8,000/month</span> from an SEO agency. On ScalifyX, it&apos;s included free.
-              </p>
-              <button
-                onClick={() => openSignup()}
-                className="px-7 py-3.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold transition shadow-lg shadow-primary/20"
+              <p className="text-zinc-600 text-xs mb-8">Billed monthly · Cancel anytime</p>
+
+              {/* Feature list */}
+              <ul className="space-y-3.5 mb-9">
+                {[
+                  'AI-Powered Business Website',
+                  'Local SEO & Google Search Indexing',
+                  'WhatsApp Lead Capture — Instant',
+                  'Mobile-First Responsive Design',
+                  'SSL Security & Managed Hosting',
+                  'Analytics & Visitor Dashboard',
+                  'Custom Domain Ready',
+                  '10+ Professional Templates',
+                  'Monthly Updates & Improvements',
+                  '24/7 Priority Support',
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center">
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4L3.5 6.5L9 1" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    <span className="text-sm text-zinc-300">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <a
+                href="#signup-form"
+                className="block w-full text-center bg-green-500 hover:bg-green-400 text-black font-extrabold text-sm py-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/20 hover:shadow-green-400/30 tracking-wide"
               >
-                Get My Free Local SEO Setup
-              </button>
+                Get Started — ₹1,499/mo
+              </a>
+
+              <p className="text-center text-zinc-600 text-xs mt-4">No credit card required to sign up</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── WHATSAPP LEADS HIGHLIGHT ── */}
-      <section className="py-4 pb-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="rounded-3xl bg-card border border-border p-8 md:p-14 flex flex-col md:flex-row items-center gap-10">
-            <div className="flex-shrink-0 w-24 h-24 rounded-3xl bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-              <WhatsAppIcon size={48} className="text-green-400" />
-            </div>
-            <div className="flex-1 text-center md:text-left">
-              <div className="inline-block px-3 py-1 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold mb-4 uppercase tracking-widest">
-                Zero Lead Leakage
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold mb-4 leading-snug">
-                Get Leads{' '}
-                <span className="text-green-400">Directly on Your WhatsApp.</span>{' '}
-                Not in a Form. Not in an Email.
-              </h2>
-              <p className="text-zinc-400 text-base leading-relaxed mb-6">
-                Every visitor on your site sees one button — WhatsApp. They tap it, they&apos;re in your chat. You reply, you close. No middlemen, no CRM, no follow-up email chains. Just real customers messaging you live on the phone that&apos;s already in your hand.
-              </p>
-              <button
-                onClick={() => openSignup()}
-                className="px-7 py-3.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold transition shadow-lg shadow-green-500/20"
-              >
-                Start Getting Leads on WhatsApp — Free
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── STATS ── */}
-      <section className="py-14 border-y border-border bg-surface/40">
+      {/* ── STATS STRIP ── */}
+      <section className="py-14 border-y border-border">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4">
           {[
             { num: '50,000+', label: 'Businesses Online' },
             { num: '60 sec', label: 'Average Setup Time' },
             { num: '99.9%', label: 'Uptime Guarantee' },
-            { num: '₹0', label: 'Cost to Start' },
+            { num: '12+', label: 'Industries Served' },
           ].map((s) => (
             <div key={s.label}>
-              <div className="text-2xl sm:text-3xl font-extrabold gradient-text">{s.num}</div>
-              <div className="text-zinc-500 text-sm mt-1">{s.label}</div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{s.num}</div>
+              <div className="text-xs text-zinc-600 font-semibold uppercase tracking-widest mt-2">{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
-              You&apos;re 60 Seconds Away from Your{' '}
-              <span className="gradient-text">Free Website</span>
-            </h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">No tech skills. No designer. No agency. Just 3 steps.</p>
+      {/* ── THE PROBLEM — editorial ── */}
+      <section className="py-28 px-4 sm:px-6 bg-surface/20">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex items-center gap-3 justify-center mb-10">
+            <span className="h-px w-8 bg-zinc-800" />
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">The Reality</span>
+            <span className="h-px w-8 bg-zinc-800" />
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.0] tracking-tight mb-8">
+            Right now, someone just<br className="hidden sm:block" />
+            searched for your business.<br />
+            <span className="text-zinc-700">They went to your competitor.</span>
+          </h2>
+          <p className="text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10">
+            Not because your competitor is better. Because they showed up on Google and you didn&apos;t. That&apos;s the only difference — and it&apos;s fixable in 60 seconds.
+          </p>
+          <button
+            onClick={scrollToForm}
+            className="px-8 py-4 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition"
+          >
+            Get Found on Google Today
+          </button>
+        </div>
+      </section>
+
+      {/* ── LOCAL SEO ── */}
+      <section className="py-28 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Your #1 Growth Engine</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight mb-6">
+              The Moment They Search,<br />
+              <span className="text-green-400">You Appear.</span>
+            </h2>
+            <p className="text-zinc-400 text-lg leading-relaxed mb-5">
+              Someone types <span className="text-white">&ldquo;best salon near me&rdquo;</span> or <span className="text-white">&ldquo;doctor in Pune&rdquo;</span> — and your business is right there. We handle every layer of Local SEO: Google Search Console, meta tags, sitemaps, page speed, structured data. Done automatically.
+            </p>
+            <p className="text-zinc-600 text-base leading-relaxed mb-8">
+              An SEO agency charges <span className="text-white font-semibold">₹8,000/month</span> for exactly this. On ScalifyX, it comes with your plan — on day one.
+            </p>
+            <button
+              onClick={scrollToForm}
+              className="px-7 py-3.5 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-xl transition"
+            >
+              Start Local SEO Setup →
+            </button>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+              <span className="ml-3 text-xs text-zinc-700 font-mono">google.com</span>
+            </div>
+            <div className="text-xs text-zinc-600 mb-5 font-mono bg-surface/50 rounded-lg px-3 py-2 border border-border">
+              🔍 &quot;best salon near me&quot;
+            </div>
+            {[
+              { name: 'Your Business', loc: 'Mumbai · 0.3 km', rating: '4.9', isYou: true },
+              { name: 'Sharma Hair Studio', loc: 'Mumbai · 0.8 km', rating: '4.3', isYou: false },
+              { name: 'Classic Cuts', loc: 'Mumbai · 1.2 km', rating: '4.1', isYou: false },
+            ].map((r) => (
+              <div
+                key={r.name}
+                className={`flex items-center justify-between p-3.5 rounded-xl mb-2 border transition ${r.isYou ? 'bg-green-500/10 border-green-500/25' : 'bg-surface/30 border-border'}`}
+              >
+                <div>
+                  <div className={`text-sm font-semibold ${r.isYou ? 'text-green-400' : 'text-zinc-500'}`}>
+                    {r.name}
+                    {r.isYou && <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full font-bold">TOP</span>}
+                  </div>
+                  <div className="text-xs text-zinc-700 mt-0.5">{r.loc}</div>
+                </div>
+                <div className="text-xs text-yellow-500 font-bold">★ {r.rating}</div>
+              </div>
+            ))}
+            <p className="text-xs text-zinc-700 mt-4 text-center">This is what customers see. You&apos;re at the top.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHATSAPP ── */}
+      <section className="py-28 px-4 sm:px-6 bg-surface/20">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="order-2 lg:order-1 rounded-2xl border border-border bg-card p-6">
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border">
+              <div className="w-8 h-8 rounded-full bg-green-500/15 border border-green-500/20 flex items-center justify-center">
+                <WhatsAppIcon size={15} className="text-green-400" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-white">Priya Singh</div>
+                <div className="text-xs text-zinc-600">New enquiry · just now</div>
+              </div>
+              <span className="ml-auto text-xs bg-green-500/10 text-green-400 font-bold px-2.5 py-1 rounded-full border border-green-500/20">Live</span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-end">
+                <div className="max-w-[80%] bg-green-500/15 border border-green-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
+                  <p className="text-sm text-white">Hi! I found your salon on Google. Do you have slots this Saturday?</p>
+                  <p className="text-xs text-zinc-600 mt-1 text-right">via your website · 2:41 PM</p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <div className="max-w-[80%] bg-green-500/15 border border-green-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
+                  <p className="text-sm text-white">I&apos;d like to book a hair colour + trim.</p>
+                  <p className="text-xs text-zinc-600 mt-1 text-right">2:41 PM</p>
+                </div>
+              </div>
+              <div className="flex">
+                <div className="max-w-[80%] bg-surface border border-border rounded-2xl rounded-tl-sm px-4 py-2.5">
+                  <p className="text-sm text-zinc-300">Yes! Saturday 11am is open. Shall I confirm?</p>
+                  <p className="text-xs text-zinc-600 mt-1">You · 2:43 PM ✓✓</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-zinc-700 mt-5 text-center">This is your inbox. Real customers. No middleman.</p>
+          </div>
+          <div className="order-1 lg:order-2">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Direct Lead Capture</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight mb-6">
+              Leads Arrive on Your Phone.<br />
+              <span className="text-green-400">Instantly. Personally.</span>
+            </h2>
+            <p className="text-zinc-400 text-lg leading-relaxed mb-5">
+              Every visitor sees one button — WhatsApp. They tap it, they&apos;re in your chat. You reply, you close. No CRM. No form submissions to chase. No email threads that go nowhere.
+            </p>
+            <p className="text-zinc-600 text-base leading-relaxed mb-8">
+              Just real customers — on the phone that&apos;s already in your hand.
+            </p>
+            <button
+              onClick={scrollToForm}
+              className="px-7 py-3.5 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-xl transition"
+            >
+              Start Getting Leads on WhatsApp →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section id="how-it-works" className="py-28 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-20">
+            <div className="flex items-center gap-3 justify-center mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">How It Works</span>
+              <span className="h-px w-8 bg-zinc-800" />
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
+              From Invisible to Found.<br />
+              <span className="text-green-400">In 60 Seconds.</span>
+            </h2>
+            <p className="mt-5 text-zinc-500 max-w-lg mx-auto text-lg">
+              No code. No calls. No waiting. Three steps between you and customers finding you on Google.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               {
                 step: '01',
-                title: 'Sign Up in Seconds',
-                desc: 'Create your free account with just your email and password. Zero friction. Takes 30 seconds.',
+                title: 'Tell Us Who You Are',
+                desc: 'Name, phone, email. Done in under 30 seconds. No credit card. No paperwork. Your account is live the moment you hit submit.',
                 cta: true,
               },
               {
                 step: '02',
-                title: 'Describe Your Business',
-                desc: 'Tell our AI your business name, type, and location. It builds your complete website & local SEO automatically.',
+                title: 'We Build Everything',
+                desc: 'Our AI reads your business type and city, then writes your copy, designs your pages, sets up Local SEO, and wires your WhatsApp — automatically.',
                 cta: false,
               },
               {
                 step: '03',
-                title: 'Go Live & Get Leads',
-                desc: 'Your website is published instantly. Google starts finding you. WhatsApp leads start coming in.',
+                title: 'Leads Start Coming In',
+                desc: 'Your site goes live. Google indexes it. Customers find you. They tap WhatsApp. You close the deal from the phone in your pocket.',
                 cta: false,
               },
             ].map((s) => (
-              <div key={s.step} className="p-7 rounded-2xl bg-card border border-border flex flex-col">
-                <div className="text-6xl font-extrabold text-green-500/20 mb-4 leading-none">{s.step}</div>
-                <h3 className="text-lg font-bold mb-2">{s.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed flex-1">{s.desc}</p>
+              <div key={s.step} className="p-8 rounded-2xl border border-border bg-card flex flex-col">
+                <div className="text-7xl font-extrabold text-white/[0.04] mb-5 leading-none select-none">{s.step}</div>
+                <h3 className="text-base font-bold text-white mb-3">{s.title}</h3>
+                <p className="text-zinc-600 text-sm leading-relaxed flex-1">{s.desc}</p>
                 {s.cta && (
                   <button
-                    onClick={() => openSignup()}
-                    className="mt-5 w-full py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-sm transition"
+                    onClick={scrollToForm}
+                    className="mt-6 w-full py-3 bg-green-500 hover:bg-green-400 text-white rounded-xl font-bold text-sm transition"
                   >
                     Start Here →
                   </button>
@@ -501,125 +540,134 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-20 px-4 bg-surface/50">
+      <section id="features" className="py-28 px-4 sm:px-6 bg-surface/20">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
-              Built for Indian Businesses.{' '}
-              <span className="gradient-text">Priced at Zero.</span>
+          <div className="text-center mb-20">
+            <div className="flex items-center gap-3 justify-center mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">What You Get</span>
+              <span className="h-px w-8 bg-zinc-800" />
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
+              Your Entire Digital Presence.<br />
+              <span className="text-green-400">Built by AI. Managed by Us.</span>
             </h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">
-              Everything a ₹50,000/year agency charges for — completely free on ScalifyX.
+            <p className="mt-5 text-zinc-500 max-w-xl mx-auto text-lg">
+              Everything a ₹50,000/year agency delivers — done for you automatically, without a single briefing call.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               {
                 Icon: ChatBotIcon,
                 title: 'AI Website Builder',
-                desc: 'Just describe your business in plain language. Our AI builds a full professional website — no templates to wrestle with.',
-                free: true,
+                desc: 'Describe your business in plain language. AI writes the copy, designs the pages, and publishes it — without you touching a line of code.',
+                included: true,
               },
               {
                 Icon: SearchIcon,
                 title: 'Local SEO — Done for You',
-                desc: 'Appear on Google when people search "best salon in Pune" or "doctor near me". We handle Google Search Console, meta tags, sitemaps — everything.',
-                free: true,
+                desc: 'Search Console, meta tags, sitemaps, structured data. All of it, handled automatically. You rank, you get found, you get customers.',
+                included: true,
               },
               {
                 Icon: WhatsAppIcon,
-                title: 'Get Leads Directly on WhatsApp',
-                desc: 'Every visitor sees a WhatsApp button. One tap — they\'re in your chat. No forms. No delays. Leads come straight to the phone in your hand.',
-                free: true,
+                title: 'Leads Land on WhatsApp',
+                desc: 'Every visitor sees one button. They tap. They\'re in your chat. You close from your phone. No form. No delay. No middleman.',
+                included: true,
               },
               {
                 Icon: PhoneIcon,
                 title: 'Mobile-First Design',
-                desc: '90% of your customers browse on phones. Your ScalifyX website looks flawless on every screen, every time.',
-                free: true,
+                desc: 'Your customers are on their phones. Your site loads instantly, looks flawless, and converts on every screen and every network.',
+                included: true,
               },
               {
                 Icon: ShieldIcon,
-                title: 'Free Hosting + SSL',
-                desc: 'We host your site on enterprise-grade servers with 99.9% uptime and an SSL certificate — so Google trusts you from day one.',
-                free: true,
+                title: 'Hosting + SSL',
+                desc: 'Enterprise-grade servers. 99.9% uptime. SSL certificate. Google trusts you from day one — and so do your customers.',
+                included: true,
               },
               {
                 Icon: GlobeIcon,
-                title: 'Free Subdomain',
-                desc: 'Get yourbusiness.scalifyx.com live in seconds. Ready to upgrade? Add your own .com or .in domain anytime.',
-                free: true,
+                title: 'Live Domain in Seconds',
+                desc: 'yourbusiness.scalifyx.com the moment you sign up. Add your own .com or .in domain anytime — one click.',
+                included: true,
               },
               {
                 Icon: PaletteIcon,
-                title: '12+ Premium Templates',
-                desc: 'Restaurant, clinic, salon, portfolio, gym, coaching — pick a design made specifically for your industry.',
-                free: true,
+                title: '12+ Industry Templates',
+                desc: 'Restaurant to clinic. Salon to law firm. Gym to coaching. Every template is built for conversion, not just to look good.',
+                included: true,
               },
               {
                 Icon: ChartIcon,
                 title: 'Analytics Dashboard',
-                desc: 'See who\'s visiting your site, where they\'re from, and which pages drive the most leads. Monthly SEO reports included.',
-                free: false,
+                desc: 'Who visited. Where they came from. Which page made them message you. Monthly SEO performance reports — to your inbox.',
+                included: false,
               },
               {
                 Icon: HeadsetIcon,
                 title: '24/7 Support',
-                desc: 'Real humans monitoring your website and SEO performance around the clock — backed by AI so response time is instant.',
-                free: false,
+                desc: 'Real people watching your site around the clock. AI-backed so response time is instant. Problems fixed before you notice them.',
+                included: false,
               },
             ].map((f) => (
-              <div key={f.title} className="p-6 rounded-xl bg-card border border-border hover:border-primary/40 transition group">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition">
-                    <f.Icon size={22} />
+              <div key={f.title} className="p-6 rounded-2xl border border-border bg-card hover:border-white/10 transition group">
+                <div className="flex items-start justify-between mb-5">
+                  <div className="w-10 h-10 rounded-xl border border-border bg-white/[0.03] flex items-center justify-center text-zinc-600 group-hover:text-green-400 group-hover:border-green-500/20 transition">
+                    <f.Icon size={20} />
                   </div>
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold ${f.free ? 'bg-green-500/10 border border-green-500/30 text-green-400' : 'bg-primary/10 border border-primary/30 text-primary'}`}>
-                    {f.free ? 'FREE' : 'PRO'}
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${f.included ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-violet-500/10 border-violet-500/20 text-violet-400'}`}>
+                    {f.included ? 'INCLUDED' : 'PRO'}
                   </span>
                 </div>
-                <h3 className="text-base font-bold mb-1.5 group-hover:text-primary transition">{f.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{f.desc}</p>
+                <h3 className="text-sm font-bold text-white mb-2">{f.title}</h3>
+                <p className="text-xs text-zinc-600 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
-
-          <div className="mt-12 text-center">
+          <div className="mt-14 text-center">
             <button
-              onClick={() => openSignup()}
-              className="px-10 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-extrabold text-lg transition shadow-xl shadow-green-500/25"
+              onClick={scrollToForm}
+              className="px-10 py-4 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition"
             >
-              Get All of This — 100% Free
+              Get Everything — Start Today
             </button>
-            <p className="mt-3 text-zinc-500 text-sm">Only {spotsLeft} free spots remaining</p>
+            <p className="mt-3 text-zinc-700 text-sm">Only {spotsLeft} launch seats remaining</p>
           </div>
         </div>
       </section>
 
       {/* ── TEMPLATES ── */}
-      <section id="templates" className="py-20 px-4">
+      <section id="templates" className="py-28 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
-              12+ Industry Templates.{' '}
-              <span className="text-green-400">All Free.</span>
+            <div className="flex items-center gap-3 justify-center mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Industry Templates</span>
+              <span className="h-px w-8 bg-zinc-800" />
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
+              Your Industry. Your Design.<br />
+              <span className="text-green-400">Ready.</span>
             </h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">
-              Pick your industry template or let AI design a fully custom one — in seconds.
+            <p className="mt-5 text-zinc-500 max-w-lg mx-auto">
+              Pick a template built for your trade — or let AI design something entirely yours. Either way, you&apos;re live in seconds.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {WEBSITE_TEMPLATES.map((t) => (
               <button
                 key={t.id}
-                onClick={() => openSignup()}
-                className="p-4 rounded-xl bg-card border border-border hover:border-green-500/40 transition text-left group"
+                onClick={scrollToForm}
+                className="p-5 rounded-2xl border border-border bg-card hover:border-green-500/25 hover:bg-green-500/[0.03] transition text-left group"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
-                  <PaletteIcon size={20} />
+                <div className="w-8 h-8 rounded-lg border border-border bg-white/[0.03] flex items-center justify-center text-zinc-600 group-hover:text-green-400 group-hover:border-green-500/20 transition mb-3">
+                  <PaletteIcon size={16} />
                 </div>
-                <h4 className="font-semibold text-sm group-hover:text-green-400 transition">{t.name}</h4>
-                <p className="text-zinc-500 text-xs mt-1">{t.preview}</p>
+                <h4 className="text-sm font-semibold text-white group-hover:text-green-400 transition leading-snug">{t.name}</h4>
+                <p className="text-xs text-zinc-700 mt-1">{t.preview}</p>
               </button>
             ))}
           </div>
@@ -627,17 +675,17 @@ export default function LandingPage() {
       </section>
 
       {/* ── BUSINESS TYPES ── */}
-      <section id="business" className="py-20 px-4 bg-surface/50">
+      <section id="business" className="py-20 px-4 sm:px-6 border-t border-border">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
-              Whatever You Do — We&apos;ve Got You Covered
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Every Business. One Platform.
             </h2>
-            <p className="text-zinc-400 max-w-xl mx-auto">
-              Doctor, salon, restaurant, tutor, freelancer — ScalifyX works for every business type. For free.
+            <p className="mt-4 text-zinc-500 max-w-lg mx-auto">
+              Your competitors already have websites. Now you have one that wins.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {BUSINESS_TYPES.map((b) => {
               const bizIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
                 restaurant: RestaurantIcon, salon: ScissorsIcon, doctor: HospitalIcon,
@@ -649,13 +697,13 @@ export default function LandingPage() {
               return (
                 <button
                   key={b.id}
-                  onClick={() => openSignup()}
-                  className="p-4 rounded-xl bg-card border border-border text-center hover:border-green-500/40 transition group"
+                  onClick={scrollToForm}
+                  className="p-4 rounded-xl border border-border bg-card hover:border-green-500/25 hover:bg-green-500/[0.03] transition text-center group"
                 >
-                  <div className="w-10 h-10 mx-auto rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2 group-hover:bg-primary/20 transition">
-                    <BizIcon size={20} />
+                  <div className="w-9 h-9 mx-auto rounded-lg border border-border bg-white/[0.03] flex items-center justify-center text-zinc-600 group-hover:text-green-400 group-hover:border-green-500/20 transition mb-2">
+                    <BizIcon size={18} />
                   </div>
-                  <div className="text-sm font-medium group-hover:text-green-400 transition">{b.label}</div>
+                  <div className="text-sm font-medium text-zinc-500 group-hover:text-white transition">{b.label}</div>
                 </button>
               );
             })}
@@ -663,38 +711,50 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── SOCIAL PROOF / TRUST ── */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-3">
-              50,000+ Businesses Trust ScalifyX
+      {/* ── TESTIMONIALS ── */}
+      <section className="py-28 px-4 sm:px-6 bg-surface/20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="flex items-center gap-3 justify-center mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Customer Stories</span>
+              <span className="h-px w-8 bg-zinc-800" />
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
+              They Used to Miss Leads.<br />
+              <span className="text-green-400">Now They Don&apos;t.</span>
             </h2>
-            <p className="text-zinc-400">Real businesses. Real leads. Real growth.</p>
+            <p className="mt-4 text-zinc-500">Real businesses. Real leads. Real results — not projections.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-5">
             {[
               {
                 name: 'Priya S.',
                 biz: 'Salon Owner, Pune',
-                quote: '"I got 12 WhatsApp inquiries on the first day my site went live. Never spent a single rupee on ads."',
+                quote: '12 WhatsApp enquiries on day one. Not a single ad. People just found me on Google and messaged directly.',
               },
               {
                 name: 'Dr. Rahul M.',
                 biz: 'Dentist, Mumbai',
-                quote: '"Patients now find my clinic on Google when they search nearby. Appointments have doubled in 2 months."',
+                quote: 'Patients search "dentist near me" and I show up. New appointments doubled in 2 months. My old agency couldn\'t do this in 2 years.',
               },
               {
                 name: 'Ankit T.',
                 biz: 'Tutor, Delhi',
-                quote: '"Set up in literally 60 seconds. My students\' parents WhatsApp me directly from the website. Game changer."',
+                quote: 'Described my tutoring centre, was live in under a minute. Parents WhatsApp me directly now. Closed 4 new students that week.',
               },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-2xl bg-card border border-border">
-                <p className="text-zinc-300 text-sm leading-relaxed mb-5 italic">{t.quote}</p>
-                <div>
-                  <div className="text-white font-bold text-sm">{t.name}</div>
-                  <div className="text-zinc-500 text-xs">{t.biz}</div>
+              <div key={t.name} className="p-7 rounded-2xl border border-border bg-card">
+                <div className="text-5xl text-zinc-800 font-serif leading-none mb-5 select-none">&ldquo;</div>
+                <p className="text-zinc-300 text-sm leading-relaxed mb-6">{t.quote}</p>
+                <div className="flex items-center gap-3 pt-5 border-t border-border">
+                  <div className="w-8 h-8 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 text-xs font-bold select-none">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-sm">{t.name}</div>
+                    <div className="text-zinc-600 text-xs">{t.biz}</div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -703,34 +763,35 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section className="py-24 px-4 bg-surface/40 border-y border-border">
+      <section className="py-32 px-4 sm:px-6 border-y border-border">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-5 py-2 mb-6 bg-violet-500/10 border border-violet-500/30 rounded-full text-violet-400 text-sm font-bold">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor"/></svg>
-            Only {spotsLeft} Free Spots Left out of 1,000
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-10 border border-violet-500/20 bg-violet-500/10 rounded-full text-violet-400 text-xs font-bold uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+            {spotsLeft} launch seats remaining
           </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold mb-5 leading-tight">
-            Your Competitor Is on Google.
-            <br className="hidden sm:block" />
-            <span className="gradient-text">Are You?</span>
+          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-tight mb-8">
+            Your Competitor<br />
+            Is on Google.<br />
+            <span className="text-green-400">Are You?</span>
           </h2>
-          <p className="text-zinc-400 text-lg mb-3 leading-relaxed">
-            Right now someone is searching for exactly what you offer. If your business isn&apos;t showing up — that customer goes to whoever is. A free website + Local SEO fixes that in 60 seconds.
+          <p className="text-zinc-500 text-lg mb-5 max-w-xl mx-auto leading-relaxed">
+            Right now, someone is searching for exactly what you offer. If you&apos;re not showing up — they go to whoever is. That customer is gone. It happens a hundred times a day. ScalifyX ends that.
           </p>
-          <p className="text-green-400 font-bold text-xl mb-10">
-            Free Website. Free SEO. Leads on WhatsApp. ₹0.
+          <p className="text-green-400 font-bold text-lg mb-12">
+            Professional Website · Local SEO · WhatsApp leads · Working while you sleep.
           </p>
           <button
-            onClick={() => openSignup()}
-            className="inline-flex items-center gap-3 px-14 py-5 bg-green-500 hover:bg-green-600 text-white rounded-2xl font-extrabold text-xl transition shadow-2xl shadow-green-500/30"
+            onClick={scrollToForm}
+            className="px-14 py-5 bg-green-500 hover:bg-green-400 text-white text-lg font-extrabold rounded-2xl transition"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white"/></svg>
-            Get My Free Website Now
+            Get Started — Go Live Today
           </button>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-zinc-500">
-            {['Free forever for first 1,000 users', 'No credit card', 'Cancel anytime'].map((t) => (
-              <span key={t} className="flex items-center gap-1.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-700">
+            {['No credit card required', 'Cancel anytime', 'Live in 60 seconds'].map((t) => (
+              <span key={t} className="flex items-center gap-2">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6L9 17l-5-5" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
                 {t}
               </span>
             ))}
@@ -739,36 +800,38 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="py-12 px-4 border-t border-border">
-        <div className="max-w-6xl mx-auto flex flex-col items-center gap-6">
-          <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4">
-            <Link href="/"><Logo size={32} /></Link>
-            <div className="flex gap-6 text-sm text-zinc-500">
+      <footer className="py-16 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-border">
+            <Link href="/"><Logo size={28} /></Link>
+            <div className="flex gap-8 text-sm text-zinc-600">
               <a href="#features" className="hover:text-white transition">Features</a>
               <a href="#templates" className="hover:text-white transition">Templates</a>
               <a href="#business" className="hover:text-white transition">Business Types</a>
+              <Link href="/login" className="hover:text-white transition">Login</Link>
             </div>
           </div>
-
-          <div className="flex flex-col items-center gap-3 pt-4 border-t border-border w-full">
-            <p className="text-zinc-500 text-sm">App coming soon on</p>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 text-white">
-                <svg width="20" height="22" viewBox="0 0 512 512" fill="white">
-                  <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z" />
-                </svg>
-                <span className="text-sm font-medium">Google Play</span>
-              </div>
-              <div className="flex items-center gap-2 text-white">
-                <svg width="18" height="22" viewBox="0 0 384 512" fill="white">
-                  <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-62.1 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
-                </svg>
-                <span className="text-sm font-medium">App Store</span>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8">
+            <p className="text-zinc-700 text-sm">© 2026 ScalifyX. All rights reserved.</p>
+            <div className="flex items-center gap-4 text-zinc-600 text-sm">
+              <span>App coming soon on</span>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition cursor-default">
+                  <svg width="13" height="15" viewBox="0 0 512 512" fill="currentColor">
+                    <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z" />
+                  </svg>
+                  Google Play
+                </span>
+                <span className="text-zinc-800">·</span>
+                <span className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition cursor-default">
+                  <svg width="11" height="15" viewBox="0 0 384 512" fill="currentColor">
+                    <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-62.1 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+                  </svg>
+                  App Store
+                </span>
               </div>
             </div>
           </div>
-
-          <div className="text-zinc-600 text-sm">© 2026 ScalifyX. All rights reserved.</div>
         </div>
       </footer>
     </div>
