@@ -1,14 +1,14 @@
-export const APP_NAME = 'ScalifyX';
+export const APP_NAME = 'Scalify';
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.EXPO_PUBLIC_API_URL ||
-  'https://api.scalifyx.com/api';
+  'https://api.scalifyapp.com/api';
 
 export const PLANS = [
   {
     id: 'pro',
-    name: 'ScalifyX Pro',
+    name: 'Scalify Pro',
     price: 749,
     originalPrice: 1999,
     period: 'month',
