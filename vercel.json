@@ -1,8 +1,3 @@
 {
-  "version": 2,
-  "framework": "nextjs",
-  "buildCommand": "cd web && npm install && npm run build",
-  "outputDirectory": "web/.next",
-  "devCommand": "cd web && npm run dev",
-  "installCommand": "cd web && npm install"
+  "version": 2
 }
