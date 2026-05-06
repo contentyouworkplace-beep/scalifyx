@@ -5,6 +5,7 @@ import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import React from 'react';
+import { registerAdminForNotifications, notificationsEnabled } from '../../lib/notifications';
 
 function formatRevenue(val: number) {
   if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
@@ -54,11 +55,22 @@ interface ActivityItem {
   color: string;
 }
 
+interface SignupItem {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  created_at: string;
+}
+
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const [dashStats, setDashStats] = useState({ totalUsers: 0, activeSites: 0, totalRevenue: 0, pendingPayments: 0 });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [recentSignups, setRecentSignups] = useState<SignupItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [requestingNotifications, setRequestingNotifications] = useState(false);
 
   const fetchDashboard = useCallback(async () => {
     try {
@@ -80,12 +92,41 @@ export default function AdminDashboard() {
       );
       items.sort((a: ActivityItem, b: ActivityItem) => new Date(b.time).getTime() - new Date(a.time).getTime());
       setActivity(items.slice(0, 8));
+
+      // Set recent signups from activity data
+      const signups = (activityData.recentUsers || []).map((u: any) => ({
+        id: u.id,
+        name: u.name || 'Unknown',
+        email: u.email || '',
+        phone: u.phone || '',
+        created_at: u.created_at,
+      }));
+      setRecentSignups(signups);
+
+      // Check notification status
+      setNotificationsEnabled(notificationsEnabled());
     } catch (e) {
       console.error('Dashboard fetch error:', e);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const handleEnableNotifications = async () => {
+    setRequestingNotifications(true);
+    try {
+      const success = await registerAdminForNotifications();
+      if (success) {
+        setNotificationsEnabled(true);
+      } else {
+        console.error('Failed to register for notifications');
+      }
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
+    } finally {
+      setRequestingNotifications(false);
+    }
+  };
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
@@ -147,6 +188,28 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {/* Notification Permission Banner */}
+      {!notificationsEnabled && (
+        <div className="mb-7 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <BellIcon className="text-blue-400" />
+              <div>
+                <p className="text-sm font-semibold text-white">Get instant signup notifications</p>
+                <p className="text-xs text-blue-200 mt-0.5">Enable browser notifications to get alerted when users sign up</p>
+              </div>
+            </div>
+            <button
+              onClick={handleEnableNotifications}
+              disabled={requestingNotifications}
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 transition disabled:opacity-50"
+            >
+              {requestingNotifications ? 'Setting up...' : 'Enable'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <h2 className="text-base font-bold mb-3">Manage</h2>
       <div className="flex justify-between mb-7">
@@ -158,6 +221,31 @@ export default function AdminDashboard() {
             <span className="text-[11px] text-zinc-500 font-medium text-center">{action.label}</span>
           </Link>
         ))}
+      </div>
+
+      {/* Recent Signups */}
+      <h2 className="text-base font-bold mb-3">Recent Signups</h2>
+      <div className="rounded-2xl bg-surface border border-border p-4 mb-7">
+        {recentSignups.length === 0 ? (
+          <p className="text-zinc-500 text-center py-4 text-sm">No recent signups</p>
+        ) : (
+          <div className="space-y-3">
+            {recentSignups.map((signup) => (
+              <div key={signup.id} className="p-3 rounded-xl bg-card border border-border/50 hover:border-border transition">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{signup.name}</p>
+                    <p className="text-xs text-zinc-500 mt-1 truncate">{signup.email}</p>
+                    {signup.phone && <p className="text-xs text-zinc-500 truncate">{signup.phone}</p>}
+                  </div>
+                  <div className="ml-3 text-right flex-shrink-0">
+                    <p className="text-xs text-zinc-400 whitespace-nowrap">{timeAgo(signup.created_at)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Recent Activity */}
