@@ -41,13 +41,14 @@ function SignupForm({ spotsLeft, nicheName }: { spotsLeft: number; nicheName: st
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
 
   useEffect(() => {
     if (!loading) return;
-    const base = 'Launching your account';
+    const base = 'Creating your account';
     let dots = 0;
     setLoadingText(base);
     const interval = setInterval(() => {
@@ -62,13 +63,14 @@ function SignupForm({ spotsLeft, nicheName }: { spotsLeft: number; nicheName: st
     setError('');
     if (!name.trim()) { setError('Please enter your company name.'); return; }
     if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
-      setError('Please enter a valid phone number.'); return;
+      setError('Please enter a valid WhatsApp number.'); return;
     }
     if (!email.trim()) { setError('Please enter your email.'); return; }
+    if (!password.trim()) { setError('Please enter a password.'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
 
     setLoading(true);
-    const autoPassword = generatePassword();
-    const result = await signUp(email, autoPassword, name, phone);
+    const result = await signUp(email, password, name, phone);
 
     if (!result.success) {
       setError(result.error || 'Something went wrong. Please try again.');
@@ -76,11 +78,7 @@ function SignupForm({ spotsLeft, nicheName }: { spotsLeft: number; nicheName: st
       return;
     }
 
-    const waMessage = encodeURIComponent(
-      `🎉 *New Signup on Scalify!*\n\n👤 *Name:* ${name}\n📱 *Phone:* +91${phone}\n📧 *Email:* ${email}\n🏢 *Source:* ${nicheName}\n🌐 *Domain:* scalifyapp.com\n\n🚀 Ready to launch their business website!\n✨ Let's make it happen!`
-    );
-    window.open(`https://wa.me/916353583148?text=${waMessage}`, '_blank');
-    router.replace('/dashboard');
+    router.replace('/signup-success');
   };
 
   return (
@@ -94,7 +92,7 @@ function SignupForm({ spotsLeft, nicheName }: { spotsLeft: number; nicheName: st
           Your next customer is already searching. Be there.
         </h2>
         <p className="mt-2 text-sm text-zinc-500 leading-relaxed">
-          Create your account — we send your enquiry to WhatsApp instantly.
+          Create your free account in 60 seconds. No credit card required.
         </p>
       </div>
 
@@ -115,7 +113,7 @@ function SignupForm({ spotsLeft, nicheName }: { spotsLeft: number; nicheName: st
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
             required
             className="flex-1 py-3 px-4 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
-            placeholder="Phone number"
+            placeholder="WhatsApp number"
           />
         </div>
         <input
@@ -125,6 +123,14 @@ function SignupForm({ spotsLeft, nicheName }: { spotsLeft: number; nicheName: st
           required
           className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
           placeholder="Email address"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+          placeholder="Password (min 6 characters)"
         />
         {error && (
           <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -136,7 +142,7 @@ function SignupForm({ spotsLeft, nicheName }: { spotsLeft: number; nicheName: st
           disabled={loading}
           className="w-full rounded-xl bg-green-500 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-green-400 active:scale-[0.99] disabled:opacity-50"
         >
-          {loading ? loadingText : `Get My ${nicheName} Website →`}
+          {loading ? loadingText : 'Create Free Account'}
         </button>
       </form>
 
