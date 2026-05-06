@@ -62,7 +62,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) { setError('Please enter your name.'); return; }
+    if (!name.trim()) { setError('Please enter your company name.'); return; }
     if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
       setError('Please enter a valid phone number.'); return;
     }
@@ -107,7 +107,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           onChange={(e) => setName(e.target.value)}
           required
           className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-          placeholder="Full name"
+          placeholder="Company name"
         />
         <div className="flex rounded-xl border border-border bg-inputBg overflow-hidden focus-within:border-green-500/50 transition">
           <span className="flex items-center px-4 text-zinc-500 text-sm border-r border-border select-none">+91</span>
