@@ -63,7 +63,9 @@ export function PushNotificationBanner() {
     setDismissed(true);
   };
 
-  if (dismissed || status === 'granted' || status === 'denied' || status === 'unsupported' || !VAPID_PUBLIC_KEY) {
+  // Only hide if dismissed, already granted, or truly unsupported
+  // Always show the banner to allow user to enable notifications
+  if (dismissed || status === 'granted') {
     return null;
   }
 
@@ -85,10 +87,10 @@ export function PushNotificationBanner() {
         </button>
         <button
           onClick={handleEnable}
-          disabled={subscribing}
-          className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold rounded-lg transition disabled:opacity-50"
+          disabled={subscribing || status === 'unsupported'}
+          className="px-3 py-1.5 bg-green-500 hover:bg-green-400 text-white text-xs font-bold rounded-lg transition active:scale-95 cursor-pointer"
         >
-          {subscribing ? '...' : 'Enable'}
+          {subscribing ? 'Enabling...' : 'Enable Notifications'}
         </button>
       </div>
     </div>
