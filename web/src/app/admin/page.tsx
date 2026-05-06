@@ -5,7 +5,7 @@ import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import React from 'react';
-import { registerAdminForNotifications, notificationsEnabled } from '../../lib/notifications';
+import { registerAdminForNotifications, notificationsEnabled as checkNotificationsEnabled } from '../../lib/notifications';
 
 function formatRevenue(val: number) {
   if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
       setRecentSignups(signups);
 
       // Check notification status
-      setNotificationsEnabled(notificationsEnabled());
+      setNotificationsEnabled(checkNotificationsEnabled());
     } catch (e) {
       console.error('Dashboard fetch error:', e);
     } finally {
