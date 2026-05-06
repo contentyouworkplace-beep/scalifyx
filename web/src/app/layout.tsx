@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     shortcut: '/favicon.png',
     apple: '/icon.png',
   },
+  verification: {
+    google: 'googlec1b155cb6acd07f9',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -46,6 +49,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             alt=""
           />
         </noscript>
+        <Script
+          id="google-analytics"
+          src="https://www.googletagmanager.com/gtag/js?id=G-ZQSEMY781C"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics-config"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-ZQSEMY781C');
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-bg text-white antialiased">
         <Providers>
