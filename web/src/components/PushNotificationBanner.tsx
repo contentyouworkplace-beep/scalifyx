@@ -34,7 +34,7 @@ export function PushNotificationBanner() {
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') { setStatus('denied'); return; }
 
-      const reg = await navigator.serviceWorker.register('/sw.js');
+      const reg = await navigator.serviceWorker.register('/service-worker.js');
       await navigator.serviceWorker.ready;
 
       const existing = await reg.pushManager.getSubscription();
