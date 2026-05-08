@@ -106,12 +106,12 @@ export default function WebsitePage() {
   ];
 
   const demos = [
-    { title: 'Friends Factory Cafe', url: 'https://friendsfactorycafe.com/', image: '/screenshots/friendsfactorycafe.jpg' },
-    { title: 'Wedding Planner Vadodara', url: 'https://weddingplannervadodara.in/', image: '/screenshots/weddingplannervadodara.jpg' },
-    { title: 'Waterproofing Vadodara', url: 'https://waterproofingvadodara.com/', image: '/screenshots/waterproofingvadodara.jpg' },
-    { title: 'Interior Design Vadodara', url: 'https://interiordesignvadodara.in/', image: '/screenshots/interiordesignvadodara.jpg' },
-    { title: 'Solar Installation', url: 'https://solarinstallationvadodara.in/', image: '/screenshots/solarinstallationvadodara.jpg' },
-    { title: 'Wow Shaadi', url: 'https://wowshaadi.com/', image: '/screenshots/wowshaadi.jpg' },
+    { title: 'Business Portfolio 1', url: '#', image: '/screenshots/1.png' },
+    { title: 'Business Portfolio 2', url: '#', image: '/screenshots/2.png' },
+    { title: 'Business Portfolio 3', url: '#', image: '/screenshots/3.png' },
+    { title: 'Business Portfolio 4', url: '#', image: '/screenshots/4.png' },
+    { title: 'Business Portfolio 5', url: '#', image: '/screenshots/5.png' },
+    { title: 'Business Portfolio 6', url: '#', image: '/screenshots/6.png' },
   ];
 
   return (
@@ -242,20 +242,8 @@ export default function WebsitePage() {
                 src={demo.image}
                 alt={demo.title}
                 fill
-                unoptimized
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 group-hover:via-black/40 transition-all duration-300" />
-
-              {/* Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                <p className="text-white font-bold text-lg mb-4 group-hover:text-green-400 transition">{demo.title}</p>
-                <button className="px-5 py-2 rounded-lg bg-green-500 text-white text-sm font-semibold hover:bg-green-400 transition transform group-hover:scale-105 active:scale-95">
-                  View Live
-                </button>
-              </div>
 
               {/* Hover overlay with arrow */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
