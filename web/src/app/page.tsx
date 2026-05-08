@@ -464,64 +464,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── LOCAL SEO ── */}
-      <section className="py-28 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Your #1 Growth Engine</span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight mb-6">
-              The Moment They Search,<br />
-              <span className="text-green-400">You Appear.</span>
-            </h2>
-            <p className="text-zinc-400 text-lg leading-relaxed mb-5">
-              Someone types <span className="text-white">&ldquo;best salon near me&rdquo;</span> or <span className="text-white">&ldquo;doctor in Pune&rdquo;</span> — and your business is right there. We handle every layer of Local SEO: Google Search Console, meta tags, sitemaps, page speed, structured data. Done automatically.
-            </p>
-            <p className="text-zinc-600 text-base leading-relaxed mb-8">
-              An SEO agency charges <span className="text-white font-semibold">₹8,000/month</span> for exactly this. On Scalify, it comes with your plan — on day one.
-            </p>
-            <button
-              onClick={scrollToForm}
-              className="px-7 py-3.5 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-xl transition"
-            >
-              Start Local SEO Setup →
-            </button>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-              <span className="ml-3 text-xs text-zinc-700 font-mono">google.com</span>
-            </div>
-            <div className="text-xs text-zinc-600 mb-5 font-mono bg-surface/50 rounded-lg px-3 py-2 border border-border">
-              🔍 &quot;best salon near me&quot;
-            </div>
-            {[
-              { name: 'Your Business', loc: 'Mumbai · 0.3 km', rating: '4.9', isYou: true },
-              { name: 'Sharma Hair Studio', loc: 'Mumbai · 0.8 km', rating: '4.3', isYou: false },
-              { name: 'Classic Cuts', loc: 'Mumbai · 1.2 km', rating: '4.1', isYou: false },
-            ].map((r) => (
-              <div
-                key={r.name}
-                className={`flex items-center justify-between p-3.5 rounded-xl mb-2 border transition ${r.isYou ? 'bg-green-500/10 border-green-500/25' : 'bg-surface/30 border-border'}`}
-              >
-                <div>
-                  <div className={`text-sm font-semibold ${r.isYou ? 'text-green-400' : 'text-zinc-500'}`}>
-                    {r.name}
-                    {r.isYou && <span className="ml-2 text-xs bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded-full font-bold">TOP</span>}
-                  </div>
-                  <div className="text-xs text-zinc-700 mt-0.5">{r.loc}</div>
-                </div>
-                <div className="text-xs text-yellow-500 font-bold">★ {r.rating}</div>
-              </div>
-            ))}
-            <p className="text-xs text-zinc-700 mt-4 text-center">This is what customers see. You&apos;re at the top.</p>
-          </div>
-        </div>
-      </section>
 
       {/* ── WHATSAPP ── */}
       <section className="py-28 px-4 sm:px-6 bg-surface/20">
