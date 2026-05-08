@@ -168,10 +168,9 @@ export default function WebsitePage() {
             {/* CTA Button */}
             <button
               onClick={handlePayNow}
-              disabled={loading}
-              className="w-full rounded-2xl bg-gradient-to-r from-green-500 to-green-400 px-8 py-5 text-lg font-bold text-white hover:shadow-lg hover:shadow-green-500/50 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+              className="w-full rounded-2xl bg-gradient-to-r from-green-500 to-green-400 px-8 py-5 text-lg font-bold text-white hover:shadow-lg hover:shadow-green-500/50 active:scale-[0.98] transition-all mb-4"
             >
-              {loading ? 'Processing...' : 'Start Your Website Now →'}
+              Start Your Website Now →
             </button>
 
             <p className="text-center text-sm text-zinc-500">
@@ -306,10 +305,9 @@ export default function WebsitePage() {
           <p className="text-zinc-500 mb-8">Starting at just ₹199/month.</p>
           <button
             onClick={handlePayNow}
-            disabled={loading}
-            className="inline-block rounded-xl bg-green-500 px-12 py-4 text-lg font-bold text-white hover:bg-green-400 active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-block rounded-xl bg-green-500 px-12 py-4 text-lg font-bold text-white hover:bg-green-400 active:scale-[0.98] transition"
           >
-            {loading ? 'Processing...' : 'Launch Your Website Today'}
+            Launch Your Website Today
           </button>
           <p className="text-xs text-zinc-600 mt-6">Free consultation. No credit card. Cancel anytime.</p>
         </div>
