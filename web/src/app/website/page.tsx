@@ -2,57 +2,17 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { Logo } from '@/components/Logo';
-import { CheckCircleIcon } from '@/components/Icons';
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 export default function WebsitePage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [whatsappQuery, setWhatsappQuery] = useState('');
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+  const PAYMENT_LINK = 'https://rzp.io/rzp/GBnrfLOh';
 
-  const handlePayNow = async () => {
-    setLoading(true);
-    try {
-      const options = {
-        key: 'rzp_live_e5lkkMNJvDtXIZ',
-        amount: 19900,
-        currency: 'INR',
-        name: 'Scalify',
-        description: 'Professional Website Design - ₹199/month',
-        image: '/brand/logo.png',
-        handler: function(response: { razorpay_payment_id: string }) {
-          sessionStorage.setItem('orderId', response.razorpay_payment_id);
-          router.push('/payment-success?orderId=' + response.razorpay_payment_id);
-        },
-        prefill: {
-          name: '',
-          email: '',
-          contact: '',
-        },
-        theme: {
-          color: '#22c55e',
-        },
-      };
-
-      const razorpay = new (window as any).Razorpay(options);
-      razorpay.open();
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to open payment';
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
+  const handlePayNow = () => {
+    window.location.href = PAYMENT_LINK;
   };
 
   const handleWhatsAppQuery = () => {
