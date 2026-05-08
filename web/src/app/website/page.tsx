@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/api';
@@ -66,6 +67,11 @@ export default function WebsitePage() {
       title: 'Free Hosting Setup',
       description: 'Complete hosting configuration included in your package',
     },
+    {
+      icon: '🌐',
+      title: 'Add Your Custom Domain',
+      description: 'Domain must be purchased separately. We\'ll integrate it with your website.',
+    },
   ];
 
   const faqs = [
@@ -90,29 +96,39 @@ export default function WebsitePage() {
       a: 'Yes. Website updates, security patches, speed optimization—all included. You focus on your business.',
     },
     {
+      q: 'What about domain names?',
+      a: 'Domains are not included in the ₹199 package. You need to purchase a domain separately from a registrar like GoDaddy, Namecheap, or others. Once purchased, we\'ll integrate it with your website at no extra cost. Domain costs vary but typically start from ₹300-500/year.',
+    },
+    {
       q: 'What happens if I cancel?',
       a: 'We give you a backup of your website. No lock-in, no drama. You own your content.',
     },
   ];
 
   const demos = [
-    { title: 'Friends Factory Cafe', url: 'https://friendsfactorycafe.com/', icon: '☕' },
-    { title: 'Wedding Planner Vadodara', url: 'https://weddingplannervadodara.in/', icon: '💒' },
-    { title: 'Waterproofing Vadodara', url: 'https://waterproofingvadodara.com/', icon: '🏗️' },
-    { title: 'Interior Design Vadodara', url: 'https://interiordesignvadodara.in/', icon: '🎨' },
-    { title: 'Solar Installation', url: 'https://solarinstallationvadodara.in/', icon: '☀️' },
-    { title: 'Wow Shaadi', url: 'https://wowshaadi.com/', icon: '💍' },
+    { title: 'Friends Factory Cafe', url: 'https://friendsfactorycafe.com/', image: '/screenshots/friendsfactorycafe.jpg' },
+    { title: 'Wedding Planner Vadodara', url: 'https://weddingplannervadodara.in/', image: '/screenshots/weddingplannervadodara.jpg' },
+    { title: 'Waterproofing Vadodara', url: 'https://waterproofingvadodara.com/', image: '/screenshots/waterproofingvadodara.jpg' },
+    { title: 'Interior Design Vadodara', url: 'https://interiordesignvadodara.in/', image: '/screenshots/interiordesignvadodara.jpg' },
+    { title: 'Solar Installation', url: 'https://solarinstallationvadodara.in/', image: '/screenshots/solarinstallationvadodara.jpg' },
+    { title: 'Wow Shaadi', url: 'https://wowshaadi.com/', image: '/screenshots/wowshaadi.jpg' },
   ];
 
   return (
     <div className="min-h-screen bg-bg text-white">
       <style>{`
-        @keyframes slowBlink {
-          0%, 49%, 100% { opacity: 1; }
-          50%, 99% { opacity: 0.3; }
+        @keyframes glow-pulse {
+          0%, 100% {
+            opacity: 1;
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+          }
+          50% {
+            opacity: 0.6;
+            box-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
+          }
         }
         .slow-blink {
-          animation: slowBlink 3s ease-in-out infinite;
+          animation: glow-pulse 2.5s ease-in-out infinite;
         }
       `}</style>
       {/* Header */}
@@ -126,7 +142,7 @@ export default function WebsitePage() {
               {/* Money Back Guarantee Badge */}
               <div className="slow-blink">
                 <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center gap-1">
-                  <span className="text-amber-400 text-xs font-semibold">💰 15 Days Money Back</span>
+                  <span className="text-amber-400 text-xs font-semibold">💰 14 Days Money Back Guarantee</span>
                 </div>
               </div>
               {user && (
@@ -221,12 +237,22 @@ export default function WebsitePage() {
               href={demo.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative rounded-2xl overflow-hidden border border-border bg-gradient-to-br from-card/50 to-card/20 hover:border-green-500/50 transition-all duration-300 h-64 sm:h-72"
+              className="group relative rounded-2xl overflow-hidden border border-border hover:border-green-500/50 transition-all duration-300 h-64 sm:h-72"
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
+              {/* Background Image */}
+              <Image
+                src={demo.image}
+                alt={demo.title}
+                fill
+                unoptimized
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+              />
 
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 group-hover:via-black/40 transition-all duration-300" />
+
+              {/* Content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-                <div className="text-6xl mb-4">{demo.icon}</div>
                 <p className="text-white font-bold text-lg mb-4 group-hover:text-green-400 transition">{demo.title}</p>
                 <button className="px-5 py-2 rounded-lg bg-green-500 text-white text-sm font-semibold hover:bg-green-400 transition transform group-hover:scale-105 active:scale-95">
                   View Live
