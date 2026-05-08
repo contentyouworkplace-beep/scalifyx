@@ -120,11 +120,9 @@ export default function WebsitePage() {
         @keyframes glow-pulse {
           0%, 100% {
             opacity: 1;
-            box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
           }
           50% {
             opacity: 0.6;
-            box-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
           }
         }
         .slow-blink {
