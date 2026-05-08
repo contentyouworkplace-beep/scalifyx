@@ -4,10 +4,9 @@ import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { CheckCircleIcon } from '@/components/Icons';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
-export default function PaymentSuccess() {
-  const router = useRouter();
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState('');
   const [loaded, setLoaded] = useState(false);
@@ -168,5 +167,21 @@ export default function PaymentSuccess() {
         </p>
       </div>
     </div>
+  );
+}
+
+import { Suspense } from 'react';
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-bg text-white flex items-center justify-center p-4">
+          <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
