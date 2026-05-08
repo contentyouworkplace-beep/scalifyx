@@ -3,35 +3,52 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { apiFetch } from '@/lib/api';
 import { Logo } from '@/components/Logo';
 import { CheckCircleIcon } from '@/components/Icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export default function WebsitePage() {
   const router = useRouter();
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [whatsappQuery, setWhatsappQuery] = useState('');
 
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
   const handlePayNow = async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/payment/create-payment-link', {
-        method: 'POST',
-        body: JSON.stringify({ redirectTo: '/payment-success' }),
-      });
-      if (data.success && data.paymentLink) {
-        sessionStorage.setItem('paymentReturnUrl', '/payment-success');
-        window.location.href = data.paymentLink;
-      } else {
-        toast.error('Failed to create payment link');
-      }
+      const options = {
+        key: 'rzp_live_e5lkkMNJvDtXIZ',
+        amount: 19900,
+        currency: 'INR',
+        name: 'Scalify',
+        description: 'Professional Website Design - ₹199/month',
+        image: '/brand/logo.png',
+        handler: function(response: { razorpay_payment_id: string }) {
+          sessionStorage.setItem('orderId', response.razorpay_payment_id);
+          router.push('/payment-success?orderId=' + response.razorpay_payment_id);
+        },
+        prefill: {
+          name: '',
+          email: '',
+          contact: '',
+        },
+        theme: {
+          color: '#22c55e',
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to create payment link';
+      const msg = error instanceof Error ? error.message : 'Failed to open payment';
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -143,11 +160,6 @@ export default function WebsitePage() {
                   <span className="text-amber-400 text-xs font-semibold">💰 14 Days Money Back Guarantee</span>
                 </div>
               </div>
-              {user && (
-                <Link href="/dashboard" className="text-sm text-green-400 hover:text-green-300 transition">
-                  Go to Dashboard →
-                </Link>
-              )}
             </div>
           </div>
         </div>
