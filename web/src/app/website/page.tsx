@@ -106,6 +106,15 @@ export default function WebsitePage() {
 
   return (
     <div className="min-h-screen bg-bg text-white">
+      <style>{`
+        @keyframes slowBlink {
+          0%, 49%, 100% { opacity: 1; }
+          50%, 99% { opacity: 0.3; }
+        }
+        .slow-blink {
+          animation: slowBlink 3s ease-in-out infinite;
+        }
+      `}</style>
       {/* Header */}
       <div className="sticky top-0 z-40 border-b border-border bg-card/30 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
@@ -113,11 +122,19 @@ export default function WebsitePage() {
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
               <Logo size={32} />
             </Link>
-            {user && (
-              <Link href="/dashboard" className="text-sm text-green-400 hover:text-green-300 transition">
-                Go to Dashboard →
-              </Link>
-            )}
+            <div className="flex items-center gap-4">
+              {/* Money Back Guarantee Badge */}
+              <div className="slow-blink">
+                <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center gap-1">
+                  <span className="text-amber-400 text-xs font-semibold">💰 15 Days Money Back</span>
+                </div>
+              </div>
+              {user && (
+                <Link href="/dashboard" className="text-sm text-green-400 hover:text-green-300 transition">
+                  Go to Dashboard →
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
