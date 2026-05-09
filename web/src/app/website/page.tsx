@@ -126,8 +126,18 @@ export default function WebsitePage() {
       </div>
 
       {/* Hero Section - Short & Punchy */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-        <div className="text-center">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 overflow-hidden">
+        {/* Background Image with Low Opacity */}
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/hero image.webp"
+            alt="background"
+            fill
+            className="object-cover opacity-15"
+            priority
+          />
+        </div>
+        <div className="text-center relative z-10">
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 leading-tight">
             Your Competitors Are Online.
             <br />
