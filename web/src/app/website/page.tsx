@@ -130,7 +130,7 @@ export default function WebsitePage() {
         {/* Background Image with Low Opacity */}
         <div className="absolute inset-0 -z-10">
           <Image
-            src="/hero image.webp"
+            src="/hero-image.webp"
             alt="background"
             fill
             className="object-cover opacity-15"
