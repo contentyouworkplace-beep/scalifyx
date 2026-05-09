@@ -62,7 +62,7 @@ export default function WebsitePage() {
     },
     {
       q: 'How fast will my website be live?',
-      a: '5-7 business days from the day you pay. We\'ve optimized this process to move fast without cutting corners.',
+      a: '5 business days from the day you pay. We\'ve optimized this process to move fast without cutting corners.',
     },
     {
       q: 'What if I don\'t like it?',
@@ -83,12 +83,12 @@ export default function WebsitePage() {
   ];
 
   const demos = [
-    { title: 'Business Portfolio 1', url: '#', image: '/screenshots/1.png' },
-    { title: 'Business Portfolio 2', url: '#', image: '/screenshots/2.png' },
-    { title: 'Business Portfolio 3', url: '#', image: '/screenshots/3.png' },
-    { title: 'Business Portfolio 4', url: '#', image: '/screenshots/4.png' },
-    { title: 'Business Portfolio 5', url: '#', image: '/screenshots/5.png' },
-    { title: 'Business Portfolio 6', url: '#', image: '/screenshots/6.png' },
+    { title: "Friends Factory Cafe", subtitle: 'Cafe Business', url: 'https://friendsfactorycafe.com/', image: '/screenshots/1.png' },
+    { title: 'Wedding Planner Vadodara', subtitle: 'Wedding Planning', url: 'https://weddingplannervadodara.in/', image: '/screenshots/2.png' },
+    { title: 'Waterproofing Vadodara', subtitle: 'Construction Services', url: 'https://waterproofingvadodara.com/', image: '/screenshots/3.png' },
+    { title: 'Interior Design Vadodara', subtitle: 'Interior Design', url: 'https://interiordesignvadodara.in/', image: '/screenshots/4.png' },
+    { title: 'Solar Installation', subtitle: 'Solar Energy', url: 'https://solarinstallationvadodara.in/', image: '/screenshots/5.png' },
+    { title: 'Wow Shaadi', subtitle: 'Wedding Services', url: 'https://wowshaadi.com/', image: '/screenshots/6.png' },
   ];
 
   return (
@@ -129,12 +129,15 @@ export default function WebsitePage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="text-center">
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 leading-tight">
-            Professional Website
+            Your Competitors Are Online.
             <br />
-            <span className="text-green-400">Starting at ₹199/month</span>
+            <span className="text-green-400">You Should Be Too.</span>
           </h1>
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-2">
-            750+ businesses already online. No design skills needed. We handle everything.
+          <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-4">
+            Professional website live in 5 days — starting at ₹199/month.
+          </p>
+          <p className="text-sm text-zinc-500 max-w-2xl mx-auto">
+            750+ small businesses found on Google with Scalify. Domain purchased separately (₹300-500/year).
           </p>
         </div>
       </div>
@@ -216,6 +219,15 @@ export default function WebsitePage() {
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
 
+              {/* Business info overlay - always visible at bottom */}
+              <div className="absolute inset-0 flex flex-col justify-between p-4">
+                <div />
+                <div className="bg-gradient-to-t from-black/80 to-transparent pt-8 pb-2">
+                  <h3 className="text-white font-semibold text-lg">{demo.title}</h3>
+                  <p className="text-green-400 text-sm">{demo.subtitle}</p>
+                </div>
+              </div>
+
               {/* Hover overlay with arrow */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
                 <div className="text-center">
@@ -242,7 +254,7 @@ export default function WebsitePage() {
               <p className="text-zinc-400">Websites Live</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-green-400 mb-2">5-7 Days</div>
+              <div className="text-4xl font-bold text-green-400 mb-2">5 Days</div>
               <p className="text-zinc-400">From Payment to Launch</p>
             </div>
             <div className="text-center">
@@ -301,15 +313,15 @@ export default function WebsitePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-20">
         <div className="rounded-3xl border border-green-500/30 bg-gradient-to-r from-green-500/10 to-green-400/5 p-10 sm:p-14 text-center">
           <h3 className="text-4xl font-bold mb-4">Ready to Go Online?</h3>
-          <p className="text-zinc-400 mb-2 text-lg">Join 750+ businesses who chose Scalify.</p>
-          <p className="text-zinc-500 mb-8">Starting at just ₹199/month.</p>
+          <p className="text-zinc-400 mb-4 text-lg">Join 750+ businesses who chose Scalify.</p>
+          <p className="text-green-400 font-semibold mb-8 text-lg">Only 30 websites per month. Limited spots available.</p>
           <button
             onClick={handlePayNow}
             className="inline-block rounded-xl bg-green-500 px-12 py-4 text-lg font-bold text-white hover:bg-green-400 active:scale-[0.98] transition"
           >
-            Launch Your Website Today
+            Get My Website for ₹199 →
           </button>
-          <p className="text-xs text-zinc-600 mt-6">Free consultation. No credit card. Cancel anytime.</p>
+          <p className="text-xs text-zinc-600 mt-6">14-day money back · No hidden charges · WhatsApp support</p>
         </div>
       </div>
 
