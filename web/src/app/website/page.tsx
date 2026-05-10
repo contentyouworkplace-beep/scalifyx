@@ -78,7 +78,7 @@ export default function WebsitePage() {
     },
     {
       q: 'What happens if I cancel?',
-      a: 'We give you a backup of your website. No lock-in, no drama. You own your content.',
+      a: 'Your website will no longer be available. But it's easy to cancel anytime—just one click.',
     },
   ];
 
@@ -147,7 +147,7 @@ export default function WebsitePage() {
             Professional website live in 5 days — starting at ₹199/month.
           </p>
           <p className="text-sm text-zinc-500 max-w-2xl mx-auto">
-            750+ small businesses found on Google with Scalify. Domain purchased separately (₹300-500/year).
+            750+ small businesses found on Google with Scalify.
           </p>
         </div>
       </div>
