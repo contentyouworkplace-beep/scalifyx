@@ -57,6 +57,10 @@ export default function WebsitePage() {
       a: 'A professional, custom-designed website that looks like you paid thousands for it. Includes beautiful design, fast loading, SEO setup, and hosting. We handle everything.',
     },
     {
+      q: 'What about domain names?',
+      a: 'Domains are not included in the ₹199 package. You need to purchase a domain separately from a registrar like GoDaddy, Namecheap, or others. Once purchased, we\'ll integrate it with your website at no extra cost. Domain costs vary but typically start from ₹300-500/year.',
+    },
+    {
       q: 'I have no design skills. Is that OK?',
       a: 'Perfect. We handle all the design work. You just need to tell us about your business.',
     },
@@ -71,10 +75,6 @@ export default function WebsitePage() {
     {
       q: 'Do you update and maintain it?',
       a: 'Yes. Website updates, security patches, speed optimization—all included. You focus on your business.',
-    },
-    {
-      q: 'What about domain names?',
-      a: 'Domains are not included in the ₹199 package. You need to purchase a domain separately from a registrar like GoDaddy, Namecheap, or others. Once purchased, we\'ll integrate it with your website at no extra cost. Domain costs vary but typically start from ₹300-500/year.',
     },
     {
       q: 'What happens if I cancel?',
@@ -116,9 +116,9 @@ export default function WebsitePage() {
             <div className="flex items-center gap-4">
               {/* Money Back Guarantee Badge */}
               <div className="slow-blink">
-                <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center gap-1">
+                <Link href="/refund" className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center gap-1 hover:bg-amber-500/30 transition">
                   <span className="text-amber-400 text-xs font-semibold">💰 14 Days Money Back Guarantee</span>
-                </div>
+                </Link>
               </div>
             </div>
           </div>
@@ -410,11 +410,12 @@ export default function WebsitePage() {
         <button
           onClick={() => setShowWhatsApp(!showWhatsApp)}
           className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white font-semibold py-4 px-6 rounded-full shadow-lg hover:shadow-xl transition transform hover:scale-110 active:scale-95"
+          title="Post-Purchase Support"
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12.031 6.172c-3.181 0-5.77 2.586-5.77 5.766 0 1.22.334 2.372.913 3.355L6.5 19.346l4.357-1.433c.996.528 2.135.832 3.174.832 3.18 0 5.768-2.586 5.768-5.766 0-3.18-2.588-5.766-5.768-5.766zm3.353 8.795c-.147.392-.468.643-.9.643-.432 0-.753-.25-.9-.643-.075-.2-.122-.436-.122-.672 0-.655.334-1.227.834-1.565.126-.098.268-.146.42-.146.15 0 .294.048.42.146.5.338.834.91.834 1.565 0 .236-.047.472-.122.672z"/>
           </svg>
-          <span className="hidden sm:inline">Ask a Question</span>
+          <span className="hidden sm:inline">Post-Purchase Support</span>
         </button>
       </div>
     </div>
