@@ -13,16 +13,16 @@ export default function WebsitePage() {
 
   const handlePayNow = async () => {
     // Track with Google Analytics
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'payment_button_click', {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'payment_button_click', {
         event_category: 'engagement',
         event_label: 'website_199_payment',
       });
     }
 
     // Track with Facebook Pixel
-    if (typeof fbq !== 'undefined') {
-      fbq('track', 'InitiateCheckout', {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'InitiateCheckout', {
         currency: 'INR',
         value: 199,
       });
