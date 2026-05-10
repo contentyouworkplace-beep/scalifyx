@@ -47,6 +47,9 @@ function CashIcon({ className }: { className?: string }) {
 function BellIcon({ className }: { className?: string }) {
   return <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
 }
+function ClickIcon({ className }: { className?: string }) {
+  return <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><polyline points="12 5 12 19"/><polyline points="5 12 19 12"/></svg>;
+}
 
 interface ActivityItem {
   icon: 'person-add' | 'card' | 'globe';
@@ -63,22 +66,32 @@ interface SignupItem {
   created_at: string;
 }
 
+interface PaymentClick {
+  id: string;
+  timestamp: string;
+  ip_address: string;
+  page: string;
+}
+
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const [dashStats, setDashStats] = useState({ totalUsers: 0, activeSites: 0, totalRevenue: 0, pendingPayments: 0 });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [recentSignups, setRecentSignups] = useState<SignupItem[]>([]);
+  const [paymentTracking, setPaymentTracking] = useState({ totalClicks: 0, todayClicks: 0, recentClicks: [] as PaymentClick[] });
   const [loading, setLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [requestingNotifications, setRequestingNotifications] = useState(false);
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const [statsData, activityData] = await Promise.all([
+      const [statsData, activityData, paymentData] = await Promise.all([
         apiFetch('/admin/dashboard'),
         apiFetch('/admin/activity'),
+        apiFetch('/api/admin/payment-tracking'),
       ]);
       setDashStats(statsData);
+      setPaymentTracking(paymentData);
 
       const items: ActivityItem[] = [];
       (activityData.recentUsers || []).forEach((u: any) =>
@@ -143,6 +156,7 @@ export default function AdminDashboard() {
     { icon: GlobeIcon, label: 'Active Sites', value: dashStats.activeSites.toLocaleString(), color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
     { icon: CardIcon, label: 'Revenue', value: formatRevenue(dashStats.totalRevenue), color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
     { icon: AlertIcon, label: 'Pending', value: dashStats.pendingPayments.toString(), color: 'text-red-400', bg: 'bg-red-400/10' },
+    { icon: ClickIcon, label: 'Payment Clicks', value: paymentTracking.totalClicks.toLocaleString(), color: 'text-purple-400', bg: 'bg-purple-400/10', extra: `${paymentTracking.todayClicks} today` },
   ];
 
   const quickActions = [
@@ -176,14 +190,15 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-7">
-        {statCards.map((card) => (
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-7">
+        {statCards.map((card: any) => (
           <div key={card.label} className="p-4 rounded-2xl bg-surface border border-border">
             <div className={`w-9 h-9 rounded-[10px] ${card.bg} flex items-center justify-center mb-3`}>
               <card.icon className={card.color} />
             </div>
             <div className="text-xl md:text-2xl font-bold">{card.value}</div>
             <div className="text-xs text-zinc-500 mt-0.5">{card.label}</div>
+            {card.extra && <div className="text-xs text-zinc-400 mt-1">{card.extra}</div>}
           </div>
         ))}
       </div>
@@ -250,7 +265,7 @@ export default function AdminDashboard() {
 
       {/* Recent Activity */}
       <h2 className="text-base font-bold mb-3">Recent Activity</h2>
-      <div className="rounded-2xl bg-surface border border-border p-4">
+      <div className="rounded-2xl bg-surface border border-border p-4 mb-7">
         {activity.length === 0 ? (
           <p className="text-zinc-500 text-center py-4 text-sm">No recent activity</p>
         ) : (
@@ -268,6 +283,35 @@ export default function AdminDashboard() {
               </div>
             );
           })
+        )}
+      </div>
+
+      {/* Payment Button Clicks */}
+      <h2 className="text-base font-bold mb-3">Payment Button Clicks (₹199 Website)</h2>
+      <div className="rounded-2xl bg-surface border border-border p-4">
+        {paymentTracking.recentClicks.length === 0 ? (
+          <p className="text-zinc-500 text-center py-4 text-sm">No clicks yet</p>
+        ) : (
+          <div className="space-y-3">
+            {paymentTracking.recentClicks.map((click, i) => (
+              <div key={i} className="p-3 rounded-xl bg-card border border-border/50 hover:border-border transition">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                      <ClickIcon className="w-4 h-4 text-purple-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white">Payment initiated</p>
+                      <p className="text-xs text-zinc-500 mt-0.5 truncate">{click.ip_address}</p>
+                    </div>
+                  </div>
+                  <div className="ml-3 text-right flex-shrink-0">
+                    <p className="text-xs text-zinc-400 whitespace-nowrap">{timeAgo(click.timestamp)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
