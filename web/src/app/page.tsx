@@ -182,7 +182,7 @@ const FAQS = [
   },
   {
     q: 'Can I use my own domain name (like mybusiness.com)?',
-    a: 'Yes! You get a free subdomain (yourbusiness.scalifyapp.com) instantly. If you want your own domain, buy it from GoDaddy or Hostinger (₹500–800/year) and we connect it for free.',
+    a: 'Yes! You get a free subdomain (yourbusiness.scalifyapp.com) instantly. If you want your own domain, buy it from GoDaddy or Hostinger (₹300–₹800/year) and we connect it for free.',
   },
   {
     q: 'Do I need a credit card to sign up?',
@@ -194,7 +194,7 @@ const FAQS = [
   },
   {
     q: 'Can I cancel anytime?',
-    a: 'Yes — no lock-in contracts. Cancel anytime with one click. You keep access until the end of your current billing month. Your data and content are always yours.',
+    a: 'If you cancel, your website will no longer be live. Cancellation is simple and straightforward.',
   },
   {
     q: 'What industries does Scalify support?',
