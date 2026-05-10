@@ -11,7 +11,35 @@ export default function WebsitePage() {
 
   const PAYMENT_LINK = 'https://rzp.io/rzp/GBnrfLOh';
 
-  const handlePayNow = () => {
+  const handlePayNow = async () => {
+    // Track with Google Analytics
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'payment_button_click', {
+        event_category: 'engagement',
+        event_label: 'website_199_payment',
+      });
+    }
+
+    // Track with Facebook Pixel
+    if (typeof fbq !== 'undefined') {
+      fbq('track', 'InitiateCheckout', {
+        currency: 'INR',
+        value: 199,
+      });
+    }
+
+    // Server-side logging
+    try {
+      await fetch('/api/track-payment-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timestamp: new Date().toISOString() }),
+      });
+    } catch (error) {
+      console.error('Failed to log payment click:', error);
+    }
+
+    // Redirect to payment
     window.location.href = PAYMENT_LINK;
   };
 
