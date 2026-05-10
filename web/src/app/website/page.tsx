@@ -78,7 +78,7 @@ export default function WebsitePage() {
     },
     {
       q: 'What happens if I cancel?',
-      a: 'Your website will no longer be available. But it's easy to cancel anytime—just one click.',
+      a: "Your website will no longer be available. But it's easy to cancel anytime—just one click.",
     },
   ];
 
