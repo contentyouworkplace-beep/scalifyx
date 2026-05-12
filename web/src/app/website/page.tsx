@@ -11,7 +11,35 @@ export default function WebsitePage() {
 
   const PAYMENT_LINK = 'https://rzp.io/rzp/GBnrfLOh';
 
-  const handlePayNow = () => {
+  const handlePayNow = async () => {
+    // Track with Google Analytics
+    if (typeof (window as any).gtag !== 'undefined') {
+      (window as any).gtag('event', 'payment_button_click', {
+        event_category: 'engagement',
+        event_label: 'website_199_payment',
+      });
+    }
+
+    // Track with Facebook Pixel
+    if (typeof (window as any).fbq !== 'undefined') {
+      (window as any).fbq('track', 'InitiateCheckout', {
+        currency: 'INR',
+        value: 199,
+      });
+    }
+
+    // Server-side logging
+    try {
+      await fetch('/api/track-payment-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timestamp: new Date().toISOString() }),
+      });
+    } catch (error) {
+      console.error('Failed to log payment click:', error);
+    }
+
+    // Redirect to payment
     window.location.href = PAYMENT_LINK;
   };
 
@@ -57,10 +85,6 @@ export default function WebsitePage() {
       a: 'A professional, custom-designed website that looks like you paid thousands for it. Includes beautiful design, fast loading, SEO setup, and hosting. We handle everything.',
     },
     {
-      q: 'What about domain names?',
-      a: 'Domains are not included in the ₹199 package. You need to purchase a domain separately from a registrar like GoDaddy, Namecheap, or others. Once purchased, we\'ll integrate it with your website at no extra cost. Domain costs vary but typically start from ₹300-500/year.',
-    },
-    {
       q: 'I have no design skills. Is that OK?',
       a: 'Perfect. We handle all the design work. You just need to tell us about your business.',
     },
@@ -75,6 +99,10 @@ export default function WebsitePage() {
     {
       q: 'Do you update and maintain it?',
       a: 'Yes. Website updates, security patches, speed optimization—all included. You focus on your business.',
+    },
+    {
+      q: 'What about domain names?',
+      a: 'Domains are not included in the ₹199 package. You need to purchase a domain separately from a registrar like GoDaddy, Namecheap, or others. Once purchased, we\'ll integrate it with your website at no extra cost. Domain costs vary but typically start from ₹300-500/year.',
     },
     {
       q: 'What happens if I cancel?',
@@ -116,9 +144,9 @@ export default function WebsitePage() {
             <div className="flex items-center gap-4">
               {/* Money Back Guarantee Badge */}
               <div className="slow-blink">
-                <Link href="/refund" className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center gap-1 hover:bg-amber-500/30 transition">
+                <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center gap-1">
                   <span className="text-amber-400 text-xs font-semibold">💰 14 Days Money Back Guarantee</span>
-                </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -126,17 +154,8 @@ export default function WebsitePage() {
       </div>
 
       {/* Hero Section - Short & Punchy */}
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 overflow-hidden">
-        {/* Background Image with Low Opacity */}
-        <div className="absolute inset-0 -z-10">
-          <Image
-            src="/hero-image.webp"
-            alt="background"
-            fill
-            className="object-cover opacity-15"
-            priority
-          />
-        </div>
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 overflow-hidden min-h-[500px] sm:min-h-[600px] flex items-center justify-center bg-black/80">
+        {/* Dark background */}
         <div className="text-center relative z-10">
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 leading-tight">
             Your Competitors Are Online.
@@ -152,43 +171,69 @@ export default function WebsitePage() {
         </div>
       </div>
 
-      {/* Main Pricing Card - Hero Product */}
+      {/* How It Works + Pricing Section */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-20">
-        <div className="max-w-2xl mx-auto">
-          <div className="rounded-3xl border border-green-500/30 bg-gradient-to-br from-card to-card/50 p-10 sm:p-14 shadow-2xl shadow-green-500/10">
-            {/* Price */}
-            <div className="text-center mb-10">
-              <div className="inline-flex items-baseline gap-3 mb-4">
-                <span className="text-7xl font-extrabold text-green-400">₹199</span>
-                <span className="text-2xl text-zinc-400">/month</span>
-              </div>
-              <p className="text-zinc-400 text-lg">Billed monthly. Cancel anytime. No surprises.</p>
-            </div>
-
-            {/* Inclusions Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-              {inclusions.map((item, idx) => (
-                <div key={idx} className="flex gap-3">
-                  <div className="text-3xl flex-shrink-0">{item.icon}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          {/* Left Column: How It Works */}
+          <div>
+            <h2 className="text-3xl font-bold mb-8">How It Works</h2>
+            <div className="space-y-6">
+              {[
+                { num: '1', title: 'Pay ₹199', desc: 'Secure payment. No hidden charges.' },
+                { num: '2', title: 'Share Your Story', desc: 'Tell us about your business on WhatsApp.' },
+                { num: '3', title: 'We Design', desc: 'Our team builds your custom website.' },
+                { num: '4', title: 'You Launch', desc: 'Website goes live. You start winning.' },
+              ].map((step, idx) => (
+                <div key={idx} className="flex gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center font-bold text-green-400 text-xl flex-shrink-0">
+                    {step.num}
+                  </div>
                   <div>
-                    <p className="font-semibold text-white mb-1">{item.title}</p>
-                    <p className="text-sm text-zinc-400">{item.description}</p>
+                    <h3 className="font-bold text-lg mb-1">{step.title}</h3>
+                    <p className="text-sm text-zinc-400">{step.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* CTA Button */}
-            <button
-              onClick={handlePayNow}
-              className="w-full rounded-2xl bg-gradient-to-r from-green-500 to-green-400 px-8 py-5 text-lg font-bold text-white hover:shadow-lg hover:shadow-green-500/50 active:scale-[0.98] transition-all mb-4"
-            >
-              Start Your Website Now →
-            </button>
+          {/* Right Column: Pricing Card */}
+          <div className="sticky top-24">
+            <div className="rounded-3xl border border-green-500/30 bg-gradient-to-br from-card to-card/50 p-10 sm:p-14 shadow-2xl shadow-green-500/10">
+              {/* Price */}
+              <div className="text-center mb-10">
+                <div className="inline-flex items-baseline gap-3 mb-4">
+                  <span className="text-7xl font-extrabold text-green-400">₹199</span>
+                  <span className="text-2xl text-zinc-400">/month</span>
+                </div>
+                <p className="text-zinc-400 text-lg">Billed monthly. Cancel anytime. No surprises.</p>
+              </div>
 
-            <p className="text-center text-sm text-zinc-500">
-              Secure payment via Razorpay. We never store your card details.
-            </p>
+              {/* Inclusions Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                {inclusions.map((item, idx) => (
+                  <div key={idx} className="flex gap-3">
+                    <div className="text-3xl flex-shrink-0">{item.icon}</div>
+                    <div>
+                      <p className="font-semibold text-white mb-1">{item.title}</p>
+                      <p className="text-sm text-zinc-400">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA Button */}
+              <button
+                onClick={handlePayNow}
+                className="w-full rounded-2xl bg-gradient-to-r from-green-500 to-green-400 px-8 py-5 text-lg font-bold text-white hover:shadow-lg hover:shadow-green-500/50 active:scale-[0.98] transition-all mb-4"
+              >
+                Start 7-Day Free Trial →
+              </button>
+
+              <p className="text-center text-sm text-zinc-500">
+                Secure payment via Razorpay. We never store your card details.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -279,26 +324,6 @@ export default function WebsitePage() {
         </div>
       </div>
 
-      {/* How It Works */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-20">
-        <h2 className="text-3xl font-bold mb-12 text-center">Simple as 1, 2, 3, 4</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { num: '1', title: 'Pay ₹199', desc: 'Secure payment. No hidden charges.' },
-            { num: '2', title: 'Share Your Story', desc: 'Tell us about your business on WhatsApp.' },
-            { num: '3', title: 'We Design', desc: 'Our team builds your custom website.' },
-            { num: '4', title: 'You Launch', desc: 'Website goes live. You start winning.' },
-          ].map((step, idx) => (
-            <div key={idx} className="rounded-xl border border-border bg-card/50 p-6 hover:bg-card transition">
-              <div className="w-12 h-12 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center font-bold text-green-400 text-xl mb-4">
-                {step.num}
-              </div>
-              <h3 className="font-bold text-lg mb-2">{step.title}</h3>
-              <p className="text-sm text-zinc-400">{step.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* FAQ Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-20">
@@ -329,7 +354,7 @@ export default function WebsitePage() {
             onClick={handlePayNow}
             className="inline-block rounded-xl bg-green-500 px-12 py-4 text-lg font-bold text-white hover:bg-green-400 active:scale-[0.98] transition"
           >
-            Get My Website for ₹199 →
+            Start 7-Day Free Trial →
           </button>
           <p className="text-xs text-zinc-600 mt-6">14-day money back · No hidden charges · WhatsApp support</p>
         </div>
@@ -410,12 +435,11 @@ export default function WebsitePage() {
         <button
           onClick={() => setShowWhatsApp(!showWhatsApp)}
           className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white font-semibold py-4 px-6 rounded-full shadow-lg hover:shadow-xl transition transform hover:scale-110 active:scale-95"
-          title="Post-Purchase Support"
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12.031 6.172c-3.181 0-5.77 2.586-5.77 5.766 0 1.22.334 2.372.913 3.355L6.5 19.346l4.357-1.433c.996.528 2.135.832 3.174.832 3.18 0 5.768-2.586 5.768-5.766 0-3.18-2.588-5.766-5.768-5.766zm3.353 8.795c-.147.392-.468.643-.9.643-.432 0-.753-.25-.9-.643-.075-.2-.122-.436-.122-.672 0-.655.334-1.227.834-1.565.126-.098.268-.146.42-.146.15 0 .294.048.42.146.5.338.834.91.834 1.565 0 .236-.047.472-.122.672z"/>
           </svg>
-          <span className="hidden sm:inline">Post-Purchase Support</span>
+          <span className="hidden sm:inline">Ask a Question</span>
         </button>
       </div>
     </div>
