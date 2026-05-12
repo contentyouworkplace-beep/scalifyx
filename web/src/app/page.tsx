@@ -5,6 +5,7 @@ import Script from 'next/script';
 import { BUSINESS_TYPES, WEBSITE_TEMPLATES } from '@/lib/constants';
 import { Logo } from '@/components/Logo';
 import { SearchConsoleStats } from '@/components/SearchConsoleStats';
+import { SignupModal } from '@/components/SignupModal';
 import {
   ChatBotIcon, PaletteIcon, PhoneIcon, SearchIcon, GlobeIcon,
   ChartIcon, WhatsAppIcon, ShieldIcon, HeadsetIcon,
@@ -182,7 +183,7 @@ const FAQS = [
   },
   {
     q: 'Can I use my own domain name (like mybusiness.com)?',
-    a: 'Yes! You get a free subdomain (yourbusiness.scalifyapp.com) instantly. If you want your own domain, buy it from GoDaddy or Hostinger (₹300–₹800/year) and we connect it for free.',
+    a: 'Yes! You get a free subdomain (yourbusiness.scalifyapp.com) instantly. If you want your own domain, buy it from GoDaddy or Hostinger (₹500–800/year) and we connect it for free.',
   },
   {
     q: 'Do I need a credit card to sign up?',
@@ -194,7 +195,7 @@ const FAQS = [
   },
   {
     q: 'Can I cancel anytime?',
-    a: 'If you cancel, your website will no longer be live. Cancellation is simple and straightforward.',
+    a: 'Yes — no lock-in contracts. Cancel anytime with one click. You keep access until the end of your current billing month. Your data and content are always yours.',
   },
   {
     q: 'What industries does Scalify support?',
@@ -248,6 +249,7 @@ function FAQSection() {
 
 export default function LandingPage() {
   const spotsLeft = useSpotsTaken();
+  const [showSignupModal, setShowSignupModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
@@ -298,7 +300,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-zinc-500 hover:text-white transition px-3 py-2">Login</Link>
             <button
-              onClick={scrollToForm}
+              onClick={() => setShowSignupModal(true)}
               className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-lg transition"
             >
               Get Started
@@ -309,13 +311,73 @@ export default function LandingPage() {
 
       {/* ── HERO ── */}
       <section className="pt-40 sm:pt-48 pb-28 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto grid gap-14 lg:grid-cols-[1.15fr_0.85fr] items-start">
+        <div className="max-w-7xl mx-auto grid gap-14 lg:gap-12 lg:grid-cols-2 items-start">
+          {/* Left: Pricing Card */}
           <div className="order-2 lg:order-1">
+            <div className="relative">
+              {/* Best value badge */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                <span className="bg-green-500 text-black text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-green-500/30">
+                  Best Value
+                </span>
+              </div>
+
+              <div className="rounded-3xl border border-green-500/20 bg-gradient-to-b from-zinc-900 to-zinc-950 p-8 shadow-2xl shadow-green-500/5">
+                {/* Plan name */}
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400 mb-4">Growth Plan</p>
+
+                {/* Price */}
+                <div className="flex items-end gap-1 mb-2">
+                  <span className="text-4xl font-extrabold text-white leading-none">₹1,499</span>
+                  <span className="text-zinc-500 text-sm mb-1">/month</span>
+                </div>
+                <p className="text-zinc-600 text-xs mb-8">Billed monthly · Cancel anytime</p>
+
+                {/* Feature list */}
+                <ul className="space-y-3.5 mb-9">
+                  {[
+                    'AI-Powered Business Website',
+                    'Local SEO & Google Search Indexing',
+                    'WhatsApp Lead Capture — Instant',
+                    'Mobile-First Responsive Design',
+                    'SSL Security & Managed Hosting',
+                    'Analytics & Visitor Dashboard',
+                    'Custom Domain Ready',
+                    '10+ Professional Templates',
+                    'Monthly Updates & Improvements',
+                    '24/7 Priority Support',
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-3">
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center">
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                          <path d="M1 4L3.5 6.5L9 1" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                      <span className="text-sm text-zinc-300">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA */}
+                <button
+                  onClick={() => setShowSignupModal(true)}
+                  className="block w-full text-center bg-green-500 hover:bg-green-400 text-black font-extrabold text-sm py-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/20 hover:shadow-green-400/30 tracking-wide"
+                >
+                  Start 7-Day Free Trial
+                </button>
+
+                <p className="text-center text-zinc-600 text-xs mt-4">No credit card required</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: CTA Section */}
+          <div className="order-1 lg:order-2">
             <div className="flex items-center gap-3 mb-8">
               <span className="h-px w-8 bg-zinc-800" />
               <span className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">India&apos;s Growth Platform for Small Businesses</span>
             </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-tight mb-8">
+            <h1 className="text-5xl sm:text-6xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight mb-8">
               The Business<br />
               That Shows Up<br />
               <span className="text-green-400">Gets the Customer.</span>
@@ -323,15 +385,23 @@ export default function LandingPage() {
             <p className="text-lg sm:text-xl text-zinc-400 max-w-lg leading-relaxed mb-10">
               We build your website, set up Local SEO, and connect every lead directly to your WhatsApp — in 60 seconds.
             </p>
-            <div className="mb-10">
+
+            <div className="space-y-4 mb-10">
+              <button
+                onClick={() => setShowSignupModal(true)}
+                className="w-full px-7 py-4 rounded-xl bg-green-500 hover:bg-green-400 text-white text-base font-bold transition"
+              >
+                Start 7-Day Free Trial
+              </button>
               <a
                 href="#features"
-                className="inline-block px-7 py-3.5 rounded-xl border border-border text-white text-sm font-semibold hover:border-white/25 transition"
+                className="block w-full text-center px-7 py-4 rounded-xl border border-border text-white text-base font-semibold hover:border-white/25 transition"
               >
                 See How It Works ↓
               </a>
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600">
+
+            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600 mb-8 pb-8 border-b border-border">
               {['No agency needed', 'No tech skills required', 'Live in 60 seconds', 'Leads on WhatsApp daily'].map((t) => (
                 <span key={t} className="flex items-center gap-2">
                   <span className="w-1 h-1 rounded-full bg-green-500" />
@@ -339,88 +409,17 @@ export default function LandingPage() {
                 </span>
               ))}
             </div>
-          </div>
-          <div className="order-1 lg:order-2">
-            <SignupForm spotsLeft={spotsLeft} />
+
+            <div className="text-sm text-zinc-600">
+              <p className="mb-2">✓ No credit card required · ✓ Auto-trial activation · ✓ Cancel anytime</p>
+              <p className="text-xs text-zinc-700">{spotsLeft} launch spots remaining — Act now to secure yours</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── FAQs ── */}
       <FAQSection />
-
-      {/* ── MEMBERSHIP PLAN ── */}
-      <section className="py-20 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-3 justify-center mb-5">
-            <span className="h-px w-8 bg-zinc-800" />
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Membership</span>
-            <span className="h-px w-8 bg-zinc-800" />
-          </div>
-          <h2 className="text-center text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">
-            One plan. Everything included.
-          </h2>
-          <p className="text-center text-zinc-500 text-sm mb-12 max-w-md mx-auto">
-            No hidden fees. No setup cost. Just your business online — from day one.
-          </p>
-
-          <div className="max-w-sm mx-auto relative">
-            {/* Best value badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-              <span className="bg-green-500 text-black text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-green-500/30">
-                Best Value
-              </span>
-            </div>
-
-            <div className="rounded-3xl border border-green-500/20 bg-gradient-to-b from-zinc-900 to-zinc-950 p-8 shadow-2xl shadow-green-500/5">
-              {/* Plan name */}
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400 mb-4">Growth Plan</p>
-
-              {/* Price */}
-              <div className="flex items-end gap-1 mb-2">
-                <span className="text-4xl font-extrabold text-white leading-none">₹1,499</span>
-                <span className="text-zinc-500 text-sm mb-1">/month</span>
-              </div>
-              <p className="text-zinc-600 text-xs mb-8">Billed monthly · Cancel anytime</p>
-
-              {/* Feature list */}
-              <ul className="space-y-3.5 mb-9">
-                {[
-                  'AI-Powered Business Website',
-                  'Local SEO & Google Search Indexing',
-                  'WhatsApp Lead Capture — Instant',
-                  'Mobile-First Responsive Design',
-                  'SSL Security & Managed Hosting',
-                  'Analytics & Visitor Dashboard',
-                  'Custom Domain Ready',
-                  '10+ Professional Templates',
-                  'Monthly Updates & Improvements',
-                  '24/7 Priority Support',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center">
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                        <path d="M1 4L3.5 6.5L9 1" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                    <span className="text-sm text-zinc-300">{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA */}
-              <a
-                href="#signup-form"
-                className="block w-full text-center bg-green-500 hover:bg-green-400 text-black font-extrabold text-sm py-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/20 hover:shadow-green-400/30 tracking-wide"
-              >
-                Get Started — ₹1,499/mo
-              </a>
-
-              <p className="text-center text-zinc-600 text-xs mt-4">No credit card required to sign up</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── STATS STRIP ── */}
       <section className="py-14 border-y border-border">
@@ -887,6 +886,13 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ── SIGNUP MODAL ── */}
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        spotsLeft={spotsLeft}
+      />
     </div>
   );
 }

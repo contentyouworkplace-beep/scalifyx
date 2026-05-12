@@ -65,7 +65,15 @@ interface SignupItem {
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
-  const [dashStats, setDashStats] = useState({ totalUsers: 0, activeSites: 0, totalRevenue: 0, pendingPayments: 0 });
+  const [dashStats, setDashStats] = useState({
+    totalFreeTrialUsers: 0,
+    domainPurchasedUsers: 0,
+    uniquePaidUsers: 0,
+    trialExpiredNotUpgraded: 0,
+    monthlyNewUsers: 0,
+    monthlyRevenue: 0,
+    totalRevenue: 0,
+  });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [recentSignups, setRecentSignups] = useState<SignupItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +86,15 @@ export default function AdminDashboard() {
         apiFetch('/admin/dashboard'),
         apiFetch('/admin/activity'),
       ]);
-      setDashStats(statsData);
+      setDashStats({
+        totalFreeTrialUsers: statsData.metrics?.totalFreeTrialUsers || 0,
+        domainPurchasedUsers: statsData.metrics?.domainPurchasedUsers || 0,
+        uniquePaidUsers: statsData.metrics?.uniquePaidUsers || 0,
+        trialExpiredNotUpgraded: statsData.metrics?.trialExpiredNotUpgraded || 0,
+        monthlyNewUsers: statsData.metrics?.monthly?.newUsers || 0,
+        monthlyRevenue: statsData.metrics?.monthly?.revenue || 0,
+        totalRevenue: statsData.metrics?.totalRevenue || 0,
+      });
 
       const items: ActivityItem[] = [];
       (activityData.recentUsers || []).forEach((u: any) =>
@@ -139,10 +155,12 @@ export default function AdminDashboard() {
   }
 
   const statCards = [
-    { icon: PeopleIcon, label: 'Total Users', value: dashStats.totalUsers.toLocaleString(), color: 'text-green-400', bg: 'bg-green-400/10' },
-    { icon: GlobeIcon, label: 'Active Sites', value: dashStats.activeSites.toLocaleString(), color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
-    { icon: CardIcon, label: 'Revenue', value: formatRevenue(dashStats.totalRevenue), color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
-    { icon: AlertIcon, label: 'Pending', value: dashStats.pendingPayments.toString(), color: 'text-red-400', bg: 'bg-red-400/10' },
+    { icon: PeopleIcon, label: 'Free Trial Users', value: dashStats.totalFreeTrialUsers.toLocaleString(), color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { icon: GlobeIcon, label: 'Domain Purchases', value: dashStats.domainPurchasedUsers.toLocaleString(), color: 'text-green-400', bg: 'bg-green-400/10' },
+    { icon: CardIcon, label: 'Paid Users', value: dashStats.uniquePaidUsers.toLocaleString(), color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+    { icon: AlertIcon, label: 'Trial Expired (Not Upgraded)', value: dashStats.trialExpiredNotUpgraded.toLocaleString(), color: 'text-red-400', bg: 'bg-red-400/10' },
+    { icon: PeopleIcon, label: 'Monthly New Users / Revenue', value: `${dashStats.monthlyNewUsers} users / ${formatRevenue(dashStats.monthlyRevenue)}`, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { icon: CashIcon, label: 'Total Lifetime Revenue', value: formatRevenue(dashStats.totalRevenue), color: 'text-orange-400', bg: 'bg-orange-400/10' },
   ];
 
   const quickActions = [
@@ -176,7 +194,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-7">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-7">
         {statCards.map((card) => (
           <div key={card.label} className="p-4 rounded-2xl bg-surface border border-border">
             <div className={`w-9 h-9 rounded-[10px] ${card.bg} flex items-center justify-center mb-3`}>

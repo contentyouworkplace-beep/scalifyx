@@ -12,6 +12,7 @@ interface UserItem {
   plan: 'free' | 'trial' | 'pro';
   business_name?: string;
   created_at: string;
+  domain_purchased?: boolean;
 }
 
 function timeAgo(dateStr: string) {
@@ -57,13 +58,15 @@ export default function AdminUsersPage() {
   const [offerTarget, setOfferTarget] = useState<UserItem | null>(null);
   const [offerForm, setOfferForm] = useState({ name: 'Special Offer', description: '', plan_type: 'pro' as 'pro' | 'trial', price: 499, original_price: 749, trial_days: 0, expires_at: '' });
   const [offerSaving, setOfferSaving] = useState(false);
+  const [togglingDomain, setTogglingDomain] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     try {
-      const data = await apiFetch('/user/admin/all');
+      const data = await apiFetch('/api/admin/users');
       const mapped = (data.users || data || []).map((u: any) => ({
         id: u.id, name: u.name || 'Unknown', phone: u.phone || '', email: u.email || '',
         plan: u.plan || 'free', business_name: u.business_name || '', created_at: u.created_at,
+        domain_purchased: u.domain_purchased || false,
       }));
       setUsers(mapped);
     } catch (e) { console.error('Fetch users error:', e); }
@@ -179,6 +182,21 @@ export default function AdminUsersPage() {
     finally { setOfferSaving(false); }
   };
 
+  const handleToggleDomain = async (userId: string) => {
+    setTogglingDomain(userId);
+    try {
+      await apiFetch(`/api/admin/users/${userId}/toggle-domain`, {
+        method: 'POST',
+      });
+      toast.success('Domain status updated');
+      fetchUsers();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to toggle domain status');
+    } finally {
+      setTogglingDomain(null);
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
@@ -252,6 +270,7 @@ export default function AdminUsersPage() {
                   <div className="flex items-center gap-2 mt-1.5">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${plan.bg} ${plan.color}`}>{plan.label}</span>
                     <span className="text-[11px] text-zinc-600">{timeAgo(user.created_at)}</span>
+                    {user.domain_purchased && <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-green-500/20 text-green-400">✓ Domain</span>}
                   </div>
                 </div>
               </div>
@@ -268,6 +287,14 @@ export default function AdminUsersPage() {
                 </button>
                 <button onClick={() => openOfferModal(user)} className="p-2 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition" title="Send Custom Offer">
                   🎁
+                </button>
+                <button
+                  onClick={() => handleToggleDomain(user.id)}
+                  disabled={togglingDomain === user.id}
+                  className={`p-2 rounded-lg transition ${user.domain_purchased ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-zinc-500/10 text-zinc-400 hover:bg-zinc-500/20'}`}
+                  title={user.domain_purchased ? 'Mark domain as not purchased' : 'Mark domain as purchased'}
+                >
+                  {togglingDomain === user.id ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> : '🌐'}
                 </button>
                 <button onClick={() => window.location.href = `/admin/chats?userId=${user.id}&userName=${user.name}`} className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition ml-auto" title="Chat">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
