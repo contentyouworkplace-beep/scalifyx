@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
+import { LegalFooter } from '@/components/LegalFooter';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -53,11 +54,12 @@ export default function TermsPage() {
             <ul>
               <li><strong>No auto-debit</strong> — payments are manual each month via Razorpay</li>
               <li>Subscription begins on the date of successful payment</li>
-              <li>A 7-day free trial is available for new users</li>
+              <li>A 7-day free trial is available for new users (no payment required)</li>
               <li>Prices are inclusive of applicable taxes where stated</li>
               <li>GST invoices are provided for all payments upon request</li>
+              <li>All payments are processed securely through Razorpay (PCI-DSS compliant)</li>
             </ul>
-            <p>We reserve the right to modify pricing with 30 days' advance notice to existing subscribers.</p>
+            <p>We reserve the right to modify pricing with 30 days' advance notice to existing subscribers. For refund eligibility and cancellation terms, please see our <Link href="/refund" className="text-green-400 hover:underline">Refund Policy</Link>.</p>
           </Section>
 
           <Section title="5. Your Content">
@@ -113,7 +115,7 @@ export default function TermsPage() {
         </div>
       </main>
 
-      <Footer />
+      <LegalFooter />
     </div>
   );
 }
@@ -129,19 +131,3 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Footer() {
-  return (
-    <footer className="border-t border-border mt-20 py-10 px-4">
-      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-600">
-        <p>© 2026 Scalify. All rights reserved.</p>
-        <div className="flex flex-wrap gap-5">
-          <Link href="/terms" className="hover:text-white transition">Terms</Link>
-          <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
-          <Link href="/refund" className="hover:text-white transition">Refund Policy</Link>
-          <Link href="/shipping" className="hover:text-white transition">Shipping</Link>
-          <Link href="/contact" className="hover:text-white transition">Contact</Link>
-        </div>
-      </div>
-    </footer>
-  );
-}

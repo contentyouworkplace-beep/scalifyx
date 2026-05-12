@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
+import { LegalFooter } from '@/components/LegalFooter';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -108,7 +109,9 @@ export default function PrivacyPage() {
           </Section>
 
           <Section title="8. Data Retention">
-            <p>We retain your personal data for as long as your account is active or as needed to provide our services. After account deletion, we retain data for a maximum of 90 days before permanent removal, unless a longer retention period is required by law.</p>
+            <p><strong>Active accounts:</strong> Your data is retained for as long as your account is active and for as long as needed to provide our services.</p>
+            <p><strong>After cancellation or deletion:</strong> When you request account deletion, we retain your data for a maximum of 30 days before permanent removal. This allows for refund processing and dispute resolution during the refund window. Payment-related data may be retained longer if required by Razorpay or Indian tax laws (GST records for 7 years).</p>
+            <p><strong>Backups:</strong> Website and content backups may be retained for up to 90 days after deletion for recovery purposes, but will not be used for any other purpose.</p>
           </Section>
 
           <Section title="9. Children's Privacy">
@@ -150,19 +153,3 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function LegalFooter() {
-  return (
-    <footer className="border-t border-border mt-20 py-10 px-4">
-      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-600">
-        <p>© 2026 Scalify. All rights reserved.</p>
-        <div className="flex flex-wrap gap-5">
-          <Link href="/terms" className="hover:text-white transition">Terms</Link>
-          <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
-          <Link href="/refund" className="hover:text-white transition">Refund Policy</Link>
-          <Link href="/shipping" className="hover:text-white transition">Shipping</Link>
-          <Link href="/contact" className="hover:text-white transition">Contact</Link>
-        </div>
-      </div>
-    </footer>
-  );
-}

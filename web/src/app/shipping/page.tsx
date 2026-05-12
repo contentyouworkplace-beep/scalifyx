@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
+import { LegalFooter } from '@/components/LegalFooter';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -89,13 +90,16 @@ export default function ShippingPage() {
             <p>We will resolve all technical delivery issues within 24 hours. If we are unable to deliver the subscribed service due to our fault, you are entitled to a full refund for that period.</p>
           </Section>
 
-          <Section title="6. Data Export on Service Termination">
-            <p>When your subscription ends or you choose to leave Scalify:</p>
+          <Section title="6. Account Cancellation and Service Termination">
+            <p>You may cancel your subscription at any time with one click from your dashboard. Here's what happens:</p>
             <ul>
-              <li>You may request an export of your website content within 30 days of account closure</li>
-              <li>Content exports include all text, images, and settings in a downloadable format</li>
-              <li>To request an export, email <a href="mailto:support@scalifyapp.com" className="text-green-400 hover:underline">support@scalifyapp.com</a></li>
+              <li>Cancellation is effective immediately</li>
+              <li>Your website remains live for the rest of your current billing month</li>
+              <li>After your billing month ends, your website will go offline (unless you renew)</li>
+              <li>No refunds are issued for unused portions of the month after the 14-day guarantee period</li>
+              <li>For refund eligibility, see our <a href="/refund" className="text-green-400 hover:underline">Refund Policy</a></li>
             </ul>
+            <p><strong>Data export:</strong> Within 30 days of account closure, you may request an export of your website content in a downloadable format. To request an export, email <a href="mailto:support@scalifyapp.com" className="text-green-400 hover:underline">support@scalifyapp.com</a>.</p>
           </Section>
 
           <Section title="7. Questions">
@@ -126,19 +130,3 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function LegalFooter() {
-  return (
-    <footer className="border-t border-border mt-20 py-10 px-4">
-      <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-zinc-600">
-        <p>© 2026 Scalify. All rights reserved.</p>
-        <div className="flex flex-wrap gap-5">
-          <Link href="/terms" className="hover:text-white transition">Terms</Link>
-          <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
-          <Link href="/refund" className="hover:text-white transition">Refund Policy</Link>
-          <Link href="/shipping" className="hover:text-white transition">Shipping</Link>
-          <Link href="/contact" className="hover:text-white transition">Contact</Link>
-        </div>
-      </div>
-    </footer>
-  );
-}
