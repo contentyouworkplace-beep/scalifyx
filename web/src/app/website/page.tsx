@@ -3,11 +3,21 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Logo } from '@/components/Logo';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function WebsitePage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [whatsappQuery, setWhatsappQuery] = useState('');
+
+  useEffect(() => {
+    if (user?.plan === 'trial') {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
 
   const PAYMENT_LINK = 'https://rzp.io/rzp/GBnrfLOh';
 
@@ -224,10 +234,10 @@ export default function WebsitePage() {
 
               {/* CTA Button */}
               <button
-                onClick={handlePayNow}
+                onClick={() => user?.plan === 'trial' ? router.push('/dashboard') : handlePayNow()}
                 className="w-full rounded-2xl bg-gradient-to-r from-green-500 to-green-400 px-8 py-5 text-lg font-bold text-white hover:shadow-lg hover:shadow-green-500/50 active:scale-[0.98] transition-all mb-4"
               >
-                Start 7-Day Free Trial →
+                {user?.plan === 'trial' ? 'Go to Dashboard →' : 'Start 7-Day Free Trial →'}
               </button>
 
               <p className="text-center text-sm text-zinc-500">

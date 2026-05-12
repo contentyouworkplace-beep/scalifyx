@@ -10,6 +10,7 @@ import {
 } from '../../components/Icons';
 import { RocketIcon } from '../../components/Icons';
 import { PushNotificationBanner } from '../../components/PushNotificationBanner';
+import { TrialBanner } from '../../components/TrialBanner';
 import React from 'react';
 
 function ShareIcon({ size = 20 }: { size?: number }) {
@@ -50,6 +51,9 @@ export default function DashboardHome() {
         </h1>
         <p className="text-zinc-500 mt-1">Welcome to your Scalify dashboard</p>
       </div>
+
+      {/* Trial countdown banner */}
+      <TrialBanner />
 
       {/* Push notification permission request */}
       <PushNotificationBanner />

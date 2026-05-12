@@ -9,8 +9,8 @@
     },
     {
       "name": "web",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/rahulmedhe/ScalifyX/web && npm run dev"],
       "port": 3000
     }
   ]
