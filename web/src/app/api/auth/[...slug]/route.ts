@@ -15,20 +15,30 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
 
       const data = await response.json();
       if (response.ok) {
+        console.log('✅ Backend auth endpoint succeeded for', endpoint);
         return Response.json(data);
+      } else {
+        console.warn(`⚠️ Backend auth endpoint returned ${response.status} for ${endpoint}:`, data);
       }
     }
   } catch (error) {
-    console.error('Backend auth error:', error instanceof Error ? error.message : String(error));
+    console.error('💥 Backend auth error:', error instanceof Error ? error.message : String(error));
   }
 
   // Fallback for signup: use Supabase directly
   if (endpoint === '/signup') {
     try {
+      console.log('🔄 Using Supabase fallback for signup (backend unavailable or failed)');
       const { createClient } = await import('@supabase/supabase-js');
+      // Anon client for auth only
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL || '',
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+      );
+      // Admin client (service role) for profile/subscription writes — bypasses RLS
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
       );
 
       const { email, password, name, phone } = body;
@@ -44,6 +54,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
       });
 
       if (authError) {
+        console.error('❌ Auth user creation failed:', authError.message);
         return Response.json({ error: authError.message }, { status: 400 });
       }
 
@@ -53,8 +64,8 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         const trialEndDate = new Date();
         trialEndDate.setDate(trialEndDate.getDate() + 7);
 
-        // Create profile with plan='trial' from the beginning
-        const { error: profileError } = await supabase
+        // Use admin client so RLS doesn't block the phone/name write
+        const { error: profileError } = await supabaseAdmin
           .from('profiles')
           .upsert({
             id: userId,
@@ -63,14 +74,17 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
             phone: phone || '',
             plan: 'trial',
             trialEndsAt: trialEndDate.toISOString(),
-          });
+          })
+          .select();
 
         if (profileError) {
-          console.warn('Profile creation error (non-blocking):', profileError);
+          console.error('❌ Profile creation error:', profileError);
+        } else {
+          console.log('✅ Profile created via Supabase fallback:', { userId, plan: 'trial', email, phone: phone ? '***' : 'N/A' });
         }
 
         // Create trial subscription
-        const { error: subError } = await supabase
+        const { error: subError } = await supabaseAdmin
           .from('subscriptions')
           .insert({
             user_id: userId,
@@ -83,7 +97,9 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
           });
 
         if (subError) {
-          console.warn('Trial subscription error (non-blocking):', subError);
+          console.error('❌ Trial subscription creation error:', subError);
+        } else {
+          console.log('✅ Trial subscription created via Supabase fallback:', { userId });
         }
       }
 
@@ -94,7 +110,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         message: '7-day free trial activated',
       });
     } catch (error) {
-      console.error('Supabase fallback error:', error instanceof Error ? error.message : String(error));
+      console.error('💥 Supabase fallback error:', error instanceof Error ? error.message : String(error));
       return Response.json(
         { error: 'Authentication service unavailable' },
         { status: 503 }
