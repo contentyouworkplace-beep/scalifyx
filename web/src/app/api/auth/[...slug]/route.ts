@@ -1,6 +1,5 @@
-export async function POST(req: Request) {
-  const { pathname } = new URL(req.url);
-  const endpoint = pathname.replace('/api/auth', '');
+export async function POST(req: Request, { params }: { params: { slug: string[] } }) {
+  const endpoint = `/${params.slug.join('/')}`;
 
   try {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
@@ -30,9 +29,8 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
-  const { pathname } = new URL(req.url);
-  const endpoint = pathname.replace('/api/auth', '');
+export async function GET(req: Request, { params }: { params: { slug: string[] } }) {
+  const endpoint = `/${params.slug.join('/')}`;
 
   try {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
