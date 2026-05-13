@@ -47,9 +47,13 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         return Response.json({ error: authError.message }, { status: 400 });
       }
 
-      // Create profile
+      // Create trial subscription and profile with plan='trial' from the start
       const userId = authData.user?.id;
       if (userId) {
+        const trialEndDate = new Date();
+        trialEndDate.setDate(trialEndDate.getDate() + 7);
+
+        // Create profile with plan='trial' from the beginning
         const { error: profileError } = await supabase
           .from('profiles')
           .upsert({
@@ -57,6 +61,8 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
             email,
             name: name || '',
             phone: phone || '',
+            plan: 'trial',
+            trialEndsAt: trialEndDate.toISOString(),
           });
 
         if (profileError) {
@@ -64,9 +70,6 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         }
 
         // Create trial subscription
-        const trialEndDate = new Date();
-        trialEndDate.setDate(trialEndDate.getDate() + 7);
-
         const { error: subError } = await supabase
           .from('subscriptions')
           .insert({
@@ -82,12 +85,6 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         if (subError) {
           console.warn('Trial subscription error (non-blocking):', subError);
         }
-
-        // Update profile with trial end date
-        await supabase
-          .from('profiles')
-          .update({ plan: 'trial', trialEndsAt: trialEndDate.toISOString() })
-          .eq('id', userId);
       }
 
       return Response.json({
