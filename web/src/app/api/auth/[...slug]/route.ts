@@ -41,11 +41,11 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         return Response.json({ error: 'Email and password required' }, { status: 400 });
       }
 
-      // Create auth user
+      // Create auth user — store phone+name in user_metadata as a reliable carrier
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name: name || '' } },
+        options: { data: { name: name || '', phone: phone || '' } },
       });
 
       if (authError) {

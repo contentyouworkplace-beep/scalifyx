@@ -68,26 +68,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('🔄 Fetching profile for userId:', userId);
       let { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error && error.code === 'PGRST116') {
-        const { data: authUser } = await supabase.auth.getUser();
-        const email = authUser?.user?.email || '';
-        const name = authUser?.user?.user_metadata?.name || '';
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .upsert({ id: userId, email, name }, { onConflict: 'id' })
-          .select()
-          .single();
-        if (insertError) throw insertError;
-        data = newProfile;
+      if (error) {
+        console.warn(`⚠️ Profile query error (code: ${error.code}):`, error.message);
+        if (error.code === 'PGRST116') {
+          console.log('📝 Profile not found, creating fallback profile with plan=free');
+          const { data: authUser } = await supabase.auth.getUser();
+          const email = authUser?.user?.email || '';
+          const name = authUser?.user?.user_metadata?.name || '';
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .upsert({ id: userId, email, name, plan: 'free' }, { onConflict: 'id' })
+            .select()
+            .single();
+          if (insertError) {
+            console.error('❌ Fallback profile creation error:', insertError);
+            throw insertError;
+          }
+          console.log('✅ Fallback profile created with plan=free');
+          data = newProfile;
+        } else {
+          throw error;
+        }
+      } else if (data) {
+        console.log('✅ Profile found in database:', { plan: data.plan, email: data.email });
       }
 
       if (!data) throw new Error('No profile found');
+
+      // If phone is missing from profile, recover it from auth user_metadata and save it
+      if (!data.phone) {
+        const { data: authUser } = await supabase.auth.getUser();
+        const phoneFromMeta = authUser?.user?.user_metadata?.phone;
+        if (phoneFromMeta) {
+          await supabase.from('profiles').update({ phone: phoneFromMeta }).eq('id', userId);
+          data.phone = phoneFromMeta;
+        }
+      }
 
       const profile: User = {
         id: data.id,
@@ -114,9 +137,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile.websiteUrl = website.deployed_url;
       }
 
+      console.log('✅ Profile fetched and set in AuthContext:', { plan: profile.plan, name: profile.name });
       setUser(profile);
     } catch (e) {
-      console.error('Failed to fetch profile:', e);
+      console.error('💥 Failed to fetch profile:', e);
     } finally {
       setIsLoading(false);
     }
@@ -124,6 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, name?: string, phone?: string) => {
     try {
+      console.log('🔄 [1] Starting signup for:', email);
       const res = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -131,16 +156,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const result = await res.json();
+      console.log('📝 [2] Signup endpoint response:', { status: res.status, success: result.success, message: result.message, error: result.error });
       if (!res.ok || !result.success) {
         return { success: false, error: result.error || 'Sign up failed' };
       }
 
+      console.log('🔐 [3] Signing in user after successful signup...');
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) return { success: false, error: signInError.message };
+      if (signInError) {
+        console.error('❌ [3] Sign in failed:', signInError.message);
+        return { success: false, error: signInError.message };
+      }
 
+      console.log('✅ [4] Sign in successful - onAuthStateChange should trigger fetchProfile');
       return { success: true };
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Sign up failed';
+      console.error('💥 Signup error:', message);
       return { success: false, error: message };
     }
   };
