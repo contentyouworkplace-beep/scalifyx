@@ -19,7 +19,7 @@ interface User {
 
 export type { User };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.scalifyapp.com/api';
+const API_BASE_URL = '/api';
 
 interface AuthContextType {
   user: User | null;
