@@ -114,7 +114,7 @@ export default function WebsitePage() {
       `}</style>
 
       {/* Signup Modal */}
-      <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} spotsLeft={30} />
+      <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} />
 
       {/* Header */}
       <div className="sticky top-0 z-40 border-b border-border bg-card/30 backdrop-blur">
