@@ -12,7 +12,14 @@ interface SignupModalProps {
 interface Offer {
   id: string;
   name: string;
+  description?: string;
+  plan_type?: string;
+  price?: number;
+  original_price?: number;
+  trial_days?: number;
   features: string[];
+  is_active?: boolean;
+  sort_order?: number;
 }
 
 export function SignupModal({ isOpen, onClose }: SignupModalProps) {
@@ -34,7 +41,7 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
         try {
           const response = await fetch('/api/offers');
           const data = await response.json();
-          const activeOffer = data.offers?.find((o: Offer) => o.is_active);
+          const activeOffer = data.offers?.[0];
           if (activeOffer) {
             setOffer(activeOffer);
           }
