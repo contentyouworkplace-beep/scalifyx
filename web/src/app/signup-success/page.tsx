@@ -2,11 +2,24 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { Logo } from '@/components/Logo';
 import { CheckCircleIcon } from '@/components/Icons';
+import { useEffect, useState } from 'react';
 
 export default function SignupSuccess() {
   const router = useRouter();
+  const { user } = useAuth();
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user && user.trialEndsAt) {
+      const endDate = new Date(user.trialEndsAt);
+      const now = new Date();
+      const days = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      setDaysLeft(Math.max(0, days));
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-bg text-white flex items-center justify-center p-4">
@@ -29,9 +42,24 @@ export default function SignupSuccess() {
           <h1 className="text-3xl font-extrabold text-center mb-2">
             Account Created!
           </h1>
-          <p className="text-center text-zinc-400 mb-8">
+          <p className="text-center text-zinc-400 mb-6">
             Welcome to Scalify. Your account is ready.
           </p>
+
+          {/* Trial Countdown */}
+          {daysLeft !== null && (
+            <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/30">
+              <div className="flex items-center gap-3">
+                <div className="text-2xl">⏰</div>
+                <div>
+                  <p className="text-sm text-zinc-400">Free Trial Remaining</p>
+                  <p className="text-lg font-bold text-green-400">
+                    {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* What's Next */}
           <div className="mb-8 space-y-3">

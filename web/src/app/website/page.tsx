@@ -6,52 +6,20 @@ import { Logo } from '@/components/Logo';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { SignupModal } from '@/components/SignupModal';
 
 export default function WebsitePage() {
   const { user } = useAuth();
   const router = useRouter();
   const [showWhatsApp, setShowWhatsApp] = useState(false);
   const [whatsappQuery, setWhatsappQuery] = useState('');
+  const [showSignupModal, setShowSignupModal] = useState(false);
 
   useEffect(() => {
     if (user?.plan === 'trial') {
       router.push('/dashboard');
     }
   }, [user, router]);
-
-  const PAYMENT_LINK = 'https://rzp.io/rzp/GBnrfLOh';
-
-  const handlePayNow = async () => {
-    // Track with Google Analytics
-    if (typeof (window as any).gtag !== 'undefined') {
-      (window as any).gtag('event', 'payment_button_click', {
-        event_category: 'engagement',
-        event_label: 'website_199_payment',
-      });
-    }
-
-    // Track with Facebook Pixel
-    if (typeof (window as any).fbq !== 'undefined') {
-      (window as any).fbq('track', 'InitiateCheckout', {
-        currency: 'INR',
-        value: 199,
-      });
-    }
-
-    // Server-side logging
-    try {
-      await fetch('/api/track-payment-click', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ timestamp: new Date().toISOString() }),
-      });
-    } catch (error) {
-      console.error('Failed to log payment click:', error);
-    }
-
-    // Redirect to payment
-    window.location.href = PAYMENT_LINK;
-  };
 
   const handleWhatsAppQuery = () => {
     const message = whatsappQuery || 'Hi Scalify team! I have a question about your website design service.';
@@ -144,6 +112,10 @@ export default function WebsitePage() {
           animation: glow-pulse 2.5s ease-in-out infinite;
         }
       `}</style>
+
+      {/* Signup Modal */}
+      <SignupModal isOpen={showSignupModal} onClose={() => setShowSignupModal(false)} spotsLeft={30} />
+
       {/* Header */}
       <div className="sticky top-0 z-40 border-b border-border bg-card/30 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
@@ -152,7 +124,6 @@ export default function WebsitePage() {
               <Logo size={32} />
             </Link>
             <div className="flex items-center gap-4">
-              {/* Money Back Guarantee Badge */}
               <div className="slow-blink">
                 <div className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 flex items-center gap-1">
                   <span className="text-amber-400 text-xs font-semibold">💰 14 Days Money Back Guarantee</span>
@@ -163,51 +134,31 @@ export default function WebsitePage() {
         </div>
       </div>
 
-      {/* Hero Section - Short & Punchy */}
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 overflow-hidden min-h-[500px] sm:min-h-[600px] flex items-center justify-center bg-black/80">
-        {/* Dark background */}
-        <div className="text-center relative z-10">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 leading-tight">
-            Your Competitors Are Online.
-            <br />
-            <span className="text-green-400">You Should Be Too.</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-4">
-            Professional website live in 5 days — starting at ₹199/month.
-          </p>
-          <p className="text-sm text-zinc-500 max-w-2xl mx-auto">
-            750+ small businesses found on Google with Scalify.
-          </p>
-        </div>
-      </div>
-
-      {/* How It Works + Pricing Section */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Left Column: How It Works */}
+      {/* Hero Section with Pricing */}
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[500px] sm:min-h-[600px]">
+          {/* Left: Hero Text */}
           <div>
-            <h2 className="text-3xl font-bold mb-8">How It Works</h2>
-            <div className="space-y-6">
-              {[
-                { num: '1', title: 'Pay ₹199', desc: 'Secure payment. No hidden charges.' },
-                { num: '2', title: 'Share Your Story', desc: 'Tell us about your business on WhatsApp.' },
-                { num: '3', title: 'We Design', desc: 'Our team builds your custom website.' },
-                { num: '4', title: 'You Launch', desc: 'Website goes live. You start winning.' },
-              ].map((step, idx) => (
-                <div key={idx} className="flex gap-4">
-                  <div className="w-12 h-12 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center font-bold text-green-400 text-xl flex-shrink-0">
-                    {step.num}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg mb-1">{step.title}</h3>
-                    <p className="text-sm text-zinc-400">{step.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 leading-tight">
+              Your Competitors Are Online.
+              <br />
+              <span className="text-green-400">You Should Be Too.</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-zinc-400 mb-4">
+              Professional website live in 5 days — starting at ₹199/month.
+            </p>
+            <p className="text-sm text-zinc-500 mb-8">
+              750+ small businesses found on Google with Scalify.
+            </p>
+            <button
+              onClick={() => setShowSignupModal(true)}
+              className="inline-block rounded-xl bg-green-500 px-8 py-4 text-lg font-bold text-white hover:bg-green-400 active:scale-[0.98] transition"
+            >
+              Start 7-Day Free Trial →
+            </button>
           </div>
 
-          {/* Right Column: Pricing Card */}
+          {/* Right: Pricing Card */}
           <div className="sticky top-24">
             <div className="rounded-3xl border border-green-500/30 bg-gradient-to-br from-card to-card/50 p-10 sm:p-14 shadow-2xl shadow-green-500/10">
               {/* Price */}
@@ -234,10 +185,10 @@ export default function WebsitePage() {
 
               {/* CTA Button */}
               <button
-                onClick={() => user?.plan === 'trial' ? router.push('/dashboard') : handlePayNow()}
+                onClick={() => setShowSignupModal(true)}
                 className="w-full rounded-2xl bg-gradient-to-r from-green-500 to-green-400 px-8 py-5 text-lg font-bold text-white hover:shadow-lg hover:shadow-green-500/50 active:scale-[0.98] transition-all mb-4"
               >
-                {user?.plan === 'trial' ? 'Go to Dashboard →' : 'Start 7-Day Free Trial →'}
+                Start 7-Day Free Trial →
               </button>
 
               <p className="text-center text-sm text-zinc-500">
@@ -245,6 +196,29 @@ export default function WebsitePage() {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* How It Works Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-20">
+        <h2 className="text-3xl font-bold mb-8">How It Works</h2>
+        <div className="space-y-6 max-w-2xl">
+          {[
+            { num: '1', title: 'Pay ₹199', desc: 'Secure payment. No hidden charges.' },
+            { num: '2', title: 'Share Your Story', desc: 'Tell us about your business on WhatsApp.' },
+            { num: '3', title: 'We Design', desc: 'Our team builds your custom website.' },
+            { num: '4', title: 'You Launch', desc: 'Website goes live. You start winning.' },
+          ].map((step, idx) => (
+            <div key={idx} className="flex gap-4">
+              <div className="w-12 h-12 rounded-full bg-green-500/20 border border-green-500/50 flex items-center justify-center font-bold text-green-400 text-xl flex-shrink-0">
+                {step.num}
+              </div>
+              <div>
+                <h3 className="font-bold text-lg mb-1">{step.title}</h3>
+                <p className="text-sm text-zinc-400">{step.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -276,7 +250,6 @@ export default function WebsitePage() {
               rel="noopener noreferrer"
               className="group relative rounded-2xl overflow-hidden border border-border hover:border-green-500/50 transition-all duration-300 h-64 sm:h-72"
             >
-              {/* Background Image */}
               <Image
                 src={demo.image}
                 alt={demo.title}
@@ -284,7 +257,6 @@ export default function WebsitePage() {
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
 
-              {/* Business info overlay - always visible at bottom */}
               <div className="absolute inset-0 flex flex-col justify-between p-4">
                 <div />
                 <div className="bg-gradient-to-t from-black/80 to-transparent pt-8 pb-2">
@@ -293,7 +265,6 @@ export default function WebsitePage() {
                 </div>
               </div>
 
-              {/* Hover overlay with arrow */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
                 <div className="text-center">
                   <svg className="w-12 h-12 text-green-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -334,7 +305,6 @@ export default function WebsitePage() {
         </div>
       </div>
 
-
       {/* FAQ Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-20">
         <h2 className="text-3xl font-bold mb-10 text-center">Questions?</h2>
@@ -361,7 +331,7 @@ export default function WebsitePage() {
           <p className="text-zinc-400 mb-4 text-lg">Join 750+ businesses who chose Scalify.</p>
           <p className="text-green-400 font-semibold mb-8 text-lg">Only 30 websites per month. Limited spots available.</p>
           <button
-            onClick={handlePayNow}
+            onClick={() => setShowSignupModal(true)}
             className="inline-block rounded-xl bg-green-500 px-12 py-4 text-lg font-bold text-white hover:bg-green-400 active:scale-[0.98] transition"
           >
             Start 7-Day Free Trial →
@@ -408,7 +378,7 @@ export default function WebsitePage() {
         </div>
       </div>
 
-      {/* WhatsApp Sticky Button with Query */}
+      {/* WhatsApp Sticky Button */}
       <div className="fixed bottom-6 right-6 z-50">
         {showWhatsApp && (
           <div className="absolute bottom-20 right-0 w-80 sm:w-96 bg-card border border-border rounded-2xl p-6 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300">

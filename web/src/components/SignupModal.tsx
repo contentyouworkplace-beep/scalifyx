@@ -7,11 +7,15 @@ import { useRouter } from 'next/navigation';
 interface SignupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  spotsLeft: number;
 }
 
+interface Offer {
+  id: string;
+  name: string;
+  features: string[];
+}
 
-export function SignupModal({ isOpen, onClose, spotsLeft }: SignupModalProps) {
+export function SignupModal({ isOpen, onClose }: SignupModalProps) {
   const { signUp } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
@@ -21,10 +25,25 @@ export function SignupModal({ isOpen, onClose, spotsLeft }: SignupModalProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
+  const [offer, setOffer] = useState<Offer | null>(null);
 
-  // Reset form when modal opens
+  // Fetch offers when modal opens
   useEffect(() => {
     if (isOpen) {
+      const fetchOffers = async () => {
+        try {
+          const response = await fetch('/api/offers');
+          const data = await response.json();
+          const activeOffer = data.offers?.find((o: Offer) => o.is_active);
+          if (activeOffer) {
+            setOffer(activeOffer);
+          }
+        } catch (err) {
+          console.error('Failed to fetch offers:', err);
+        }
+      };
+
+      fetchOffers();
       setName('');
       setPhone('');
       setEmail('');
@@ -44,6 +63,7 @@ export function SignupModal({ isOpen, onClose, spotsLeft }: SignupModalProps) {
     }, 400);
     return () => clearInterval(interval);
   }, [loading]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,10 +96,12 @@ export function SignupModal({ isOpen, onClose, spotsLeft }: SignupModalProps) {
         {/* Close button */}
         <button
           onClick={onClose}
-          className="sticky top-4 right-4 float-right z-10 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-border flex items-center justify-center text-zinc-400 hover:text-white transition"
+          className="sticky top-5 right-5 float-right z-10 w-7 h-7 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 hover:border-zinc-500 flex items-center justify-center text-zinc-400 hover:text-zinc-200 transition"
+          title="Close"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
 
@@ -154,6 +176,20 @@ export function SignupModal({ isOpen, onClose, spotsLeft }: SignupModalProps) {
             {error && (
               <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
                 {error}
+              </div>
+            )}
+
+            {offer && offer.features && offer.features.length > 0 && (
+              <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-1.5">
+                {offer.features.slice(0, 12).map((feature, idx) => (
+                  <div key={idx} className="flex items-start gap-1.5">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5 text-green-400">
+                      <circle cx="8" cy="8" r="7.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M4.5 8L6.5 10L11.5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span className="text-[11px] leading-tight text-zinc-300">{feature}</span>
+                  </div>
+                ))}
               </div>
             )}
 

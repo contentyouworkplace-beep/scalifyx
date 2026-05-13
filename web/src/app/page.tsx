@@ -2,15 +2,13 @@
 
 import Link from 'next/link';
 import Script from 'next/script';
-import { BUSINESS_TYPES, WEBSITE_TEMPLATES } from '@/lib/constants';
+import Image from 'next/image';
 import { Logo } from '@/components/Logo';
 import { SearchConsoleStats } from '@/components/SearchConsoleStats';
 import { SignupModal } from '@/components/SignupModal';
 import {
-  ChatBotIcon, PaletteIcon, PhoneIcon, SearchIcon, GlobeIcon,
+  ChatBotIcon, PhoneIcon, SearchIcon, GlobeIcon,
   ChartIcon, WhatsAppIcon, ShieldIcon, HeadsetIcon,
-  RestaurantIcon, ScissorsIcon, HospitalIcon, ScaleIcon, ShoppingBagIcon,
-  DumbbellIcon, BookIcon, CameraIcon, CarIcon, HomeOutlineIcon, BriefcaseIcon, WrenchIcon,
 } from '@/components/Icons';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +16,15 @@ import { useRouter } from 'next/navigation';
 
 const TOTAL_LAUNCH_SEATS = 1000;
 const SPOTS_TAKEN_KEY = 'sxSpotsTaken';
+
+const DEMO_WEBSITES = [
+  { title: "Friends Factory Cafe", subtitle: 'Cafe Business', url: 'https://friendsfactorycafe.com/', image: '/screenshots/1.png' },
+  { title: 'Wedding Planner Vadodara', subtitle: 'Wedding Planning', url: 'https://weddingplannervadodara.in/', image: '/screenshots/2.png' },
+  { title: 'Waterproofing Vadodara', subtitle: 'Construction Services', url: 'https://waterproofingvadodara.com/', image: '/screenshots/3.png' },
+  { title: 'Interior Design Vadodara', subtitle: 'Interior Design', url: 'https://interiordesignvadodara.in/', image: '/screenshots/4.png' },
+  { title: 'Solar Installation', subtitle: 'Solar Energy', url: 'https://solarinstallationvadodara.in/', image: '/screenshots/5.png' },
+  { title: 'Wow Shaadi', subtitle: 'Wedding Services', url: 'https://wowshaadi.com/', image: '/screenshots/6.png' },
+];
 
 function useSpotsTaken() {
   const [taken, setTaken] = useState(847);
@@ -48,6 +55,14 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
+
+  const planFeatures = [
+    'Website + Search Engine Optimization',
+    'Unlimited Pages Professional Website',
+    'Add Your Custom Domain',
+    'Free Hosting',
+    'Website Maintenance',
+  ];
 
   useEffect(() => {
     if (!loading) return;
@@ -85,37 +100,33 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
   };
 
   return (
-    <div id="signup-form" className="rounded-2xl border border-border bg-card p-7 sm:p-8">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="h-px w-5 bg-green-500" />
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-green-400">Live in 60 seconds</span>
-        </div>
-        <h2 className="text-2xl sm:text-[26px] font-extrabold text-white leading-[1.15]">
-          Your next customer is already searching. Be there.
+    <div id="signup-form" className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <div className="mb-4">
+        <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-[1.15] mb-2">
+          Start Your 7-Day Free Trial
         </h2>
-        <p className="mt-2 text-sm text-zinc-500 leading-relaxed">
-          Create your free account in 60 seconds. No credit card required.
+        <p className="text-xs sm:text-sm text-zinc-500">
+          No credit card required. Access all features instantly.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-2.5 mb-4">
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+          className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
           placeholder="Company name"
         />
-        <div className="flex rounded-xl border border-border bg-inputBg overflow-hidden focus-within:border-green-500/50 transition">
-          <span className="flex items-center px-4 text-zinc-500 text-sm border-r border-border select-none">+91</span>
+        <div className="flex rounded-lg border border-border bg-inputBg overflow-hidden focus-within:border-green-500/50 transition">
+          <span className="flex items-center px-3 text-zinc-500 text-xs sm:text-sm border-r border-border select-none">+91</span>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
             required
-            className="flex-1 py-3 px-4 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
+            className="flex-1 py-2 px-3 bg-transparent text-xs sm:text-sm text-white placeholder-zinc-600 focus:outline-none"
             placeholder="WhatsApp number"
           />
         </div>
@@ -124,7 +135,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+          className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
           placeholder="Email address"
         />
         <input
@@ -132,29 +143,35 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-          placeholder="Password (min 6 characters)"
+          className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+          placeholder="Password (min 6 chars)"
         />
         {error && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
             {error}
           </div>
         )}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-green-500 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-green-400 active:scale-[0.99] disabled:opacity-50"
+          className="w-full rounded-lg bg-green-500 px-3 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-green-400 active:scale-[0.99] disabled:opacity-50"
         >
-          {loading ? loadingText : 'Create Free Account'}
+          {loading ? loadingText : 'Start Free Trial'}
         </button>
       </form>
 
-      <div className="mt-5 pt-5 border-t border-border flex items-center justify-between text-xs text-zinc-700">
-        <span>No setup fee</span>
-        <span>·</span>
-        <span>{spotsLeft} spots left</span>
-        <span>·</span>
-        <span>Cancel anytime</span>
+      <div className="space-y-2 pt-3 border-t border-border">
+        <p className="text-xs text-zinc-400 font-semibold mb-2">What you get:</p>
+        {planFeatures.map((feature) => (
+          <div key={feature} className="flex items-start gap-2">
+            <span className="flex-shrink-0 w-3.5 h-3.5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center mt-0.5">
+              <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span className="text-xs text-zinc-400">{feature}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -294,8 +311,8 @@ export default function LandingPage() {
           <Link href="/"><Logo size={30} /></Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-zinc-500 hover:text-white text-sm transition">Features</a>
-            <a href="#how-it-works" className="text-zinc-500 hover:text-white text-sm transition">How It Works</a>
-            <a href="#templates" className="text-zinc-500 hover:text-white text-sm transition">Templates</a>
+            <a href="#portfolio" className="text-zinc-500 hover:text-white text-sm transition">Portfolio</a>
+            <a href="#faq" className="text-zinc-500 hover:text-white text-sm transition">FAQ</a>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-zinc-500 hover:text-white transition px-3 py-2">Login</Link>
@@ -303,7 +320,7 @@ export default function LandingPage() {
               onClick={() => setShowSignupModal(true)}
               className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-lg transition"
             >
-              Get Started
+              Start 7-Day Free Trial
             </button>
           </div>
         </div>
@@ -312,9 +329,54 @@ export default function LandingPage() {
       {/* ── HERO ── */}
       <section className="pt-40 sm:pt-48 pb-28 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto grid gap-14 lg:gap-12 lg:grid-cols-2 items-start">
-          {/* Left: Pricing Card */}
-          <div className="order-2 lg:order-1">
-            <div className="relative">
+          {/* Left: CTA Section */}
+          <div>
+            <div className="flex items-center gap-3 mb-8">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">India&apos;s Growth Platform for Small Businesses</span>
+            </div>
+            <h1 className="text-5xl sm:text-6xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight mb-8">
+              The Business<br />
+              That Shows Up<br />
+              <span className="text-green-400">Gets the Customer.</span>
+            </h1>
+            <p className="text-lg sm:text-xl text-zinc-400 max-w-lg leading-relaxed mb-10">
+              We build your website, set up Local SEO, and connect every lead directly to your WhatsApp — in 60 seconds.
+            </p>
+
+            <div className="space-y-4 mb-10">
+              <button
+                onClick={() => setShowSignupModal(true)}
+                className="w-full px-7 py-4 rounded-xl bg-green-500 hover:bg-green-400 text-white text-base font-bold transition"
+              >
+                Start 7-Day Free Trial
+              </button>
+              <a
+                href="#features"
+                className="block w-full text-center px-7 py-4 rounded-xl border border-border text-white text-base font-semibold hover:border-white/25 transition"
+              >
+                See How It Works ↓
+              </a>
+            </div>
+
+            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600 mb-8 pb-8 border-b border-border">
+              {['No agency needed', 'No tech skills required', 'Live in 60 seconds', 'Leads on WhatsApp daily'].map((t) => (
+                <span key={t} className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-green-500" />
+                  {t}
+                </span>
+              ))}
+            </div>
+
+            <div className="text-sm text-zinc-600">
+              <p className="mb-2">✓ No credit card required · ✓ Auto-trial activation · ✓ Cancel anytime</p>
+              <p className="text-xs text-zinc-700">{spotsLeft} launch spots remaining — Act now to secure yours</p>
+            </div>
+          </div>
+
+          {/* Right: Pricing Card */}
+          <div>
+            <div className="relative lg:sticky lg:top-24">
               {/* Best value badge */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                 <span className="bg-green-500 text-black text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-green-500/30">
@@ -370,219 +432,8 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-
-          {/* Right: CTA Section */}
-          <div className="order-1 lg:order-2">
-            <div className="flex items-center gap-3 mb-8">
-              <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">India&apos;s Growth Platform for Small Businesses</span>
-            </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight mb-8">
-              The Business<br />
-              That Shows Up<br />
-              <span className="text-green-400">Gets the Customer.</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-zinc-400 max-w-lg leading-relaxed mb-10">
-              We build your website, set up Local SEO, and connect every lead directly to your WhatsApp — in 60 seconds.
-            </p>
-
-            <div className="space-y-4 mb-10">
-              <button
-                onClick={() => setShowSignupModal(true)}
-                className="w-full px-7 py-4 rounded-xl bg-green-500 hover:bg-green-400 text-white text-base font-bold transition"
-              >
-                Start 7-Day Free Trial
-              </button>
-              <a
-                href="#features"
-                className="block w-full text-center px-7 py-4 rounded-xl border border-border text-white text-base font-semibold hover:border-white/25 transition"
-              >
-                See How It Works ↓
-              </a>
-            </div>
-
-            <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600 mb-8 pb-8 border-b border-border">
-              {['No agency needed', 'No tech skills required', 'Live in 60 seconds', 'Leads on WhatsApp daily'].map((t) => (
-                <span key={t} className="flex items-center gap-2">
-                  <span className="w-1 h-1 rounded-full bg-green-500" />
-                  {t}
-                </span>
-              ))}
-            </div>
-
-            <div className="text-sm text-zinc-600">
-              <p className="mb-2">✓ No credit card required · ✓ Auto-trial activation · ✓ Cancel anytime</p>
-              <p className="text-xs text-zinc-700">{spotsLeft} launch spots remaining — Act now to secure yours</p>
-            </div>
-          </div>
         </div>
       </section>
-
-      {/* ── FAQs ── */}
-      <FAQSection />
-
-      {/* ── STATS STRIP ── */}
-      <section className="py-14 border-y border-border">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4">
-          {[
-            { num: '50,000+', label: 'Businesses Online' },
-            { num: '60 sec', label: 'Average Setup Time' },
-            { num: '99.9%', label: 'Uptime Guarantee' },
-            { num: '12+', label: 'Industries Served' },
-          ].map((s) => (
-            <div key={s.label}>
-              <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{s.num}</div>
-              <div className="text-xs text-zinc-600 font-semibold uppercase tracking-widest mt-2">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── THE PROBLEM — editorial ── */}
-      <section className="py-28 px-4 sm:px-6 bg-surface/20">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex items-center gap-3 justify-center mb-10">
-            <span className="h-px w-8 bg-zinc-800" />
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">The Reality</span>
-            <span className="h-px w-8 bg-zinc-800" />
-          </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.0] tracking-tight mb-8">
-            Right now, someone just<br className="hidden sm:block" />
-            searched for your business.<br />
-            <span className="text-zinc-700">They went to your competitor.</span>
-          </h2>
-          <p className="text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10">
-            Not because your competitor is better. Because they showed up on Google and you didn&apos;t. That&apos;s the only difference — and it&apos;s fixable in 60 seconds.
-          </p>
-          <button
-            onClick={scrollToForm}
-            className="px-8 py-4 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition"
-          >
-            Get Found on Google Today
-          </button>
-        </div>
-      </section>
-
-
-      {/* ── WHATSAPP ── */}
-      <section className="py-28 px-4 sm:px-6 bg-surface/20">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-          <div className="order-2 lg:order-1 rounded-2xl border border-border bg-card p-6">
-            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-green-500/15 border border-green-500/20 flex items-center justify-center">
-                <WhatsAppIcon size={15} className="text-green-400" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-white">Priya Singh</div>
-                <div className="text-xs text-zinc-600">New enquiry · just now</div>
-              </div>
-              <span className="ml-auto text-xs bg-green-500/10 text-green-400 font-bold px-2.5 py-1 rounded-full border border-green-500/20">Live</span>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-end">
-                <div className="max-w-[80%] bg-green-500/15 border border-green-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
-                  <p className="text-sm text-white">Hi! I found your salon on Google. Do you have slots this Saturday?</p>
-                  <p className="text-xs text-zinc-600 mt-1 text-right">via your website · 2:41 PM</p>
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <div className="max-w-[80%] bg-green-500/15 border border-green-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
-                  <p className="text-sm text-white">I&apos;d like to book a hair colour + trim.</p>
-                  <p className="text-xs text-zinc-600 mt-1 text-right">2:41 PM</p>
-                </div>
-              </div>
-              <div className="flex">
-                <div className="max-w-[80%] bg-surface border border-border rounded-2xl rounded-tl-sm px-4 py-2.5">
-                  <p className="text-sm text-zinc-300">Yes! Saturday 11am is open. Shall I confirm?</p>
-                  <p className="text-xs text-zinc-600 mt-1">You · 2:43 PM ✓✓</p>
-                </div>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-700 mt-5 text-center">This is your inbox. Real customers. No middleman.</p>
-          </div>
-          <div className="order-1 lg:order-2">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Direct Lead Capture</span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight mb-6">
-              Leads Arrive on Your Phone.<br />
-              <span className="text-green-400">Instantly. Personally.</span>
-            </h2>
-            <p className="text-zinc-400 text-lg leading-relaxed mb-5">
-              Every visitor sees one button — WhatsApp. They tap it, they&apos;re in your chat. You reply, you close. No CRM. No form submissions to chase. No email threads that go nowhere.
-            </p>
-            <p className="text-zinc-600 text-base leading-relaxed mb-8">
-              Just real customers — on the phone that&apos;s already in your hand.
-            </p>
-            <button
-              onClick={scrollToForm}
-              className="px-7 py-3.5 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-xl transition"
-            >
-              Start Getting Leads on WhatsApp →
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-28 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="flex items-center gap-3 justify-center mb-6">
-              <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">How It Works</span>
-              <span className="h-px w-8 bg-zinc-800" />
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
-              From Invisible to Found.<br />
-              <span className="text-green-400">In 60 Seconds.</span>
-            </h2>
-            <p className="mt-5 text-zinc-500 max-w-lg mx-auto text-lg">
-              No code. No calls. No waiting. Three steps between you and customers finding you on Google.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              {
-                step: '01',
-                title: 'Tell Us Who You Are',
-                desc: 'Name, phone, email. Done in under 30 seconds. No credit card. No paperwork. Your account is live the moment you hit submit.',
-                cta: true,
-              },
-              {
-                step: '02',
-                title: 'We Build Everything',
-                desc: 'Our AI reads your business type and city, then writes your copy, designs your pages, sets up Local SEO, and wires your WhatsApp — automatically.',
-                cta: false,
-              },
-              {
-                step: '03',
-                title: 'Leads Start Coming In',
-                desc: 'Your site goes live. Google indexes it. Customers find you. They tap WhatsApp. You close the deal from the phone in your pocket.',
-                cta: false,
-              },
-            ].map((s) => (
-              <div key={s.step} className="p-8 rounded-2xl border border-border bg-card flex flex-col">
-                <div className="text-7xl font-extrabold text-white/[0.04] mb-5 leading-none select-none">{s.step}</div>
-                <h3 className="text-base font-bold text-white mb-3">{s.title}</h3>
-                <p className="text-zinc-600 text-sm leading-relaxed flex-1">{s.desc}</p>
-                {s.cta && (
-                  <button
-                    onClick={scrollToForm}
-                    className="mt-6 w-full py-3 bg-green-500 hover:bg-green-400 text-white rounded-xl font-bold text-sm transition"
-                  >
-                    Start Here →
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── MEMBER RESULTS ── */}
-      <SearchConsoleStats />
 
       {/* ── FEATURES ── */}
       <section id="features" className="py-28 px-4 sm:px-6 bg-surface/20">
@@ -640,22 +491,16 @@ export default function LandingPage() {
                 included: true,
               },
               {
-                Icon: PaletteIcon,
-                title: '12+ Industry Templates',
-                desc: 'Restaurant to clinic. Salon to law firm. Gym to coaching. Every template is built for conversion, not just to look good.',
+                Icon: ChartIcon,
+                title: 'Monthly Analytics & SEO Report',
+                desc: 'Who visited. Where they came from. Which page made them message you. Monthly SEO performance reports — to your inbox.',
                 included: true,
               },
               {
-                Icon: ChartIcon,
-                title: 'Analytics Dashboard',
-                desc: 'Who visited. Where they came from. Which page made them message you. Monthly SEO performance reports — to your inbox.',
-                included: false,
-              },
-              {
                 Icon: HeadsetIcon,
-                title: '24/7 Support',
+                title: 'Priority Chat Support',
                 desc: 'Real people watching your site around the clock. AI-backed so response time is instant. Problems fixed before you notice them.',
-                included: false,
+                included: true,
               },
             ].map((f) => (
               <div key={f.title} className="p-6 rounded-2xl border border-border bg-card hover:border-white/10 transition group">
@@ -674,84 +519,235 @@ export default function LandingPage() {
           </div>
           <div className="mt-14 text-center">
             <button
-              onClick={scrollToForm}
+              onClick={() => setShowSignupModal(true)}
               className="px-10 py-4 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition"
             >
-              Get Everything — Start Today
+              Start 7-Day Free Trial
             </button>
             <p className="mt-3 text-zinc-700 text-sm">Only {spotsLeft} launch seats remaining</p>
           </div>
         </div>
       </section>
 
-      {/* ── TEMPLATES ── */}
-      <section id="templates" className="py-28 px-4 sm:px-6">
+      {/* ── PORTFOLIO SECTION ── */}
+      <section id="portfolio" className="py-28 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="flex items-center gap-3 justify-center mb-6">
               <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Industry Templates</span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Built & Live</span>
               <span className="h-px w-8 bg-zinc-800" />
             </div>
-            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
-              Your Industry. Your Design.<br />
-              <span className="text-green-400">Ready.</span>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] mb-4">
+              Beautiful Websites<br />
+              <span className="text-green-400">We've Built</span>
             </h2>
-            <p className="mt-5 text-zinc-500 max-w-lg mx-auto">
-              Pick a template built for your trade — or let AI design something entirely yours. Either way, you&apos;re live in seconds.
-            </p>
+            <p className="text-zinc-500 text-lg max-w-2xl mx-auto">750+ businesses across industries. All starting at ₹1,499/month.</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {WEBSITE_TEMPLATES.map((t) => (
-              <button
-                key={t.id}
-                onClick={scrollToForm}
-                className="p-5 rounded-2xl border border-border bg-card hover:border-green-500/25 hover:bg-green-500/[0.03] transition text-left group"
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {DEMO_WEBSITES.map((demo, idx) => (
+              <a
+                key={idx}
+                href={demo.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative rounded-2xl overflow-hidden border border-border hover:border-green-500/50 transition-all duration-300 h-64 sm:h-72"
               >
-                <div className="w-8 h-8 rounded-lg border border-border bg-white/[0.03] flex items-center justify-center text-zinc-600 group-hover:text-green-400 group-hover:border-green-500/20 transition mb-3">
-                  <PaletteIcon size={16} />
+                <Image
+                  src={demo.image}
+                  alt={demo.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+
+                <div className="absolute inset-0 flex flex-col justify-between p-4">
+                  <div />
+                  <div className="bg-gradient-to-t from-black/80 to-transparent pt-8 pb-2">
+                    <h3 className="text-white font-semibold text-lg">{demo.title}</h3>
+                    <p className="text-green-400 text-sm">{demo.subtitle}</p>
+                  </div>
                 </div>
-                <h4 className="text-sm font-semibold text-white group-hover:text-green-400 transition leading-snug">{t.name}</h4>
-                <p className="text-xs text-zinc-700 mt-1">{t.preview}</p>
-              </button>
+
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
+                  <div className="text-center">
+                    <svg className="w-12 h-12 text-green-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <p className="text-white text-sm font-semibold">Click to explore</p>
+                  </div>
+                </div>
+              </a>
             ))}
+          </div>
+
+          <p className="text-center text-zinc-500 text-sm mt-10">All live websites built with our service. Click any to see them in action.</p>
+        </div>
+      </section>
+
+      {/* ── MEMBER RESULTS ── */}
+      <SearchConsoleStats />
+
+      {/* ── FAQs ── */}
+      <section id="faq">
+        <FAQSection />
+      </section>
+
+      {/* ── STATS STRIP ── */}
+      <section className="py-14 border-y border-border">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4">
+          {[
+            { num: '50,000+', label: 'Businesses Online' },
+            { num: '60 sec', label: 'Average Setup Time' },
+            { num: '99.9%', label: 'Uptime Guarantee' },
+            { num: '12+', label: 'Industries Served' },
+          ].map((s) => (
+            <div key={s.label}>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">{s.num}</div>
+              <div className="text-xs text-zinc-600 font-semibold uppercase tracking-widest mt-2">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── THE PROBLEM — editorial ── */}
+      <section className="py-28 px-4 sm:px-6 bg-surface/20">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex items-center gap-3 justify-center mb-10">
+            <span className="h-px w-8 bg-zinc-800" />
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">The Reality</span>
+            <span className="h-px w-8 bg-zinc-800" />
+          </div>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.0] tracking-tight mb-8">
+            Right now, someone just<br className="hidden sm:block" />
+            searched for your business.<br />
+            <span className="text-zinc-700">They went to your competitor.</span>
+          </h2>
+          <p className="text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10">
+            Not because your competitor is better. Because they showed up on Google and you didn&apos;t. That&apos;s the only difference — and it&apos;s fixable in 60 seconds.
+          </p>
+          <button
+            onClick={scrollToForm}
+            className="px-8 py-4 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition"
+          >
+            Get Found on Google Today
+          </button>
+        </div>
+      </section>
+
+      {/* ── WHATSAPP ── */}
+      <section className="py-28 px-4 sm:px-6 bg-surface/20">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="order-2 lg:order-1 rounded-2xl border border-border bg-card p-6">
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border">
+              <div className="w-8 h-8 rounded-full bg-green-500/15 border border-green-500/20 flex items-center justify-center">
+                <WhatsAppIcon size={15} className="text-green-400" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-white">Priya Singh</div>
+                <div className="text-xs text-zinc-600">New enquiry · just now</div>
+              </div>
+              <span className="ml-auto text-xs bg-green-500/10 text-green-400 font-bold px-2.5 py-1 rounded-full border border-green-500/20">Live</span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-end">
+                <div className="max-w-[80%] bg-green-500/15 border border-green-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
+                  <p className="text-sm text-white">Hi! I found your salon on Google. Do you have slots this Saturday?</p>
+                  <p className="text-xs text-zinc-600 mt-1 text-right">via your website · 2:41 PM</p>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <div className="max-w-[80%] bg-green-500/15 border border-green-500/20 rounded-2xl rounded-tr-sm px-4 py-2.5">
+                  <p className="text-sm text-white">I&apos;d like to book a hair colour + trim.</p>
+                  <p className="text-xs text-zinc-600 mt-1 text-right">2:41 PM</p>
+                </div>
+              </div>
+              <div className="flex">
+                <div className="max-w-[80%] bg-surface border border-border rounded-2xl rounded-tl-sm px-4 py-2.5">
+                  <p className="text-sm text-zinc-300">Yes! Saturday 11am is open. Shall I confirm?</p>
+                  <p className="text-xs text-zinc-600 mt-1">You · 2:43 PM ✓✓</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-zinc-700 mt-5 text-center">This is your inbox. Real customers. No middleman.</p>
+          </div>
+          <div className="order-1 lg:order-2">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Direct Lead Capture</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold leading-[1.05] tracking-tight mb-6">
+              Leads Arrive on Your Phone.<br />
+              <span className="text-green-400">Instantly. Personally.</span>
+            </h2>
+            <p className="text-zinc-400 text-lg leading-relaxed mb-5">
+              Every visitor sees one button — WhatsApp. They tap it, they&apos;re in your chat. You reply, you close. No CRM. No form submissions to chase. No email threads that go nowhere.
+            </p>
+            <p className="text-zinc-600 text-base leading-relaxed mb-8">
+              Just real customers — on the phone that&apos;s already in your hand.
+            </p>
+            <button
+              onClick={() => setShowSignupModal(true)}
+              className="px-7 py-3.5 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-xl transition"
+            >
+              Start 7-Day Free Trial
+            </button>
           </div>
         </div>
       </section>
 
-      {/* ── BUSINESS TYPES ── */}
-      <section id="business" className="py-20 px-4 sm:px-6 border-t border-border">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Every Business. One Platform.
+      {/* ── HOW IT WORKS ── */}
+      <section id="how-it-works" className="py-28 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-20">
+            <div className="flex items-center gap-3 justify-center mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">How It Works</span>
+              <span className="h-px w-8 bg-zinc-800" />
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
+              From Invisible to Found.<br />
+              <span className="text-green-400">In 60 Seconds.</span>
             </h2>
-            <p className="mt-4 text-zinc-500 max-w-lg mx-auto">
-              Your competitors already have websites. Now you have one that wins.
+            <p className="mt-5 text-zinc-500 max-w-lg mx-auto text-lg">
+              No code. No calls. No waiting. Three steps between you and customers finding you on Google.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {BUSINESS_TYPES.map((b) => {
-              const bizIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-                restaurant: RestaurantIcon, salon: ScissorsIcon, doctor: HospitalIcon,
-                lawyer: ScaleIcon, shop: ShoppingBagIcon, gym: DumbbellIcon,
-                tutor: BookIcon, photographer: CameraIcon, auto: CarIcon,
-                realestate: HomeOutlineIcon, freelancer: BriefcaseIcon, other: WrenchIcon,
-              };
-              const BizIcon = bizIcons[b.id] || BriefcaseIcon;
-              return (
-                <button
-                  key={b.id}
-                  onClick={scrollToForm}
-                  className="p-4 rounded-xl border border-border bg-card hover:border-green-500/25 hover:bg-green-500/[0.03] transition text-center group"
-                >
-                  <div className="w-9 h-9 mx-auto rounded-lg border border-border bg-white/[0.03] flex items-center justify-center text-zinc-600 group-hover:text-green-400 group-hover:border-green-500/20 transition mb-2">
-                    <BizIcon size={18} />
-                  </div>
-                  <div className="text-sm font-medium text-zinc-500 group-hover:text-white transition">{b.label}</div>
-                </button>
-              );
-            })}
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                step: '01',
+                title: 'Tell Us Who You Are',
+                desc: 'Name, phone, email. Done in under 30 seconds. No credit card. No paperwork. Your account is live the moment you hit submit.',
+                cta: true,
+              },
+              {
+                step: '02',
+                title: 'We Build Everything',
+                desc: 'Our AI reads your business type and city, then writes your copy, designs your pages, sets up Local SEO, and wires your WhatsApp — automatically.',
+                cta: false,
+              },
+              {
+                step: '03',
+                title: 'Leads Start Coming In',
+                desc: 'Your site goes live. Google indexes it. Customers find you. They tap WhatsApp. You close the deal from the phone in your pocket.',
+                cta: false,
+              },
+            ].map((s) => (
+              <div key={s.step} className="p-8 rounded-2xl border border-border bg-card flex flex-col">
+                <div className="text-7xl font-extrabold text-white/[0.04] mb-5 leading-none select-none">{s.step}</div>
+                <h3 className="text-base font-bold text-white mb-3">{s.title}</h3>
+                <p className="text-zinc-600 text-sm leading-relaxed flex-1">{s.desc}</p>
+                {s.cta && (
+                  <button
+                    onClick={() => setShowSignupModal(true)}
+                    className="mt-6 w-full py-3 bg-green-500 hover:bg-green-400 text-white rounded-xl font-bold text-sm transition"
+                  >
+                    Start 7-Day Free Trial
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -807,6 +803,62 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── PORTFOLIO SECTION ── */}
+      <section className="py-28 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="flex items-center gap-3 justify-center mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Built & Live</span>
+              <span className="h-px w-8 bg-zinc-800" />
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] mb-4">
+              Beautiful Websites<br />
+              <span className="text-green-400">We've Built</span>
+            </h2>
+            <p className="text-zinc-500 text-lg max-w-2xl mx-auto">750+ businesses across industries. All starting at ₹1,499/month.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {DEMO_WEBSITES.map((demo, idx) => (
+              <a
+                key={idx}
+                href={demo.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative rounded-2xl overflow-hidden border border-border hover:border-green-500/50 transition-all duration-300 h-64 sm:h-72"
+              >
+                <Image
+                  src={demo.image}
+                  alt={demo.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+
+                <div className="absolute inset-0 flex flex-col justify-between p-4">
+                  <div />
+                  <div className="bg-gradient-to-t from-black/80 to-transparent pt-8 pb-2">
+                    <h3 className="text-white font-semibold text-lg">{demo.title}</h3>
+                    <p className="text-green-400 text-sm">{demo.subtitle}</p>
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
+                  <div className="text-center">
+                    <svg className="w-12 h-12 text-green-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                    <p className="text-white text-sm font-semibold">Click to explore</p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <p className="text-center text-zinc-500 text-sm mt-10">All live websites built with our service. Click any to see them in action.</p>
+        </div>
+      </section>
+
       {/* ── FINAL CTA ── */}
       <section className="py-32 px-4 sm:px-6 border-y border-border">
         <div className="max-w-3xl mx-auto text-center">
@@ -826,10 +878,10 @@ export default function LandingPage() {
             AI at Work. · Website · SEO · WhatsApp Leads · All-in-One.
           </p>
           <button
-            onClick={scrollToForm}
+            onClick={() => setShowSignupModal(true)}
             className="px-14 py-5 bg-green-500 hover:bg-green-400 text-white text-lg font-extrabold rounded-2xl transition"
           >
-            Get Started — Go Live Today
+            Start 7-Day Free Trial
           </button>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-700">
             {['No credit card required', 'Cancel anytime', 'Live in 60 seconds'].map((t) => (
@@ -851,8 +903,8 @@ export default function LandingPage() {
             <Link href="/"><Logo size={28} /></Link>
             <div className="flex gap-8 text-sm text-zinc-600">
               <a href="#features" className="hover:text-white transition">Features</a>
-              <a href="#templates" className="hover:text-white transition">Templates</a>
-              <a href="#business" className="hover:text-white transition">Business Types</a>
+              <a href="#portfolio" className="hover:text-white transition">Portfolio</a>
+              <a href="#faq" className="hover:text-white transition">FAQ</a>
               <Link href="/login" className="hover:text-white transition">Login</Link>
             </div>
           </div>
@@ -891,7 +943,6 @@ export default function LandingPage() {
       <SignupModal
         isOpen={showSignupModal}
         onClose={() => setShowSignupModal(false)}
-        spotsLeft={spotsLeft}
       />
     </div>
   );
