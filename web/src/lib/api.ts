@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.scalifyapp.com/api';
+const API_BASE_URL = '/api';
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
   const { data: { session } } = await supabase.auth.getSession();
