@@ -30,16 +30,11 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
     try {
       console.log('🔄 Using Supabase fallback for signup (backend unavailable or failed)');
       const { createClient } = await import('@supabase/supabase-js');
-      // Anon client for auth only
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-      );
-      // Admin client (service role) for profile/subscription writes — bypasses RLS
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-      );
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+      const supabase = createClient(supabaseUrl, anonKey);
 
       const { email, password, name, phone } = body;
       if (!email || !password) {
@@ -64,8 +59,25 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         const trialEndDate = new Date();
         trialEndDate.setDate(trialEndDate.getDate() + 7);
 
-        // Use admin client so RLS doesn't block the phone/name write
-        const { error: profileError } = await supabaseAdmin
+        // Pick the best client for DB writes (needs to bypass RLS):
+        // 1. Service role key (full bypass) — requires SUPABASE_SERVICE_ROLE_KEY env var
+        // 2. User's own session token — RLS allows user to write their own profile row
+        // 3. Anon fallback — may fail RLS but won't crash signup
+        let writeClient;
+        if (serviceRoleKey) {
+          writeClient = createClient(supabaseUrl, serviceRoleKey);
+          console.log('🔑 Using service role key for profile write');
+        } else if (authData.session?.access_token) {
+          writeClient = createClient(supabaseUrl, anonKey, {
+            global: { headers: { Authorization: `Bearer ${authData.session.access_token}` } },
+          });
+          console.log('🔑 Using user session token for profile write');
+        } else {
+          writeClient = supabase;
+          console.warn('⚠️ No service role key or session — profile write may be blocked by RLS');
+        }
+
+        const { error: profileError } = await writeClient
           .from('profiles')
           .upsert({
             id: userId,
@@ -84,7 +96,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
         }
 
         // Create trial subscription
-        const { error: subError } = await supabaseAdmin
+        const { error: subError } = await writeClient
           .from('subscriptions')
           .insert({
             user_id: userId,
