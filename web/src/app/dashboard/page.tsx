@@ -8,6 +8,14 @@ import {
   ChatBotIcon, GlobeIcon, DiamondIcon, ZapIcon, SearchIcon,
   SparklesIcon, ShieldIcon, HeadsetIcon, PhoneIcon, LinkIcon, ChartIcon,
 } from '../../components/Icons';
+
+function WhatsAppIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-5.031 1.378c-1.563.946-2.846 2.435-3.297 4.12-.45 1.684-.196 3.52.536 5.035.73 1.514 2.082 2.684 3.708 3.333 1.627.648 3.415.81 5.028.472 1.614-.337 3.053-1.198 4.014-2.458.96-1.26 1.498-2.836 1.498-4.467 0-2.549-1.039-4.947-2.886-6.739-1.848-1.792-4.353-2.799-6.966-2.799z"/>
+    </svg>
+  );
+}
 import { RocketIcon } from '../../components/Icons';
 import { PushNotificationBanner } from '../../components/PushNotificationBanner';
 import { TrialBanner } from '../../components/TrialBanner';
@@ -108,46 +116,67 @@ export default function DashboardHome() {
 
       {/* Quick Actions */}
       <h2 className="text-sm md:text-base font-bold mb-3">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         {[
           { href: '/dashboard/chat', Icon: ChatBotIcon, label: 'AI Chat', desc: 'Create website', action: null },
           { href: '/dashboard/website', Icon: GlobeIcon, label: 'My Website', desc: 'View & edit', action: null },
           { href: '/dashboard/plans', Icon: DiamondIcon, label: 'Plan', desc: '₹1,499/mo', action: null },
           { href: '#', Icon: ShareIcon, label: 'Share', desc: 'Tell friends', action: 'share' },
-        ].map((a) => (
-          a.action === 'share' ? (
-            <button
-              key="share"
-              onClick={() => {
-                const msg = 'Hey! Check out Scalify — build a professional website with SEO in 60 seconds\n\nhttps://scalifyapp.com';
-                if (navigator.share) {
-                  navigator.share({ title: 'Scalify', text: msg, url: 'https://scalifyapp.com' });
-                } else {
-                  navigator.clipboard.writeText(msg);
-                }
-              }}
-              className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition group text-left"
-            >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
-                <a.Icon size={20} />
-              </div>
-              <div className="text-sm font-semibold group-hover:text-primary transition">{a.label}</div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">{a.desc}</div>
-            </button>
-          ) : (
-            <Link
-              key={a.href}
-              href={a.href}
-              className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition group"
-            >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
-                <a.Icon size={20} />
-              </div>
-              <div className="text-sm font-semibold group-hover:text-primary transition">{a.label}</div>
-              <div className="text-[11px] text-zinc-500 mt-0.5">{a.desc}</div>
-            </Link>
-          )
-        ))}
+          { href: '#', Icon: WhatsAppIcon, label: 'WhatsApp', desc: 'Chat support', action: 'whatsapp' },
+        ].map((a) => {
+          if (a.action === 'share') {
+            return (
+              <button
+                key="share"
+                onClick={() => {
+                  const msg = 'Hey! Check out Scalify — build a professional website with SEO in 60 seconds\n\nhttps://scalifyapp.com';
+                  if (navigator.share) {
+                    navigator.share({ title: 'Scalify', text: msg, url: 'https://scalifyapp.com' });
+                  } else {
+                    navigator.clipboard.writeText(msg);
+                  }
+                }}
+                className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition group text-left"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
+                  <a.Icon size={20} />
+                </div>
+                <div className="text-sm font-semibold group-hover:text-primary transition">{a.label}</div>
+                <div className="text-[11px] text-zinc-500 mt-0.5">{a.desc}</div>
+              </button>
+            );
+          } else if (a.action === 'whatsapp') {
+            return (
+              <a
+                key="whatsapp"
+                href="https://wa.me/916353583149?text=I%20have%20activated%20the%20free%20trial%20now%20what%20is%20the%20next%20step..."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
+                  <a.Icon size={20} />
+                </div>
+                <div className="text-sm font-semibold group-hover:text-primary transition">{a.label}</div>
+                <div className="text-[11px] text-zinc-500 mt-0.5">{a.desc}</div>
+              </a>
+            );
+          } else {
+            return (
+              <Link
+                key={a.href}
+                href={a.href}
+                className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
+                  <a.Icon size={20} />
+                </div>
+                <div className="text-sm font-semibold group-hover:text-primary transition">{a.label}</div>
+                <div className="text-[11px] text-zinc-500 mt-0.5">{a.desc}</div>
+              </Link>
+            );
+          }
+        })}
       </div>
 
       {/* Why Scalify - matches mobile app feature list */}
