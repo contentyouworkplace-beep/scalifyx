@@ -30,10 +30,11 @@ export async function POST(req: Request) {
     business_name, business_category, business_city, whatsapp_number,
     business_address, google_maps_link, business_description,
     logo_url, instagram_url, facebook_url, existing_website_url,
-    services, gallery_images, domain_purchased, domain_name,
+    services, gallery_images, domain_purchased, domain_name, email,
   } = body;
 
-  const { error } = await db()
+  // 1. Save profile
+  const { error: profileError } = await db()
     .from('profiles')
     .update({
       business_name: business_name || null,
@@ -56,9 +57,70 @@ export async function POST(req: Request) {
     })
     .eq('id', user.id);
 
-  if (error) {
-    console.error('Onboarding submit error:', error);
+  if (profileError) {
+    console.error('Onboarding submit error:', profileError);
     return Response.json({ error: 'Failed to save onboarding data' }, { status: 500 });
+  }
+
+  // 2. Auto-create a draft website with all business details
+  const siteId = `site_${user.id.replace(/-/g, '').slice(0, 12)}`;
+
+  const contact = {
+    whatsapp: whatsapp_number || null,
+    address: business_address || null,
+    maps_link: google_maps_link || null,
+    email: email || user.email || null,
+    city: business_city || null,
+  };
+
+  const socialLinks = {
+    instagram: instagram_url || null,
+    facebook: facebook_url || null,
+    existing_website: existing_website_url || null,
+  };
+
+  // Check if website already exists for this user
+  const { data: existingWebsite } = await db()
+    .from('websites')
+    .select('id')
+    .eq('user_id', user.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (existingWebsite) {
+    // Update existing
+    await db()
+      .from('websites')
+      .update({
+        business_name: (business_name as string) || 'My Business',
+        business_type: (business_category as string) || null,
+        description: (business_description as string) || null,
+        logo_url: (logo_url as string) || null,
+        photos: (gallery_images as unknown[]) || [],
+        services: (services as unknown[]) || [],
+        contact,
+        social_links: socialLinks,
+        domain_name: (domain_name as string) || null,
+        status: 'draft',
+      })
+      .eq('id', existingWebsite.id);
+  } else {
+    // Create new
+    await db()
+      .from('websites')
+      .insert({
+        user_id: user.id,
+        site_id: siteId,
+        business_name: (business_name as string) || 'My Business',
+        business_type: (business_category as string) || null,
+        description: (business_description as string) || null,
+        logo_url: (logo_url as string) || null,
+        photos: (gallery_images as unknown[]) || [],
+        services: (services as unknown[]) || [],
+        contact,
+        social_links: socialLinks,
+        status: 'draft',
+      });
   }
 
   return Response.json({ success: true });

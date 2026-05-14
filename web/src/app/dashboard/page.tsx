@@ -2,6 +2,7 @@
 
 import { useAuth } from '../../context/AuthContext';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiFetch } from '../../lib/api';
 import Link from 'next/link';
 import {
@@ -41,6 +42,7 @@ function EyeIcon({ size = 18 }: { size?: number }) {
 
 export default function DashboardHome() {
   const { user, updateUser } = useAuth();
+  const router = useRouter();
   const [stats, setStats] = useState({ visitors: 0, leads: 0, uptime: 99.9 });
 
   useEffect(() => {
@@ -61,7 +63,11 @@ export default function DashboardHome() {
           </h1>
           <p className="text-zinc-500 mt-1">Let's set up your business profile</p>
         </div>
-        <OnboardingModal onComplete={() => updateUser({ onboarding_completed: true })} />
+        <OnboardingModal onComplete={() => {
+          updateUser({ onboarding_completed: true });
+          router.push('/dashboard/website');
+        }} />
+
       </div>
     );
   }

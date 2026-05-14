@@ -118,7 +118,7 @@ export default function OnboardingStep2({ data, updateData }: OnboardingStep2Pro
 
       {/* Instagram */}
       <div>
-        <label className="block text-sm font-medium text-white mb-2">Instagram Profile URL</label>
+        <label className="block text-sm font-medium text-white mb-2">Instagram Profile URL <span className="text-zinc-500 font-normal">(Optional)</span></label>
         <input
           type="url"
           value={data.instagram_url || ''}
@@ -130,7 +130,7 @@ export default function OnboardingStep2({ data, updateData }: OnboardingStep2Pro
 
       {/* Facebook */}
       <div>
-        <label className="block text-sm font-medium text-white mb-2">Facebook Profile URL</label>
+        <label className="block text-sm font-medium text-white mb-2">Facebook Profile URL <span className="text-zinc-500 font-normal">(Optional)</span></label>
         <input
           type="url"
           value={data.facebook_url || ''}
