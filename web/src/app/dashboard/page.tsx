@@ -44,6 +44,7 @@ export default function DashboardHome() {
   const { user, updateUser } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState({ visitors: 0, leads: 0, uptime: 99.9 });
+  const [editingProfile, setEditingProfile] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -53,21 +54,23 @@ export default function DashboardHome() {
     }
   }, [user]);
 
-  // Show onboarding for new users who haven't completed it
-  if (user && !user.onboarding_completed) {
+  // Show onboarding for new users OR when editing profile
+  if (user && (!user.onboarding_completed || editingProfile)) {
     return (
       <div>
-        <div className="hidden md:block mb-8">
+        <div className="hidden md:block mb-6">
           <h1 className="text-2xl font-bold">
             Hey, <span className="gradient-text">{user?.name || 'there'}</span>
           </h1>
-          <p className="text-zinc-500 mt-1">Let's set up your business profile</p>
+          <p className="text-zinc-500 mt-1">
+            {editingProfile ? 'Update your business profile' : "Let's set up your business profile"}
+          </p>
         </div>
         <OnboardingModal onComplete={() => {
           updateUser({ onboarding_completed: true });
+          setEditingProfile(false);
           router.push('/dashboard/website');
         }} />
-
       </div>
     );
   }
@@ -138,13 +141,12 @@ export default function DashboardHome() {
 
       {/* Quick Actions */}
       <h2 className="text-sm md:text-base font-bold mb-3">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
           { href: '/dashboard/chat', Icon: ChatBotIcon, label: 'AI Chat', desc: 'Create website', action: null },
           { href: '/dashboard/website', Icon: GlobeIcon, label: 'My Website', desc: 'View & edit', action: null },
           { href: '/dashboard/plans', Icon: DiamondIcon, label: 'Plan', desc: '₹1,499/mo', action: null },
           { href: '#', Icon: ShareIcon, label: 'Share', desc: 'Tell friends', action: 'share' },
-          { href: '#', Icon: WhatsAppIcon, label: 'WhatsApp', desc: 'Chat support', action: 'whatsapp' },
         ].map((a) => {
           if (a.action === 'share') {
             return (
@@ -167,22 +169,6 @@ export default function DashboardHome() {
                 <div className="text-[11px] text-zinc-500 mt-0.5">{a.desc}</div>
               </button>
             );
-          } else if (a.action === 'whatsapp') {
-            return (
-              <a
-                key="whatsapp"
-                href="https://wa.me/916353583149?text=I%20have%20activated%20the%20free%20trial%20now%20what%20is%20the%20next%20step..."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
-                  <a.Icon size={20} />
-                </div>
-                <div className="text-sm font-semibold group-hover:text-primary transition">{a.label}</div>
-                <div className="text-[11px] text-zinc-500 mt-0.5">{a.desc}</div>
-              </a>
-            );
           } else {
             return (
               <Link
@@ -190,7 +176,7 @@ export default function DashboardHome() {
                 href={a.href}
                 className="p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition group"
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
+                <div className="w-10 h-10 `rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary/20 transition">
                   <a.Icon size={20} />
                 </div>
                 <div className="text-sm font-semibold group-hover:text-primary transition">{a.label}</div>
