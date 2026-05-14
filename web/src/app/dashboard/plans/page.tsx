@@ -45,26 +45,6 @@ export default function PlansPage() {
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [cancelLoading, setCancelLoading] = useState(false);
 
-  useEffect(() => {
-    loadData();
-    // Handle Razorpay redirect back after payment
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'success') {
-      toast.success('Payment successful! Your Pro plan is being activated.', { duration: 6000 });
-      // Clean URL without reload
-      window.history.replaceState({}, '', '/dashboard/plans');
-      // Poll for plan activation (webhook may take a few seconds)
-      const poll = setInterval(() => { fetchStatus(); }, 3000);
-      setTimeout(() => clearInterval(poll), 30000);
-    }
-  }, []);
-
-  const loadData = async () => {
-    setFetchingOffers(true);
-    await Promise.all([fetchOffers(), fetchStatus()]);
-    setFetchingOffers(false);
-  };
-
   const fetchOffers = async () => {
     try {
       const data = await apiFetch('/payment/offers');
@@ -74,17 +54,47 @@ export default function PlansPage() {
     }
   };
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     try {
       const data = await apiFetch('/payment/status');
       if (data.success) {
+        // If authenticated user has no subscription, auto-start their trial
+        if (data.subscription?.status === 'free') {
+          const trial = await apiFetch('/payment/start-trial', { method: 'POST', body: JSON.stringify({}) });
+          if (trial.success) {
+            const refreshed = await apiFetch('/payment/status');
+            if (refreshed.success) {
+              setSubStatus(refreshed.subscription);
+              setPayments(refreshed.payments || []);
+              return;
+            }
+          }
+        }
         setSubStatus(data.subscription);
         setPayments(data.payments || []);
       }
     } catch (error) {
       console.error('Failed to fetch status:', error);
     }
-  };
+  }, []);
+
+  const loadData = useCallback(async () => {
+    setFetchingOffers(true);
+    await Promise.all([fetchOffers(), fetchStatus()]);
+    setFetchingOffers(false);
+  }, [fetchStatus]);
+
+  useEffect(() => {
+    loadData();
+    // Handle Razorpay redirect back after payment
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      toast.success('Payment successful! Your Pro plan is being activated.', { duration: 6000 });
+      window.history.replaceState({}, '', '/dashboard/plans');
+      const poll = setInterval(() => { fetchStatus(); }, 3000);
+      setTimeout(() => clearInterval(poll), 30000);
+    }
+  }, [loadData, fetchStatus]);
 
   const trialOffer = offers.find(o => o.plan_type === 'trial' && !o.is_user_offer);
   const paidOffers = offers.filter(o => o.plan_type === 'pro' && !o.is_user_offer);

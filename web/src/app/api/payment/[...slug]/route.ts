@@ -250,7 +250,7 @@ async function handleCancel(req: Request) {
   if (!sub) return Response.json({ error: 'No active subscription found' }, { status: 404 });
 
   await db().from('subscriptions').update({ status: 'cancelled' }).eq('id', sub.id);
-  await db().from('profiles').update({ plan: 'free' }).eq('id', user.id);
+  await db().from('profiles').update({ plan: 'trial' }).eq('id', user.id);
 
   const accessUntil = new Date(sub.end_date).toLocaleDateString('en-IN', {
     day: '2-digit', month: 'short', year: 'numeric',

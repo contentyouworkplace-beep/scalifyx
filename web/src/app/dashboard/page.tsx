@@ -19,6 +19,7 @@ function WhatsAppIcon({ size = 20 }: { size?: number }) {
 import { RocketIcon } from '../../components/Icons';
 import { PushNotificationBanner } from '../../components/PushNotificationBanner';
 import { TrialBanner } from '../../components/TrialBanner';
+import OnboardingModal from '../../components/OnboardingModal';
 import React from 'react';
 
 function ShareIcon({ size = 20 }: { size?: number }) {
@@ -39,7 +40,7 @@ function EyeIcon({ size = 18 }: { size?: number }) {
 }
 
 export default function DashboardHome() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [stats, setStats] = useState({ visitors: 0, leads: 0, uptime: 99.9 });
 
   useEffect(() => {
@@ -49,6 +50,21 @@ export default function DashboardHome() {
         .catch(() => {});
     }
   }, [user]);
+
+  // Show onboarding for new users who haven't completed it
+  if (user && !user.onboarding_completed) {
+    return (
+      <div>
+        <div className="hidden md:block mb-8">
+          <h1 className="text-2xl font-bold">
+            Hey, <span className="gradient-text">{user?.name || 'there'}</span>
+          </h1>
+          <p className="text-zinc-500 mt-1">Let's set up your business profile</p>
+        </div>
+        <OnboardingModal onComplete={() => updateUser({ onboarding_completed: true })} />
+      </div>
+    );
+  }
 
   return (
     <div>

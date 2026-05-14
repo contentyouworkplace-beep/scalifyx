@@ -5,21 +5,23 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Logo } from '@/components/Logo';
 import { CheckCircleIcon } from '@/components/Icons';
+import { apiFetch } from '@/lib/api';
 import { useEffect, useState } from 'react';
 
 export default function SignupSuccess() {
   const router = useRouter();
-  const { user } = useAuth();
-  const [daysLeft, setDaysLeft] = useState<number | null>(null);
+  const { session } = useAuth();
+  const [daysLeft, setDaysLeft] = useState<number>(7);
 
   useEffect(() => {
-    if (user && user.trialEndsAt) {
-      const endDate = new Date(user.trialEndsAt);
-      const now = new Date();
-      const days = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      setDaysLeft(Math.max(0, days));
-    }
-  }, [user]);
+    if (!session) return; // wait for auth to be ready
+    apiFetch('/payment/start-trial')
+      .then(data => {
+        const days = data?.subscription?.trialDays ?? data?.subscription?.daysLeft;
+        if (days != null && days > 0) setDaysLeft(days);
+      })
+      .catch(() => {}); // keep the 7-day default on error
+  }, [session]);
 
   return (
     <div className="min-h-screen bg-bg text-white flex items-center justify-center p-4">

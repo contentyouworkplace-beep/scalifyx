@@ -85,7 +85,6 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
             name: name || '',
             phone: phone || '',
             plan: 'trial',
-            trialEndsAt: trialEndDate.toISOString(),
           })
           .select();
 

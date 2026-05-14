@@ -1,38 +1,30 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export function TrialBanner() {
   const { user } = useAuth();
-  const [daysLeft, setDaysLeft] = useState(0);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
-    if (!user?.trial_ends_at) return;
-
-    const calculateDaysLeft = () => {
-      const now = new Date();
-      const trialEnd = new Date(user.trial_ends_at);
-      const diff = trialEnd.getTime() - now.getTime();
-      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
-      if (days <= 0) {
-        setIsExpired(true);
-        setDaysLeft(0);
-      } else {
-        setIsExpired(false);
-        setDaysLeft(days);
-      }
-    };
-
-    calculateDaysLeft();
-    const interval = setInterval(calculateDaysLeft, 60000);
-    return () => clearInterval(interval);
-  }, [user?.trial_ends_at]);
+    if (!user?.id || user.plan !== 'trial') return;
+    apiFetch('/payment/status')
+      .then(data => {
+        const days = data?.subscription?.daysLeft ?? null;
+        if (days != null) {
+          setDaysLeft(days);
+          setIsExpired(days <= 0);
+        }
+      })
+      .catch(() => {});
+  }, [user?.id, user?.plan]);
 
   if (!user?.plan || user.plan !== 'trial') return null;
+  if (daysLeft === null) return null; // loading
 
   if (isExpired) {
     return (

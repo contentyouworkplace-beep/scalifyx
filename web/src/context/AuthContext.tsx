@@ -14,6 +14,24 @@ interface User {
   business_type?: string;
   referral_code?: string;
   created_at?: string;
+  // Onboarding fields
+  business_category?: string;
+  business_city?: string;
+  whatsapp_number?: string;
+  business_address?: string;
+  google_maps_link?: string;
+  business_description?: string;
+  logo_url?: string;
+  instagram_url?: string;
+  facebook_url?: string;
+  existing_website_url?: string;
+  domain_name?: string;
+  domain_purchased?: boolean;
+  domain_skipped_until?: string;
+  services?: any[];
+  gallery_images?: any[];
+  onboarding_completed?: boolean;
+  onboarding_completed_at?: string;
   [key: string]: any;
 }
 
@@ -78,20 +96,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.warn(`⚠️ Profile query error (code: ${error.code}):`, error.message);
         if (error.code === 'PGRST116') {
-          console.log('📝 Profile not found, creating fallback profile with plan=free');
+          console.log('📝 Profile not found, creating fallback profile with plan=trial');
           const { data: authUser } = await supabase.auth.getUser();
           const email = authUser?.user?.email || '';
           const name = authUser?.user?.user_metadata?.name || '';
           const { data: newProfile, error: insertError } = await supabase
             .from('profiles')
-            .upsert({ id: userId, email, name, plan: 'free' }, { onConflict: 'id' })
+            .upsert({ id: userId, email, name, plan: 'trial' }, { onConflict: 'id' })
             .select()
             .single();
           if (insertError) {
             console.error('❌ Fallback profile creation error:', insertError);
             throw insertError;
           }
-          console.log('✅ Fallback profile created with plan=free');
+          console.log('✅ Fallback profile created with plan=trial');
           data = newProfile;
         } else {
           throw error;
@@ -123,6 +141,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: data.role,
         credits: data.credits,
         referralCode: data.referral_code,
+        // Onboarding fields
+        business_category: data.business_category,
+        business_city: data.business_city,
+        whatsapp_number: data.whatsapp_number,
+        business_address: data.business_address,
+        google_maps_link: data.google_maps_link,
+        business_description: data.business_description,
+        logo_url: data.logo_url,
+        instagram_url: data.instagram_url,
+        facebook_url: data.facebook_url,
+        existing_website_url: data.existing_website_url,
+        domain_name: data.domain_name,
+        domain_purchased: data.domain_purchased,
+        domain_skipped_until: data.domain_skipped_until,
+        services: data.services,
+        gallery_images: data.gallery_images,
+        onboarding_completed: data.onboarding_completed,
+        onboarding_completed_at: data.onboarding_completed_at,
       };
 
       const { data: websites } = await supabase
