@@ -24,21 +24,10 @@ interface Website {
   leads: number;
 }
 
-interface Lead {
-  id: string;
-  name: string | null;
-  phone: string | null;
-  email: string | null;
-  message: string | null;
-  source: string;
-  created_at: string;
-}
-
 export default function MyWebsitePage() {
   const { user } = useAuth();
   const [website, setWebsite] = useState<Website | null>(null);
   const [loading, setLoading] = useState(true);
-  const [leads, setLeads] = useState<Lead[]>([]);
   const [syncing, setSyncing] = useState(false);
 
   const fetchWebsite = useCallback(async () => {
@@ -54,14 +43,6 @@ export default function MyWebsitePage() {
       .maybeSingle();
     setWebsite(data ?? null);
     setLoading(false);
-  }, [user?.id]);
-
-  const fetchLeads = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      const data = await apiFetch('/leads');
-      setLeads(data.leads || []);
-    } catch {}
   }, [user?.id]);
 
   // Auto-create website from profile if onboarding done but no website record yet
@@ -100,8 +81,7 @@ export default function MyWebsitePage() {
 
   useEffect(() => {
     fetchWebsite();
-    fetchLeads();
-  }, [fetchWebsite, fetchLeads]);
+  }, [fetchWebsite]);
 
   // If profile is done but no website record, auto-sync
   useEffect(() => {
@@ -153,7 +133,7 @@ export default function MyWebsitePage() {
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-extrabold">My Website</h1>
         <Link
-          href="/dashboard"
+          href="/dashboard?edit=1"
           className="flex items-center gap-1.5 text-xs text-primary border border-primary/30 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -305,54 +285,6 @@ export default function MyWebsitePage() {
         </div>
       </div>
 
-      {/* Leads Section */}
-      <div className="rounded-2xl bg-card border border-border overflow-hidden mb-5">
-        <div className="px-5 py-4 flex items-center justify-between border-b border-border">
-          <div>
-            <h2 className="font-bold text-base">Leads</h2>
-            <p className="text-xs text-zinc-500 mt-0.5">People who contacted you from your website</p>
-          </div>
-          <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">{leads.length}</span>
-        </div>
-
-        {leads.length === 0 ? (
-          <div className="px-5 py-8 text-center">
-            <p className="text-sm text-zinc-500">No leads yet</p>
-            <p className="text-xs text-zinc-600 mt-1">When someone fills your contact form, they'll appear here</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-border">
-            {leads.map((lead) => (
-              <div key={lead.id} className="px-5 py-3.5 flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">{lead.name || 'Unknown'}</p>
-                  <div className="flex flex-wrap gap-x-3 mt-0.5">
-                    {lead.phone && <span className="text-xs text-green-400">📱 {lead.phone}</span>}
-                    {lead.email && <span className="text-xs text-zinc-400">✉️ {lead.email}</span>}
-                  </div>
-                  {lead.message && <p className="text-xs text-zinc-500 mt-1 truncate">{lead.message}</p>}
-                </div>
-                <div className="flex-shrink-0 text-right">
-                  <p className="text-xs text-zinc-600">
-                    {new Date(lead.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                  </p>
-                  {lead.phone && (
-                    <a
-                      href={`https://wa.me/${lead.phone.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(lead.name || '')}%2C%20thanks%20for%20reaching%20out!`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-1 text-xs text-green-400 hover:underline"
-                    >
-                      Reply →
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* Stats (live only) */}
       {isLive && (
         <>
@@ -360,7 +292,7 @@ export default function MyWebsitePage() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'Visitors', value: (website.visitors || 0).toLocaleString(), color: 'text-primary' },
-              { label: 'Leads', value: leads.length.toLocaleString(), color: 'text-indigo-400' },
+              { label: 'Leads', value: (website.leads || 0).toLocaleString(), color: 'text-indigo-400' },
             ].map((s) => (
               <div key={s.label} className="p-4 rounded-2xl bg-surface border border-border">
                 <div className={`text-xl font-extrabold ${s.color}`}>{s.value}</div>

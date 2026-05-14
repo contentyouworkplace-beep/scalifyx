@@ -46,6 +46,15 @@ export default function DashboardHome() {
   const [stats, setStats] = useState({ visitors: 0, leads: 0, uptime: 99.9 });
   const [editingProfile, setEditingProfile] = useState(false);
 
+  // Read ?edit=1 from URL to trigger profile edit mode
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('edit') === '1') {
+      setEditingProfile(true);
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, []);
+
   useEffect(() => {
     if (user?.id) {
       apiFetch(`/user/${user.id}/analytics`)
