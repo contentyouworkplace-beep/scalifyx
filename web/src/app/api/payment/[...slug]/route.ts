@@ -5,17 +5,23 @@ async function startTrialViaSupabase(authHeader: string | null) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-    // Identify the user via their auth token
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { ...(authHeader && { authorization: authHeader }) } },
-    });
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // Extract JWT and verify the user — must pass token directly to getUser()
+    const jwt = authHeader?.replace(/^Bearer\s+/i, '').trim();
+    if (!jwt) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Use service role for writes if available, otherwise user client
+    const authClient = createClient(supabaseUrl, anonKey);
+    const { data: { user }, error: authErr } = await authClient.auth.getUser(jwt);
+    if (authErr || !user) {
+      console.error('Trial auth error:', authErr?.message);
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Use service role for writes if available (bypasses RLS), otherwise user's JWT
     const writeClient = serviceRoleKey
       ? createClient(supabaseUrl, serviceRoleKey)
-      : userClient;
+      : createClient(supabaseUrl, anonKey, {
+          global: { headers: { authorization: `Bearer ${jwt}` } },
+        });
 
     // Check if trial already used
     const { data: existing } = await writeClient
@@ -65,6 +71,46 @@ async function startTrialViaSupabase(authHeader: string | null) {
   }
 }
 
+async function createPaymentLinkDirect() {
+  try {
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
+      return Response.json({ error: 'Payment service not configured. Contact support.' }, { status: 503 });
+    }
+
+    const credentials = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+    const callbackUrl = 'https://scalifyapp.com/payment-success?payment=success';
+
+    const response = await fetch('https://api.razorpay.com/v1/payment_links', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${credentials}`,
+      },
+      body: JSON.stringify({
+        amount: 149900,
+        currency: 'INR',
+        description: 'Scalify Pro — ₹1499/month',
+        customer_notify: 1,
+        callback_url: callbackUrl,
+        callback_method: 'get',
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Razorpay direct error:', data);
+      return Response.json({ error: 'Failed to create payment link' }, { status: 502 });
+    }
+
+    return Response.json({ success: true, paymentLink: data.short_url, paymentLinkId: data.id });
+  } catch (err) {
+    console.error('Razorpay direct fallback error:', err instanceof Error ? err.message : String(err));
+    return Response.json({ error: 'Failed to create payment link' }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request, { params }: { params: { slug: string[] } }) {
   const endpoint = `/${params.slug.join('/')}`;
   const authHeader = req.headers.get('authorization');
@@ -92,9 +138,13 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
     }
   }
 
-  // Supabase fallback for safe, payment-free endpoints
+  // Fallbacks when backend is unavailable
   if (endpoint === '/start-trial') {
     return startTrialViaSupabase(authHeader);
+  }
+
+  if (endpoint === '/create-payment-link') {
+    return createPaymentLinkDirect();
   }
 
   return Response.json({ error: 'Payment service unavailable' }, { status: 503 });
