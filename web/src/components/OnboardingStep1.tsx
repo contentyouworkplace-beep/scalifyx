@@ -7,22 +7,6 @@ interface OnboardingStep1Props {
   updateData: (updates: any) => void;
 }
 
-const BUSINESS_CATEGORIES = [
-  'E-commerce',
-  'Service',
-  'Restaurant',
-  'Healthcare',
-  'Education',
-  'Real Estate',
-  'Technology',
-  'Fitness',
-  'Beauty & Wellness',
-  'Entertainment',
-  'Travel',
-  'Finance',
-  'Other',
-];
-
 export default function OnboardingStep1({ data, updateData }: OnboardingStep1Props) {
   return (
     <div className="space-y-4">
@@ -39,18 +23,13 @@ export default function OnboardingStep1({ data, updateData }: OnboardingStep1Pro
 
       <div>
         <label className="block text-sm font-medium text-white mb-2">Business Category *</label>
-        <select
+        <input
+          type="text"
           value={data.business_category || ''}
           onChange={(e) => updateData({ business_category: e.target.value })}
           className="w-full px-4 py-2 bg-surface border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="">Select a category</option>
-          {BUSINESS_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          placeholder="e.g. Restaurant, Salon, Clinic, Retail..."
+        />
       </div>
 
       <div>
