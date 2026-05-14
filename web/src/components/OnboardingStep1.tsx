@@ -76,16 +76,6 @@ export default function OnboardingStep1({ data, updateData }: OnboardingStep1Pro
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-white mb-2">Business Description *</label>
-        <textarea
-          value={data.business_description || ''}
-          onChange={(e) => updateData({ business_description: e.target.value })}
-          className="w-full px-4 py-2 bg-surface border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-          placeholder="Tell us about your business (2-3 sentences)"
-          rows={4}
-        />
-      </div>
     </div>
   );
 }

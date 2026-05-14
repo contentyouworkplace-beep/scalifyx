@@ -76,7 +76,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
     switch (step) {
       case 1:
         return !!(data.business_name && data.business_category && data.business_city &&
-                  data.whatsapp_number && data.business_address && data.business_description);
+                  data.whatsapp_number && data.business_address);
       case 2:
         return !!data.logo_url;
       case 3:
