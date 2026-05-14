@@ -30,7 +30,6 @@ export default function NotificationsPage() {
         const filtered = (data || []).filter((n: AppNotification) => {
           if (n.target === 'all') return true;
           if (n.target === 'pro' && user?.plan === 'pro') return true;
-          if (n.target === 'free' && user?.plan !== 'pro') return true;
           if (n.target === 'specific' && n.target_user_ids?.includes(user?.id || '')) return true;
           return false;
         });

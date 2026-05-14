@@ -41,7 +41,7 @@ CREATE TABLE public.profiles (
   business_type TEXT,
   avatar_url TEXT,
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
-  plan TEXT NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'trial', 'pro')),
+  plan TEXT NOT NULL DEFAULT 'trial' CHECK (plan IN ('trial', 'pro')),
   referral_code TEXT UNIQUE,
   referred_by UUID REFERENCES public.profiles(id),
   referral_count INTEGER DEFAULT 0,

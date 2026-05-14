@@ -8,7 +8,7 @@ interface Notification {
   id: string;
   title: string;
   body: string;
-  target: 'all' | 'pro' | 'free';
+  target: 'all' | 'pro';
   sentAt: string;
   status: 'sent' | 'draft' | 'scheduled';
   recipients: number;
@@ -17,7 +17,6 @@ interface Notification {
 const TARGET_OPTIONS = [
   { value: 'all', label: 'All Users', icon: '👥' },
   { value: 'pro', label: 'Pro Users', icon: '⭐' },
-  { value: 'free', label: 'Free Users', icon: '👤' },
 ] as const;
 
 export default function AdminNotificationsPage() {
@@ -29,7 +28,7 @@ export default function AdminNotificationsPage() {
   // Compose state
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [target, setTarget] = useState<'all' | 'pro' | 'free'>('all');
+  const [target, setTarget] = useState<'all' | 'pro'>('all');
   const [sending, setSending] = useState(false);
 
   const fetchNotifications = useCallback(async () => {
@@ -124,7 +123,6 @@ export default function AdminNotificationsPage() {
                 const config = statusConfig[n.status];
                 const targetConfig: Record<string, { color: string; bg: string }> = {
                   pro: { color: 'text-primary', bg: 'bg-primary/20' },
-                  free: { color: 'text-yellow-400', bg: 'bg-yellow-400/20' },
                   all: { color: 'text-zinc-400', bg: 'bg-zinc-400/20' },
                 };
                 const tConfig = targetConfig[n.target];

@@ -13,14 +13,11 @@ import React from 'react';
 
 const userLinks = [
   { href: '/dashboard', label: 'Home', icon: HomeIcon },
-  { href: '/dashboard/chat', label: 'AI Chat', icon: ChatBotIcon },
   { href: '/dashboard/website', label: 'My Website', icon: GlobeIcon },
-  { href: '/dashboard/templates', label: 'Templates', icon: PaletteIcon },
   { href: '/dashboard/plans', label: 'Plans', icon: DiamondIcon },
-  { href: '/dashboard/referral', label: 'Share', icon: GiftIcon },
-  { href: '/dashboard/notifications', label: 'Notifications', icon: BellIcon },
   { href: '/dashboard/profile', label: 'Profile', icon: UserIcon },
-  { href: '/dashboard/support', label: 'Support', icon: MessageIcon },
+  { href: '/dashboard/notifications', label: 'Notifications', icon: BellIcon },
+  { href: '/dashboard/referral', label: 'Share', icon: GiftIcon },
 ];
 
 const adminLinks = [

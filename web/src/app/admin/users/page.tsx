@@ -9,7 +9,7 @@ interface UserItem {
   name: string;
   phone: string;
   email: string;
-  plan: 'free' | 'trial' | 'pro';
+  plan: 'trial' | 'pro';
   business_name?: string;
   created_at: string;
   domain_purchased?: boolean;
@@ -29,10 +29,9 @@ function timeAgo(dateStr: string) {
 const PLAN_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   pro: { label: 'PRO', color: 'text-primary', bg: 'bg-primary/20' },
   trial: { label: 'TRIAL', color: 'text-yellow-400', bg: 'bg-yellow-400/20' },
-  free: { label: 'FREE', color: 'text-zinc-400', bg: 'bg-zinc-400/20' },
 };
 
-const EMPTY_FORM = { email: '', password: '', name: '', phone: '', plan: 'free' as string, business_name: '' };
+const EMPTY_FORM = { email: '', password: '', name: '', phone: '', plan: 'trial' as string, business_name: '' };
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
@@ -65,7 +64,7 @@ export default function AdminUsersPage() {
       const data = await apiFetch('/api/admin/users');
       const mapped = (data.users || data || []).map((u: any) => ({
         id: u.id, name: u.name || 'Unknown', phone: u.phone || '', email: u.email || '',
-        plan: u.plan || 'free', business_name: u.business_name || '', created_at: u.created_at,
+        plan: u.plan || 'trial', business_name: u.business_name || '', created_at: u.created_at,
         domain_purchased: u.domain_purchased || false,
       }));
       setUsers(mapped);
@@ -203,7 +202,7 @@ export default function AdminUsersPage() {
 
   const planSelector = (current: string, onSelect: (p: string) => void) => (
     <div className="flex gap-2">
-      {[{ key: 'free', label: 'Free' }, { key: 'trial', label: 'Trial' }, { key: 'pro', label: 'Pro' }].map((p) => (
+      {[{ key: 'trial', label: 'Trial' }, { key: 'pro', label: 'Pro' }].map((p) => (
         <button key={p.key} onClick={() => onSelect(p.key)}
           className={`flex-1 py-2 rounded-lg text-sm font-medium border transition ${current === p.key ? 'bg-primary/20 border-primary text-primary' : 'bg-surface border-border text-zinc-400'}`}
         >{p.label}</button>
@@ -234,7 +233,6 @@ export default function AdminUsersPage() {
       <div className="flex gap-1.5 mb-4 flex-wrap">
         {[
           { key: 'all', label: `All (${users.length})` },
-          { key: 'free', label: `Free (${users.filter(u => u.plan === 'free').length})` },
           { key: 'trial', label: `Trial (${users.filter(u => u.plan === 'trial').length})` },
           { key: 'pro', label: `Pro (${users.filter(u => u.plan === 'pro').length})` },
         ].map((f) => (
@@ -253,7 +251,7 @@ export default function AdminUsersPage() {
           </div>
         )}
         {filtered.map((user) => {
-          const plan = PLAN_CONFIG[user.plan] || PLAN_CONFIG.free;
+          const plan = PLAN_CONFIG[user.plan] || PLAN_CONFIG.trial;
           return (
             <div key={user.id} className="rounded-2xl bg-surface border border-border p-3.5">
               <div className="flex items-start">

@@ -228,7 +228,7 @@ export default function AdminChatsPage() {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate">{userName}</p>
             <p className="text-[11px] text-zinc-500">
-              {selected.profiles?.plan === 'pro' ? '⭐ Pro' : '🆓 Free'}
+              {selected.profiles?.plan === 'pro' ? '⭐ Pro' : '⏱️ Trial'}
               {selected.type ? ` · ${selected.type === 'ai' ? '🤖 AI' : '🧑‍💼 Human'}` : ''}
             </p>
           </div>
@@ -379,7 +379,7 @@ export default function AdminChatsPage() {
           const lastSender = conv.last_message ? senderLabel(conv.last_message.sender_type) : '';
           const isHuman = conv.type === 'support';
           const isResolved = conv.status === 'resolved';
-          const plan = conv.profiles?.plan || 'free';
+          const plan = conv.profiles?.plan || 'trial';
 
           return (
             <button key={conv.id} onClick={() => selectConversation(conv)} className="w-full flex items-center gap-3 p-3 rounded-2xl bg-surface border border-border hover:border-primary/30 transition text-left">
