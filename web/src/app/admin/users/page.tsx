@@ -434,7 +434,7 @@ export default function AdminUsersPage() {
             </div>
             <p className="text-xs text-zinc-500 mb-4">
               Sending to <span className="text-white font-semibold">{offerTarget.name || offerTarget.email}</span>
-              {offerTarget.plan !== 'free' && <span className="ml-1 text-primary">({offerTarget.plan})</span>}
+              {offerTarget.plan && <span className="ml-1 text-primary">({offerTarget.plan})</span>}
             </p>
 
             <div className="space-y-3">

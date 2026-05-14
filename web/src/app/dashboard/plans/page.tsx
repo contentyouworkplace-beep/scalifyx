@@ -124,19 +124,76 @@ export default function PlansPage() {
     }
   };
 
+  const loadRazorpay = (): Promise<boolean> =>
+    new Promise((resolve) => {
+      if ((window as unknown as Record<string, unknown>).Razorpay) return resolve(true);
+      const s = document.createElement('script');
+      s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      s.onload = () => resolve(true);
+      s.onerror = () => resolve(false);
+      document.body.appendChild(s);
+    });
+
   const handlePayNow = async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/payment/create-payment-link', { method: 'POST' });
-      if (data.success && data.paymentLink) {
-        window.open(data.paymentLink, '_blank');
-      } else {
-        toast.error('Failed to create payment link');
+      const data = await apiFetch('/payment/create-order', { method: 'POST' });
+
+      if (!data.success) {
+        // Razorpay not configured — open WhatsApp fallback
+        if (data.whatsappFallback) {
+          window.open(data.whatsappFallback, '_blank');
+        } else {
+          toast.error(data.error || 'Failed to initiate payment');
+        }
+        return;
       }
+
+      const loaded = await loadRazorpay();
+      if (!loaded) {
+        toast.error('Payment gateway failed to load. Try again or contact support.');
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rzp = new (window as any).Razorpay({
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.orderId,
+        name: 'Scalify',
+        description: 'Scalify Pro — ₹1,499/month',
+        image: 'https://scalifyapp.com/logo.png',
+        prefill: { email: user?.email || '', name: user?.name || '' },
+        theme: { color: '#6366F1' },
+        modal: { ondismiss: () => setLoading(false) },
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          try {
+            const verify = await apiFetch('/payment/verify', {
+              method: 'POST',
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            if (verify.success) {
+              toast.success('Payment successful! Scalify Pro activated!', { duration: 5000 });
+              fetchStatus();
+            } else {
+              toast.error(verify.error || 'Payment verification failed. Contact support.');
+            }
+          } catch {
+            toast.error('Verification failed. Contact support on WhatsApp.');
+          } finally {
+            setLoading(false);
+          }
+        },
+      });
+      rzp.open();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to create payment link';
+      const msg = error instanceof Error ? error.message : 'Failed to initiate payment';
       toast.error(msg);
-    } finally {
       setLoading(false);
     }
   };
