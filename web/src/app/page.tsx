@@ -96,6 +96,9 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
       return;
     }
 
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Lead');
+    }
     router.replace('/signup-success');
   };
 
@@ -345,12 +348,6 @@ export default function LandingPage() {
             </p>
 
             <div className="space-y-4 mb-10">
-              <button
-                onClick={() => setShowSignupModal(true)}
-                className="w-full px-7 py-4 rounded-xl bg-green-500 hover:bg-green-400 text-white text-base font-bold transition"
-              >
-                Start 7-Day Free Trial
-              </button>
               <a
                 href="#features"
                 className="block w-full text-center px-7 py-4 rounded-xl border border-border text-white text-base font-semibold hover:border-white/25 transition"

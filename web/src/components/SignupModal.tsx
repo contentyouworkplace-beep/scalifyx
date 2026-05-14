@@ -92,6 +92,9 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
       return;
     }
 
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Lead');
+    }
     router.replace('/signup-success');
   };
 
