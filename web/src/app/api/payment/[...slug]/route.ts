@@ -1,36 +1,103 @@
-export async function POST(req: Request, { params }: { params: { slug: string[] } }) {
-  const endpoint = `/${params.slug.join('/')}`;
-
+async function startTrialViaSupabase(authHeader: string | null) {
   try {
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-    const url = `${backendUrl}/api/payment${endpoint}`;
+    const { createClient } = await import('@supabase/supabase-js');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-    const authHeader = req.headers.get('authorization');
-    const body = await req.json().catch(() => ({}));
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authHeader && { authorization: authHeader }),
-      },
-      body: JSON.stringify(body),
+    // Identify the user via their auth token
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { ...(authHeader && { authorization: authHeader }) } },
     });
+    const { data: { user } } = await userClient.auth.getUser();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const data = await response.json();
+    // Use service role for writes if available, otherwise user client
+    const writeClient = serviceRoleKey
+      ? createClient(supabaseUrl, serviceRoleKey)
+      : userClient;
 
-    if (!response.ok) {
-      return Response.json(data, { status: response.status });
+    // Check if trial already used
+    const { data: existing } = await writeClient
+      .from('subscriptions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('plan', 'trial')
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      return Response.json({ error: 'You have already used your free trial' }, { status: 400 });
     }
 
-    return Response.json(data);
-  } catch (error) {
-    console.error('Payment proxy error:', error instanceof Error ? error.message : String(error));
-    return Response.json(
-      { error: 'Payment service unavailable' },
-      { status: 503 }
-    );
+    const trialDays = 7;
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + trialDays);
+
+    const { data: sub, error: subErr } = await writeClient
+      .from('subscriptions')
+      .insert({
+        user_id: user.id,
+        plan: 'trial',
+        amount: 0,
+        status: 'active',
+        start_date: now.toISOString(),
+        end_date: endDate.toISOString(),
+        auto_renew: false,
+      })
+      .select()
+      .maybeSingle();
+
+    if (subErr) {
+      console.error('Trial insert error:', subErr);
+      return Response.json({ error: 'Failed to start trial' }, { status: 500 });
+    }
+
+    await writeClient.from('profiles').update({ plan: 'trial' }).eq('id', user.id);
+
+    return Response.json({
+      success: true,
+      subscription: { id: sub?.id, plan: 'trial', trialDays, endDate: endDate.toISOString() },
+    });
+  } catch (err) {
+    console.error('Supabase trial fallback error:', err instanceof Error ? err.message : String(err));
+    return Response.json({ error: 'Failed to start trial' }, { status: 500 });
   }
+}
+
+export async function POST(req: Request, { params }: { params: { slug: string[] } }) {
+  const endpoint = `/${params.slug.join('/')}`;
+  const authHeader = req.headers.get('authorization');
+  const body = await req.json().catch(() => ({}));
+
+  // Try backend if configured
+  const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (backendUrl) {
+    try {
+      const response = await fetch(`${backendUrl}/api/payment${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authHeader && { authorization: authHeader }),
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+      if (response.ok) return Response.json(data);
+      // Non-2xx from backend — return as-is (e.g. 400 "already used trial")
+      return Response.json(data, { status: response.status });
+    } catch (error) {
+      console.error('Payment proxy error:', error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  // Supabase fallback for safe, payment-free endpoints
+  if (endpoint === '/start-trial') {
+    return startTrialViaSupabase(authHeader);
+  }
+
+  return Response.json({ error: 'Payment service unavailable' }, { status: 503 });
 }
 
 const FALLBACK_OFFERS = [

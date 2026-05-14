@@ -69,7 +69,9 @@ export default function PlansPage() {
     try {
       const data = await apiFetch('/payment/offers');
       if (data.offers) setOffers(data.offers);
-    } catch {}
+    } catch (error) {
+      console.error('Failed to fetch offers:', error);
+    }
   };
 
   const fetchStatus = async () => {
@@ -79,7 +81,9 @@ export default function PlansPage() {
         setSubStatus(data.subscription);
         setPayments(data.payments || []);
       }
-    } catch {}
+    } catch (error) {
+      console.error('Failed to fetch status:', error);
+    }
   };
 
   const trialOffer = offers.find(o => o.plan_type === 'trial' && !o.is_user_offer);
@@ -167,6 +171,22 @@ export default function PlansPage() {
           {isActive ? 'Your subscription is active' : isTrial ? "You're on a free trial" : isExpired ? 'Your plan has expired' : 'No confusing tiers. Just one powerful plan.'}
         </p>
       </div>
+
+      {/* Current Plan Badge for Free Users */}
+      {isFree && (
+        <div className="rounded-2xl p-4 mb-5 bg-zinc-800/40 border border-zinc-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-zinc-700/50 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-zinc-400"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div className="flex-1">
+              <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wide">Current Plan</div>
+              <div className="text-lg font-bold text-zinc-200">Free Plan</div>
+            </div>
+            <span className="px-3 py-1 rounded-lg bg-zinc-700/40 text-zinc-400 text-xs font-bold">Active</span>
+          </div>
+        </div>
+      )}
 
       {/* Status Banner */}
       {(isActive || isTrial || isExpired) && (
