@@ -192,9 +192,10 @@ async function handleCreateOrder(req: Request) {
   if (!keyId || !keySecret) {
     console.error('Razorpay keys not configured');
     return Response.json({
+      success: false,
       error: 'Online payment not configured. Please pay via WhatsApp.',
       whatsappFallback: WHATSAPP_SUPPORT,
-    }, { status: 503 });
+    });
   }
 
   try {
@@ -213,9 +214,10 @@ async function handleCreateOrder(req: Request) {
     if (!rzRes.ok) {
       console.error('Razorpay create-order error:', JSON.stringify(rzData));
       return Response.json({
+        success: false,
         error: rzData?.error?.description || 'Failed to create payment order',
         whatsappFallback: WHATSAPP_SUPPORT,
-      }, { status: 502 });
+      });
     }
 
     return Response.json({
@@ -228,9 +230,10 @@ async function handleCreateOrder(req: Request) {
   } catch (err) {
     console.error('Razorpay request exception:', err);
     return Response.json({
+      success: false,
       error: 'Payment service unavailable. Please pay via WhatsApp.',
       whatsappFallback: WHATSAPP_SUPPORT,
-    }, { status: 500 });
+    });
   }
 }
 
