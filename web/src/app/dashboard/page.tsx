@@ -40,11 +40,60 @@ function EyeIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+function UpgradePopup({ onClose }: { onClose: () => void }) {
+  const router = useRouter();
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="w-full max-w-sm rounded-3xl border border-primary/30 bg-zinc-900 shadow-2xl p-6 text-center"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Lock icon */}
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+        </div>
+
+        <h3 className="text-xl font-extrabold text-white mb-2">Upgrade to Build Your Website</h3>
+        <p className="text-zinc-400 text-sm mb-5">
+          Complete your profile and go live on Google.<br />
+          Subscribe to unlock all 5 steps.
+        </p>
+
+        {/* What you get */}
+        <div className="text-left space-y-2 mb-6 bg-black/30 rounded-xl p-4 border border-border">
+          {['Fill your business profile', 'Upload logo & gallery', 'Add your services', 'Connect your domain', 'Go live on Google'].map((item, i) => (
+            <div key={i} className="flex items-center gap-2 text-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              <span className="text-zinc-300">{item}</span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={() => router.push('/dashboard/plans')}
+          className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-extrabold text-sm transition mb-3"
+        >
+          Upgrade Now — ₹1,499/month →
+        </button>
+        <button onClick={onClose} className="text-xs text-zinc-600 hover:text-zinc-400 transition">
+          Maybe later
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardHome() {
   const { user, updateUser } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState({ visitors: 0, leads: 0, uptime: 99.9 });
   const [editingProfile, setEditingProfile] = useState(false);
+  const [showUpgradePopup, setShowUpgradePopup] = useState(false);
+
+  const isPro = user?.plan === 'pro';
 
   // Read ?edit=1 from URL to trigger profile edit mode
   useEffect(() => {
@@ -67,6 +116,8 @@ export default function DashboardHome() {
   if (user && (!user.onboarding_completed || editingProfile)) {
     return (
       <div>
+        {showUpgradePopup && <UpgradePopup onClose={() => setShowUpgradePopup(false)} />}
+
         <div className="hidden md:block mb-6">
           <h1 className="text-2xl font-bold">
             Hey, <span className="gradient-text">{user?.name || 'there'}</span>
@@ -75,11 +126,42 @@ export default function DashboardHome() {
             {editingProfile ? 'Update your business profile' : "Let's set up your business profile"}
           </p>
         </div>
-        <OnboardingModal onComplete={() => {
-          updateUser({ onboarding_completed: true });
-          setEditingProfile(false);
-          router.push('/dashboard/website');
-        }} />
+
+        <div className="relative">
+          <OnboardingModal onComplete={() => {
+            updateUser({ onboarding_completed: true });
+            setEditingProfile(false);
+            router.push('/dashboard/website');
+          }} />
+
+          {/* Paywall overlay for unpaid users */}
+          {!isPro && (
+            <div
+              className="absolute inset-0 z-10 rounded-2xl cursor-pointer"
+              style={{ backdropFilter: 'blur(3px)', background: 'rgba(10,10,14,0.55)' }}
+              onClick={() => setShowUpgradePopup(true)}
+            >
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-primary/30 flex items-center justify-center shadow-xl">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white font-extrabold text-lg leading-tight">Upgrade to Complete Your Profile</p>
+                  <p className="text-zinc-400 text-sm mt-1">Subscribe to fill in your details and make your website live</p>
+                </div>
+                <button
+                  className="px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-sm transition shadow-lg shadow-primary/20"
+                  onClick={e => { e.stopPropagation(); setShowUpgradePopup(true); }}
+                >
+                  Upgrade Now — ₹1,499/month
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
