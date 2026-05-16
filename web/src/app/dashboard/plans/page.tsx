@@ -267,6 +267,17 @@ export default function PlansPage() {
 
   const handlePayNow = async () => {
     setLoading(true);
+
+    // Fire InitiateCheckout pixel + CAPI
+    const checkoutEventId = `checkout_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'InitiateCheckout', { currency: 'INR', value: coupon?.price || 1499 }, { eventID: checkoutEventId });
+    }
+    apiFetch('/payment/initiate-checkout', {
+      method: 'POST',
+      body: JSON.stringify({ event_id: checkoutEventId, amount: coupon?.price || 1499 }),
+    }).catch(() => {});
+
     try {
       const data = await apiFetch('/payment/create-order', { method: 'POST' });
 
@@ -299,6 +310,7 @@ export default function PlansPage() {
         theme: { color: '#22c55e' },
         modal: { ondismiss: () => setLoading(false) },
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          const purchaseEventId = `purchase_${response.razorpay_payment_id}`;
           try {
             const verify = await apiFetch('/payment/verify', {
               method: 'POST',
@@ -306,11 +318,13 @@ export default function PlansPage() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                event_id: purchaseEventId,
+                amount: data.displayPrice || 1499,
               }),
             });
             if (verify.success) {
               if (typeof window !== 'undefined' && (window as any).fbq) {
-                (window as any).fbq('track', 'Purchase', { value: data.displayPrice || 1499, currency: 'INR' });
+                (window as any).fbq('track', 'Purchase', { value: data.displayPrice || 1499, currency: 'INR' }, { eventID: purchaseEventId });
               }
               // Update AuthContext immediately so paywall unlocks on redirect
               updateUser({ plan: 'pro' });

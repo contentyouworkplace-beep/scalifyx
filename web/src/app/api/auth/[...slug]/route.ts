@@ -1,3 +1,5 @@
+import { sendCapiEvent } from '@/lib/metaCapi';
+
 export async function POST(req: Request, { params }: { params: { slug: string[] } }) {
   const endpoint = `/${params.slug.join('/')}`;
   const body = await req.json();
@@ -56,9 +58,6 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
       // Create trial subscription and profile with plan='trial' from the start
       const userId = authData.user?.id;
       if (userId) {
-        const trialEndDate = new Date();
-        trialEndDate.setDate(trialEndDate.getDate() + 7);
-
         // Pick the best client for DB writes (needs to bypass RLS):
         // 1. Service role key (full bypass) — requires SUPABASE_SERVICE_ROLE_KEY env var
         // 2. User's own session token — RLS allows user to write their own profile row
@@ -84,7 +83,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
             email,
             name: name || '',
             phone: phone || '',
-            plan: 'trial',
+            plan: 'free',
           })
           .select();
 
@@ -94,31 +93,23 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
           console.log('✅ Profile created via Supabase fallback:', { userId, plan: 'trial', email, phone: phone ? '***' : 'N/A' });
         }
 
-        // Create trial subscription
-        const { error: subError } = await writeClient
-          .from('subscriptions')
-          .insert({
-            user_id: userId,
-            plan: 'trial',
-            amount: 0,
-            status: 'active',
-            start_date: new Date().toISOString(),
-            end_date: trialEndDate.toISOString(),
-            auto_renew: false,
-          });
-
-        if (subError) {
-          console.error('❌ Trial subscription creation error:', subError);
-        } else {
-          console.log('✅ Trial subscription created via Supabase fallback:', { userId });
-        }
+        // Fire server-side Lead event for Meta CAPI
+        const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || req.headers.get('x-real-ip') || '';
+        const ua = req.headers.get('user-agent') || '';
+        const fbc = req.headers.get('cookie')?.match(/_fbc=([^;]+)/)?.[1] || '';
+        const fbp = req.headers.get('cookie')?.match(/_fbp=([^;]+)/)?.[1] || '';
+        sendCapiEvent({
+          eventName: 'Lead',
+          eventId: `lead_${userId}`,
+          eventSourceUrl: 'https://scalifyapp.com',
+          userData: { email, phone: phone || undefined, client_ip_address: ip, client_user_agent: ua, fbc: fbc || undefined, fbp: fbp || undefined },
+        }).catch(() => {});
       }
 
       return Response.json({
         success: true,
         userId: authData.user?.id,
-        trialActivated: true,
-        message: '7-day free trial activated',
+        message: 'Account created successfully',
       });
     } catch (error) {
       console.error('💥 Supabase fallback error:', error instanceof Error ? error.message : String(error));

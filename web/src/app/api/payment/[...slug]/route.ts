@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { sendCapiEvent } from '@/lib/metaCapi';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -280,7 +281,12 @@ async function handleVerifyPayment(req: Request) {
   const user = await getUser(req);
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  let body: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string };
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+  const ua = req.headers.get('user-agent') || '';
+  const fbc = req.headers.get('cookie')?.match(/_fbc=([^;]+)/)?.[1] || '';
+  const fbp = req.headers.get('cookie')?.match(/_fbp=([^;]+)/)?.[1] || '';
+
+  let body: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; event_id?: string; amount?: number };
   try { body = await req.json(); } catch {
     return Response.json({ error: 'Invalid body' }, { status: 400 });
   }
@@ -330,6 +336,22 @@ async function handleVerifyPayment(req: Request) {
     }, { onConflict: 'razorpay_payment_id' });
   }
 
+  // Server-side Purchase event — deduplicates with client fbq('track','Purchase')
+  const paidAmount = body.amount || 1499;
+  sendCapiEvent({
+    eventName: 'Purchase',
+    eventId: body.event_id || razorpay_payment_id || `purchase_${user.id}`,
+    eventSourceUrl: 'https://scalifyapp.com/dashboard/plans',
+    userData: {
+      email: user.email || '',
+      client_ip_address: ip,
+      client_user_agent: ua,
+      fbc,
+      fbp,
+    },
+    customData: { value: paidAmount, currency: 'INR', content_name: 'Scalify Pro' },
+  }).catch(() => {});
+
   return Response.json({ success: true });
 }
 
@@ -357,6 +379,36 @@ async function handleCancel(req: Request) {
   });
 
   return Response.json({ success: true, message: `Subscription cancelled. Access continues until ${accessUntil}.` });
+}
+
+// ─── POST /payment/initiate-checkout ──────────────────────────────────────────
+async function handleInitiateCheckout(req: Request) {
+  const user = await getUser(req);
+  if (!user) return Response.json({ ok: true }); // fire-and-forget, don't block
+
+  let body: { event_id?: string; amount?: number } = {};
+  try { body = await req.json(); } catch { /* ok */ }
+
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '';
+  const ua = req.headers.get('user-agent') || '';
+  const fbc = req.headers.get('cookie')?.match(/_fbc=([^;]+)/)?.[1] || '';
+  const fbp = req.headers.get('cookie')?.match(/_fbp=([^;]+)/)?.[1] || '';
+
+  sendCapiEvent({
+    eventName: 'InitiateCheckout',
+    eventId: body.event_id || `checkout_${user.id}_${Date.now()}`,
+    eventSourceUrl: 'https://scalifyapp.com/dashboard/plans',
+    userData: {
+      email: user.email || '',
+      client_ip_address: ip,
+      client_user_agent: ua,
+      fbc: fbc || undefined,
+      fbp: fbp || undefined,
+    },
+    customData: { value: body.amount || 1499, currency: 'INR' },
+  }).catch(() => {});
+
+  return Response.json({ ok: true });
 }
 
 // ─── POST /payment/webhook ─────────────────────────────────────────────────────
@@ -434,6 +486,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
   if (endpoint === '/start-trial') return handleStartTrial(req);
   if (endpoint === '/create-order') return handleCreateOrder(req);
   if (endpoint === '/verify') return handleVerifyPayment(req);
+  if (endpoint === '/initiate-checkout') return handleInitiateCheckout(req);
   if (endpoint === '/cancel') return handleCancel(req);
   if (endpoint === '/webhook') return handleWebhook(req);
   return Response.json({ error: 'Not found' }, { status: 404 });

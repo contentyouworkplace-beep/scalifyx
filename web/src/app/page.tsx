@@ -10,7 +10,7 @@ import {
   ChatBotIcon, PhoneIcon, SearchIcon, GlobeIcon,
   ChartIcon, WhatsAppIcon, ShieldIcon, HeadsetIcon,
 } from '@/components/Icons';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -270,9 +270,31 @@ function FAQSection() {
 export default function LandingPage() {
   const spotsLeft = useSpotsTaken();
   const [showSignupModal, setShowSignupModal] = useState(false);
+  const pricingRef = useRef<HTMLDivElement>(null);
+  const viewContentFired = useRef(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, []);
+
+  useEffect(() => {
+    const el = pricingRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !viewContentFired.current) {
+          viewContentFired.current = true;
+          if (typeof window !== 'undefined' && (window as any).fbq) {
+            const eventId = `vc_landing_${Date.now()}`;
+            (window as any).fbq('track', 'ViewContent', { content_name: 'Scalify Pro Pricing', currency: 'INR', value: 1499 }, { eventID: eventId });
+          }
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const scrollToForm = () => {
@@ -373,7 +395,7 @@ export default function LandingPage() {
 
           {/* Right: Pricing Card */}
           <div>
-            <div className="relative lg:sticky lg:top-24">
+            <div ref={pricingRef} className="relative lg:sticky lg:top-24">
               {/* Best value badge */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                 <span className="bg-green-500 text-black text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-green-500/30">
