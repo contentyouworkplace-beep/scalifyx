@@ -3,6 +3,7 @@
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { DiamondIcon, ShieldIcon, CheckCircleIcon } from '../../../components/Icons';
 
@@ -192,7 +193,8 @@ function CouponBanner({ coupon, onPay, loading }: { coupon: CouponInfo; onPay: (
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function PlansPage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [fetchingOffers, setFetchingOffers] = useState(true);
@@ -310,8 +312,11 @@ export default function PlansPage() {
               if (typeof window !== 'undefined' && (window as any).fbq) {
                 (window as any).fbq('track', 'Purchase', { value: data.displayPrice || 1499, currency: 'INR' });
               }
-              toast.success('Payment successful! Scalify Pro activated!', { duration: 5000 });
-              fetchStatus();
+              // Update AuthContext immediately so paywall unlocks on redirect
+              updateUser({ plan: 'pro' });
+              toast.success('🎉 Payment successful! Welcome to Scalify Pro!', { duration: 4000 });
+              // Redirect to onboarding to complete profile
+              setTimeout(() => router.replace('/dashboard'), 1500);
             } else {
               toast.error(verify.error || 'Payment verification failed. Contact support.');
             }
