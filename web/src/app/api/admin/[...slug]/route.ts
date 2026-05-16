@@ -284,6 +284,36 @@ async function handleExtend(req: Request, subId: string) {
   return Response.json({ success: true });
 }
 
+// ── POST /api/admin/users/:id/apply-coupon ────────────────────────────────────
+async function handleApplyCoupon(req: Request, userId: string) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+
+  let body: { price: number; original_price?: number; minutes: number };
+  try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
+
+  const { price, original_price = 1499, minutes } = body;
+  if (!price || price < 1) return Response.json({ error: 'Price required' }, { status: 400 });
+  if (!minutes || minutes < 1) return Response.json({ error: 'Duration required' }, { status: 400 });
+
+  const expiresAt = new Date(Date.now() + minutes * 60000).toISOString();
+
+  await db().from('admin_coupons').upsert(
+    { user_id: userId, price, original_price, expires_at: expiresAt },
+    { onConflict: 'user_id' }
+  );
+
+  return Response.json({ success: true, expires_at: expiresAt });
+}
+
+// ── DELETE /api/admin/users/:id/remove-coupon ─────────────────────────────────
+async function handleRemoveCoupon(req: Request, userId: string) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+  await db().from('admin_coupons').delete().eq('user_id', userId);
+  return Response.json({ success: true });
+}
+
 // ── GET /api/admin/notifications ──────────────────────────────────────────────
 async function handleNotifications(req: Request) {
   const auth = await requireAdmin(req);
@@ -319,7 +349,9 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
   if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'manual-upgrade') return handleManualUpgrade(req, slug[1]);
   // /users/:id/set-password
   if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'set-password') return handleSetPassword(req, slug[1]);
-  // /subscriptions/:id/extend  (also used as /payment/admin/extend/:id)
+  // /users/:id/apply-coupon
+  if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'apply-coupon') return handleApplyCoupon(req, slug[1]);
+  // /subscriptions/:id/extend
   if (slug.length === 3 && slug[0] === 'subscriptions' && slug[2] === 'extend') return handleExtend(req, slug[1]);
 
   return Response.json({ error: 'Not found' }, { status: 404 });
@@ -329,5 +361,7 @@ export async function DELETE(req: Request, { params }: { params: { slug: string[
   const slug = params.slug;
   // /users/:id
   if (slug.length === 2 && slug[0] === 'users') return handleDeleteUser(req, slug[1]);
+  // /users/:id/remove-coupon
+  if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'remove-coupon') return handleRemoveCoupon(req, slug[1]);
   return Response.json({ error: 'Not found' }, { status: 404 });
 }

@@ -118,7 +118,27 @@ async function handleStatus(req: Request) {
   const user = await getUser(req);
   if (!user) return Response.json(FREE_STATUS);
 
-  const coupon = getCoupon(user);
+  // Admin-applied coupon takes priority over auto-generated one
+  let coupon = null;
+  const { data: adminCoupon } = await db()
+    .from('admin_coupons')
+    .select('price, original_price, expires_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (adminCoupon && new Date(adminCoupon.expires_at) > new Date()) {
+    const discount = (adminCoupon.original_price || 1499) - adminCoupon.price;
+    coupon = {
+      tier: 1 as const,
+      code: 'SPECIAL' + user.id.replace(/[^0-9]/g, '').slice(0, 3).padEnd(3, '0'),
+      price: adminCoupon.price,
+      discount,
+      expiresAt: adminCoupon.expires_at,
+      label: 'Special Offer',
+    };
+  } else {
+    coupon = getCoupon(user);
+  }
 
   const { data: sub } = await db()
     .from('subscriptions')
@@ -228,7 +248,19 @@ async function handleCreateOrder(req: Request) {
     });
   }
 
-  const coupon = getCoupon(user);
+  // Check admin coupon first, then auto-generated
+  let coupon = null;
+  const { data: adminCouponOrder } = await db()
+    .from('admin_coupons')
+    .select('price, original_price, expires_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (adminCouponOrder && new Date(adminCouponOrder.expires_at) > new Date()) {
+    const discount = (adminCouponOrder.original_price || 1499) - adminCouponOrder.price;
+    coupon = { price: adminCouponOrder.price, discount, label: 'Special Offer' };
+  } else {
+    coupon = getCoupon(user);
+  }
   const amount = coupon ? coupon.price * 100 : 149900;
   const description = coupon
     ? `Scalify Pro — ₹${coupon.price} (${coupon.label})`

@@ -156,6 +156,159 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
   );
 }
 
+// ── Apply Coupon Modal ────────────────────────────────────────────────────────
+const DURATION_PRESETS = [
+  { label: '10 min', minutes: 10 },
+  { label: '30 min', minutes: 30 },
+  { label: '1 hour', minutes: 60 },
+  { label: '3 hours', minutes: 180 },
+  { label: '6 hours', minutes: 360 },
+  { label: '24 hours', minutes: 1440 },
+];
+
+function ApplyCouponModal({ user, onClose, onDone }: { user: User; onClose: () => void; onDone: () => void }) {
+  const [price, setPrice] = useState('899');
+  const [minutes, setMinutes] = useState(60);
+  const [customMin, setCustomMin] = useState('');
+  const [useCustom, setUseCustom] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const effectiveMinutes = useCustom ? Number(customMin) : minutes;
+  const discount = 1499 - Number(price);
+  const expiresAt = new Date(Date.now() + effectiveMinutes * 60000);
+
+  const submit = async () => {
+    if (!price || Number(price) < 1) { toast.error('Enter a valid price'); return; }
+    if (!effectiveMinutes || effectiveMinutes < 1) { toast.error('Enter a valid duration'); return; }
+    setSaving(true);
+    try {
+      await apiFetch(`/admin/users/${user.id}/apply-coupon`, {
+        method: 'POST',
+        body: JSON.stringify({ price: Number(price), original_price: 1499, minutes: effectiveMinutes }),
+      });
+      toast.success(`Coupon applied — ₹${price} valid for ${effectiveMinutes < 60 ? `${effectiveMinutes} min` : `${Math.round(effectiveMinutes / 60)}h`}`);
+      onDone();
+      onClose();
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to apply coupon');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const removeCoupon = async () => {
+    setSaving(true);
+    try {
+      await apiFetch(`/admin/users/${user.id}/remove-coupon`, { method: 'DELETE' });
+      toast.success('Coupon removed');
+      onDone();
+      onClose();
+    } catch {
+      toast.error('Failed to remove coupon');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl bg-zinc-900 border border-border shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-1">
+          <div>
+            <h3 className="text-lg font-extrabold">Apply Coupon</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">{user.name || user.email}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center text-sm transition">✕</button>
+        </div>
+
+        <p className="text-xs text-zinc-600 mb-4 leading-relaxed">
+          User will see this as a personal offer with a live countdown on their Plans page.
+        </p>
+
+        <div className="space-y-4">
+          {/* Price */}
+          <div>
+            <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">Offer Price (₹)</label>
+            <div className="flex gap-2 mb-2">
+              {['699', '799', '899', '999', '1199'].map(v => (
+                <button key={v} type="button" onClick={() => setPrice(v)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition ${price === v ? 'bg-primary/20 border-primary text-primary' : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'}`}>
+                  ₹{v}
+                </button>
+              ))}
+            </div>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">₹</span>
+              <input
+                type="number" min="1" max="1499"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl pl-7 pr-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/60"
+                placeholder="Custom price"
+              />
+            </div>
+            {Number(price) > 0 && Number(price) < 1499 && (
+              <p className="text-xs text-green-400 mt-1">User saves ₹{discount} off ₹1,499</p>
+            )}
+          </div>
+
+          {/* Duration */}
+          <div>
+            <label className="text-xs font-semibold text-zinc-500 mb-1.5 block">Valid For</label>
+            <div className="grid grid-cols-3 gap-2 mb-2">
+              {DURATION_PRESETS.map(p => (
+                <button key={p.minutes} type="button"
+                  onClick={() => { setMinutes(p.minutes); setUseCustom(false); }}
+                  className={`py-2 rounded-xl text-xs font-semibold border transition ${!useCustom && minutes === p.minutes ? 'bg-primary/20 border-primary text-primary' : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'}`}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2 items-center">
+              <input
+                type="number" min="1"
+                value={customMin}
+                onChange={e => { setCustomMin(e.target.value); setUseCustom(true); }}
+                onFocus={() => setUseCustom(true)}
+                placeholder="Custom minutes"
+                className={`flex-1 bg-zinc-800 border rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none transition ${useCustom ? 'border-primary/60' : 'border-zinc-700'}`}
+              />
+              <span className="text-xs text-zinc-600">min</span>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="rounded-xl bg-zinc-800/60 border border-zinc-700/50 px-4 py-3">
+            <p className="text-[11px] text-zinc-500 mb-0.5">User will see</p>
+            <p className="text-sm font-extrabold text-white">₹{price} <span className="text-zinc-500 line-through font-normal text-xs">₹1,499</span></p>
+            <p className="text-xs text-yellow-400 mt-0.5">
+              Expires {expiresAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+              {' · '}{expiresAt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mt-5">
+          <button
+            onClick={removeCoupon}
+            disabled={saving}
+            className="px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-400 text-xs font-bold hover:text-red-400 hover:border-red-500/30 transition disabled:opacity-50"
+          >
+            Remove
+          </button>
+          <button
+            onClick={submit}
+            disabled={saving || !price || Number(price) < 1 || !effectiveMinutes}
+            className="flex-1 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-extrabold text-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Apply Coupon'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Set Password Modal ────────────────────────────────────────────────────────
 function SetPasswordModal({ user, onClose }: { user: User; onClose: () => void }) {
   const [password, setPassword] = useState('');
@@ -337,6 +490,7 @@ function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
   const [upgrading, setUpgrading] = useState(false);
   const [showSetPlan, setShowSetPlan] = useState(false);
   const [showSetPassword, setShowSetPassword] = useState(false);
+  const [showCoupon, setShowCoupon] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm(`Delete ${user.name || user.email}?\n\nThis permanently removes the user, their subscription, and all data. This cannot be undone.`)) return;
@@ -374,6 +528,9 @@ function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
       )}
       {showSetPassword && (
         <SetPasswordModal user={user} onClose={() => setShowSetPassword(false)} />
+      )}
+      {showCoupon && (
+        <ApplyCouponModal user={user} onClose={() => setShowCoupon(false)} onDone={onRefresh} />
       )}
 
       <div className="border-b border-border last:border-0">
@@ -505,6 +662,15 @@ function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                   WhatsApp
                 </a>
               )}
+
+              {/* Apply Coupon */}
+              <button
+                onClick={() => setShowCoupon(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-bold hover:bg-yellow-500/20 transition"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                Coupon
+              </button>
 
               {/* Set Plan */}
               <button
