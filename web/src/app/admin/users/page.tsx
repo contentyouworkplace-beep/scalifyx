@@ -10,7 +10,6 @@ interface User {
   email: string;
   phone: string;
   plan: string;
-  // Onboarding data
   business_name: string;
   business_category: string;
   business_city: string;
@@ -31,53 +30,261 @@ interface User {
   subscription: { plan: string; status: string; end_date: string | null; amount: number };
 }
 
-function timeAgo(d: string) {
-  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
-  if (s < 60) return 'just now';
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  if (s < 86400 * 30) return `${Math.floor(s / 86400)}d ago`;
-  return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-}
-
 function fmtDate(d: string | null) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function WhatsAppBtn({ phone }: { phone: string }) {
-  if (!phone) return null;
-  const clean = phone.replace(/\D/g, '');
-  const num = clean.startsWith('91') ? clean : `91${clean}`;
+function timeAgo(d: string) {
+  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+// ── Create User Modal ─────────────────────────────────────────────────────────
+function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', plan: 'free', amount: '1499' });
+  const [saving, setSaving] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+
+  const submit = async () => {
+    if (!form.email || !form.password) { toast.error('Email and password required'); return; }
+    setSaving(true);
+    try {
+      await apiFetch('/admin/users', {
+        method: 'POST',
+        body: JSON.stringify({ ...form, amount: form.plan === 'pro' ? Number(form.amount) : 0 }),
+      });
+      toast.success('User created');
+      onCreated();
+      onClose();
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to create user');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <a href={`https://wa.me/${num}`} target="_blank" rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-semibold hover:bg-green-500/20 transition">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-5.031 1.378l-.111.066-1.149.604.13-.483A8.4 8.4 0 003.6 9.173a8.5 8.5 0 108.5 8.5 8.504 8.504 0 00-8.5-8.5z"/></svg>
-      WhatsApp
-    </a>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl bg-zinc-900 border border-border shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-lg font-extrabold">Create User</h3>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center text-sm transition">✕</button>
+        </div>
+
+        <div className="space-y-3">
+          {[
+            { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Rahul Sharma' },
+            { label: 'Email *', key: 'email', type: 'email', placeholder: 'user@email.com' },
+            { label: 'Phone', key: 'phone', type: 'tel', placeholder: '9876543210' },
+          ].map(f => (
+            <div key={f.key}>
+              <label className="text-xs font-semibold text-zinc-500 mb-1 block">{f.label}</label>
+              <input
+                type={f.type}
+                placeholder={f.placeholder}
+                value={(form as any)[f.key]}
+                onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary/60"
+              />
+            </div>
+          ))}
+
+          <div>
+            <label className="text-xs font-semibold text-zinc-500 mb-1 block">Password *</label>
+            <div className="relative">
+              <input
+                type={showPw ? 'text' : 'password'}
+                placeholder="Min 6 characters"
+                value={form.password}
+                onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary/60 pr-10"
+              />
+              <button type="button" onClick={() => setShowPw(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
+                {showPw
+                  ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                }
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-zinc-500 mb-1 block">Plan</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(['free', 'pro'] as const).map(p => (
+                <button key={p} type="button" onClick={() => setForm(f => ({ ...f, plan: p }))}
+                  className={`py-2.5 rounded-xl text-sm font-bold border transition capitalize ${
+                    form.plan === p ? (p === 'pro' ? 'bg-primary/20 border-primary text-primary' : 'bg-zinc-700 border-zinc-600 text-white') : 'bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600'
+                  }`}>
+                  {p === 'pro' ? '✦ Pro' : 'Free'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {form.plan === 'pro' && (
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 mb-1 block">Amount Paid (₹)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.amount}
+                onChange={e => setForm(p => ({ ...p, amount: e.target.value }))}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/60"
+              />
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={submit}
+          disabled={saving}
+          className="w-full mt-5 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-extrabold text-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {saving
+            ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            : 'Create User'
+          }
+        </button>
+      </div>
+    </div>
   );
 }
 
-function PlanBadge({ plan }: { plan: string }) {
-  const isPro = plan === 'pro';
+// ── Set Plan Modal ────────────────────────────────────────────────────────────
+function SetPlanModal({ user, onClose, onDone }: { user: User; onClose: () => void; onDone: () => void }) {
+  const [plan, setPlan] = useState<'free' | 'pro'>('pro');
+  const [amount, setAmount] = useState('1499');
+  const [months, setMonths] = useState('1');
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    setSaving(true);
+    try {
+      await apiFetch(`/admin/users/${user.id}/set-plan`, {
+        method: 'POST',
+        body: JSON.stringify({ plan, amount: Number(amount), months: Number(months) }),
+      });
+      toast.success(`Plan set to ${plan.toUpperCase()}`);
+      onDone();
+      onClose();
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to set plan');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <span className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold ${isPro ? 'bg-primary/20 text-primary' : 'bg-zinc-800 text-zinc-500'}`}>
-      {isPro ? 'PRO' : 'FREE'}
-    </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-xs rounded-2xl bg-zinc-900 border border-border shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="text-lg font-extrabold">Set Plan</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">{user.name}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center text-sm transition">✕</button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-zinc-500 mb-2 block">Plan</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(['free', 'pro'] as const).map(p => (
+                <button key={p} type="button" onClick={() => setPlan(p)}
+                  className={`py-3 rounded-xl text-sm font-bold border transition ${
+                    plan === p ? (p === 'pro' ? 'bg-primary/20 border-primary text-primary' : 'bg-zinc-700 border-zinc-600 text-white') : 'bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600'
+                  }`}>
+                  {p === 'pro' ? '✦ Pro' : 'Free'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {plan === 'pro' && (
+            <>
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 mb-1 block">Amount Paid (₹)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">₹</span>
+                  <input
+                    type="number" min="0"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-xl pl-7 pr-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/60"
+                  />
+                </div>
+                <div className="flex gap-2 mt-1.5">
+                  {['899', '1199', '1499', '0'].map(v => (
+                    <button key={v} type="button" onClick={() => setAmount(v)}
+                      className={`flex-1 py-1 rounded-lg text-[11px] font-semibold border transition ${amount === v ? 'bg-primary/20 border-primary text-primary' : 'bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}>
+                      {v === '0' ? 'Free' : `₹${v}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 mb-1 block">Duration</label>
+                <div className="flex gap-2">
+                  {[['1', '1 month'], ['3', '3 months'], ['12', '1 year']].map(([v, label]) => (
+                    <button key={v} type="button" onClick={() => setMonths(v)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition ${months === v ? 'bg-primary/20 border-primary text-primary' : 'bg-zinc-800 border-zinc-700 text-zinc-500 hover:border-zinc-600'}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <button
+          onClick={submit}
+          disabled={saving}
+          className="w-full mt-5 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-extrabold text-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {saving
+            ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            : `Confirm — Set ${plan.toUpperCase()}${plan === 'pro' ? ` · ₹${amount}` : ''}`
+          }
+        </button>
+      </div>
+    </div>
   );
 }
 
-function Row({ user, onPlanChange }: { user: User; onPlanChange: () => void }) {
+// ── User Row ──────────────────────────────────────────────────────────────────
+function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
   const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
+  const [showSetPlan, setShowSetPlan] = useState(false);
 
-  const handleManualUpgrade = async () => {
-    if (!confirm(`Manually upgrade ${user.name} to PRO?`)) return;
+  const handleDelete = async () => {
+    if (!confirm(`Delete ${user.name || user.email}?\n\nThis permanently removes the user, their subscription, and all data. This cannot be undone.`)) return;
+    setDeleting(true);
+    try {
+      await apiFetch(`/admin/users/${user.id}`, { method: 'DELETE' });
+      toast.success('User deleted');
+      onRefresh();
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to delete');
+      setDeleting(false);
+    }
+  };
+
+  const handleQuickUpgrade = async () => {
+    if (!confirm(`Upgrade ${user.name} to PRO (₹1,499, 30 days)?`)) return;
     setUpgrading(true);
     try {
       await apiFetch(`/admin/users/${user.id}/manual-upgrade`, { method: 'POST' });
-      toast.success(`${user.name} upgraded to PRO`);
-      onPlanChange();
+      toast.success('Upgraded to PRO');
+      onRefresh();
     } catch {
       toast.error('Failed to upgrade');
     } finally {
@@ -85,153 +292,207 @@ function Row({ user, onPlanChange }: { user: User; onPlanChange: () => void }) {
     }
   };
 
+  const isPro = (user.plan || user.subscription?.plan) === 'pro';
+
   return (
-    <div className="border-b border-border last:border-0">
-      {/* Main row */}
-      <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface/60 transition text-left" onClick={() => setOpen(o => !o)}>
-        {/* Avatar */}
-        <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm bg-primary/10 text-primary">
-          {(user.name || '?')[0].toUpperCase()}
-        </div>
-
-        {/* Name + business */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold">{user.name || '—'}</span>
-            {user.business_name && (
-              <span className="text-xs text-zinc-500 truncate">· {user.business_name}</span>
-            )}
-          </div>
-          <div className="text-xs text-zinc-600 mt-0.5">
-            {user.phone || user.whatsapp_number || user.email || '—'}
-            {user.business_city ? ` · ${user.business_city}` : ''}
-          </div>
-        </div>
-
-        {/* Right side */}
-        <div className="flex-shrink-0 flex items-center gap-2">
-          <PlanBadge plan={user.plan || user.subscription?.plan || 'free'} />
-          {user.onboarding_completed && (
-            <span className="hidden sm:inline px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-green-500/10 text-green-500">✓ Profile</span>
-          )}
-          <svg className={`text-zinc-600 transition-transform ${open ? 'rotate-180' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
-        </div>
-      </button>
-
-      {/* Expanded details */}
-      {open && (
-        <div className="px-4 pb-5 bg-zinc-950/50">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 pt-3 mb-4">
-            {/* Contact */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Contact</p>
-              <div className="space-y-1.5 text-sm">
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Email</span><span className="text-zinc-300 break-all">{user.email || '—'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Phone</span><span className="text-zinc-300">{user.phone || user.whatsapp_number || '—'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">City</span><span className="text-zinc-300">{user.business_city || '—'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Address</span><span className="text-zinc-300 text-xs">{user.business_address || '—'}</span></div>
-              </div>
-            </div>
-
-            {/* Business */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Business</p>
-              <div className="space-y-1.5 text-sm">
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Name</span><span className="text-zinc-300">{user.business_name || '—'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Category</span><span className="text-zinc-300">{user.business_category || '—'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Domain</span><span className="text-zinc-300">{user.domain_name || (user.domain_purchased ? 'Purchased' : '—')}</span></div>
-                {user.existing_website_url && (
-                  <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Website</span><a href={user.existing_website_url} target="_blank" rel="noopener noreferrer" className="text-primary text-xs underline truncate">{user.existing_website_url}</a></div>
-                )}
-              </div>
-            </div>
-
-            {/* Plan + Subscription */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Subscription</p>
-              <div className="space-y-1.5 text-sm">
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Plan</span><span className="text-zinc-300 capitalize">{user.subscription?.plan || user.plan || 'free'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Status</span><span className="text-zinc-300 capitalize">{user.subscription?.status || 'inactive'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Expires</span><span className="text-zinc-300">{fmtDate(user.subscription?.end_date)}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Paid</span><span className="text-zinc-300">{user.subscription?.amount ? `₹${user.subscription.amount}` : '—'}</span></div>
-                <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Joined</span><span className="text-zinc-300">{fmtDate(user.created_at)}</span></div>
-              </div>
-            </div>
-
-            {/* Services */}
-            {user.services?.length > 0 && (
-              <div className="sm:col-span-2 lg:col-span-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Services ({user.services.length})</p>
-                <div className="flex flex-wrap gap-2">
-                  {user.services.map((s, i) => (
-                    <span key={i} className="px-3 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-xs text-zinc-300">
-                      {s.name}{s.price ? ` · ₹${s.price}` : ''}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Description */}
-            {user.business_description && (
-              <div className="sm:col-span-2 lg:col-span-3">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">About</p>
-                <p className="text-xs text-zinc-400 leading-relaxed">{user.business_description}</p>
-              </div>
-            )}
-
-            {/* Social */}
-            {(user.instagram_url || user.facebook_url) && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Social</p>
-                <div className="space-y-1.5 text-sm">
-                  {user.instagram_url && <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Instagram</span><a href={user.instagram_url} target="_blank" rel="noopener noreferrer" className="text-primary text-xs underline truncate">{user.instagram_url}</a></div>}
-                  {user.facebook_url && <div className="flex gap-2"><span className="text-zinc-600 w-16 flex-shrink-0">Facebook</span><a href={user.facebook_url} target="_blank" rel="noopener noreferrer" className="text-primary text-xs underline truncate">{user.facebook_url}</a></div>}
-                </div>
-              </div>
-            )}
-
-            {/* Gallery count + logo */}
-            {(user.logo_url || user.gallery_images?.length > 0) && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Media</p>
-                <div className="flex items-center gap-3">
-                  {user.logo_url && (
-                    <img src={user.logo_url} alt="logo" className="w-10 h-10 rounded-lg object-cover border border-border" />
-                  )}
-                  {user.gallery_images?.length > 0 && (
-                    <span className="text-xs text-zinc-400">{user.gallery_images.length} gallery image{user.gallery_images.length !== 1 ? 's' : ''}</span>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex items-center gap-2 pt-3 border-t border-border/50">
-            <WhatsAppBtn phone={user.phone || user.whatsapp_number || ''} />
-            {(user.plan !== 'pro' && user.subscription?.plan !== 'pro') && (
-              <button
-                onClick={handleManualUpgrade}
-                disabled={upgrading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-primary text-xs font-semibold hover:bg-primary/20 transition disabled:opacity-50"
-              >
-                {upgrading ? 'Upgrading...' : '⬆ Manual Upgrade'}
-              </button>
-            )}
-            <span className="ml-auto text-[11px] text-zinc-700">ID: {user.id.slice(0, 8)}…</span>
-          </div>
-        </div>
+    <>
+      {showSetPlan && (
+        <SetPlanModal user={user} onClose={() => setShowSetPlan(false)} onDone={onRefresh} />
       )}
+
+      <div className="border-b border-border last:border-0">
+        {/* Main row */}
+        <button
+          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface/60 transition text-left"
+          onClick={() => setOpen(o => !o)}
+        >
+          <div className={`w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm ${isPro ? 'bg-primary/15 text-primary' : 'bg-zinc-800 text-zinc-400'}`}>
+            {(user.name || user.email || '?')[0].toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">{user.name || '—'}</span>
+              {user.business_name && <span className="text-xs text-zinc-500 truncate hidden sm:inline">· {user.business_name}</span>}
+            </div>
+            <div className="text-xs text-zinc-600 mt-0.5 truncate">
+              {user.phone || user.whatsapp_number || user.email}{user.business_city ? ` · ${user.business_city}` : ''}
+            </div>
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <span className={`px-2 py-0.5 rounded-md text-[11px] font-extrabold ${isPro ? 'bg-primary/20 text-primary' : 'bg-zinc-800 text-zinc-500'}`}>
+              {isPro ? 'PRO' : 'FREE'}
+            </span>
+            {user.onboarding_completed && <span className="hidden sm:inline px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-green-500/10 text-green-500">✓</span>}
+            <svg className={`text-zinc-600 transition-transform ${open ? 'rotate-180' : ''}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </button>
+
+        {/* Expanded */}
+        {open && (
+          <div className="px-4 pb-5 bg-zinc-950/50">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 pt-3 mb-4">
+
+              {/* Contact */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Contact</p>
+                <div className="space-y-1.5 text-sm">
+                  <Row2 label="Email" value={user.email} />
+                  <Row2 label="Phone" value={user.phone || user.whatsapp_number} />
+                  <Row2 label="City" value={user.business_city} />
+                  <Row2 label="Address" value={user.business_address} small />
+                </div>
+              </div>
+
+              {/* Business */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Business</p>
+                <div className="space-y-1.5 text-sm">
+                  <Row2 label="Name" value={user.business_name} />
+                  <Row2 label="Category" value={user.business_category} />
+                  <Row2 label="Domain" value={user.domain_name || (user.domain_purchased ? 'Purchased' : undefined)} />
+                  {user.existing_website_url && (
+                    <div className="flex gap-2">
+                      <span className="text-zinc-600 w-16 flex-shrink-0 text-xs">Website</span>
+                      <a href={user.existing_website_url} target="_blank" rel="noopener noreferrer" className="text-primary text-xs underline truncate">{user.existing_website_url}</a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Subscription */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Subscription</p>
+                <div className="space-y-1.5 text-sm">
+                  <Row2 label="Plan" value={(user.subscription?.plan || user.plan || 'free').toUpperCase()} />
+                  <Row2 label="Status" value={user.subscription?.status} />
+                  <Row2 label="Expires" value={fmtDate(user.subscription?.end_date)} />
+                  <Row2 label="Paid" value={user.subscription?.amount ? `₹${user.subscription.amount}` : undefined} />
+                  <Row2 label="Joined" value={fmtDate(user.created_at)} />
+                </div>
+              </div>
+
+              {/* Services */}
+              {user.services?.length > 0 && (
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Services ({user.services.length})</p>
+                  <div className="flex flex-wrap gap-2">
+                    {user.services.map((s, i) => (
+                      <span key={i} className="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-xs text-zinc-300">
+                        {s.name}{s.price ? ` · ₹${s.price}` : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Description */}
+              {user.business_description && (
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-1">About</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed">{user.business_description}</p>
+                </div>
+              )}
+
+              {/* Media */}
+              {(user.logo_url || user.gallery_images?.length > 0) && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Media</p>
+                  <div className="flex items-center gap-3">
+                    {user.logo_url && <img src={user.logo_url} alt="" className="w-10 h-10 rounded-lg object-cover border border-border" />}
+                    {user.gallery_images?.length > 0 && <span className="text-xs text-zinc-500">{user.gallery_images.length} photo{user.gallery_images.length !== 1 ? 's' : ''}</span>}
+                  </div>
+                </div>
+              )}
+
+              {/* Social */}
+              {(user.instagram_url || user.facebook_url) && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Social</p>
+                  <div className="space-y-1">
+                    {user.instagram_url && <a href={user.instagram_url} target="_blank" rel="noopener noreferrer" className="block text-xs text-primary underline truncate">Instagram</a>}
+                    {user.facebook_url && <a href={user.facebook_url} target="_blank" rel="noopener noreferrer" className="block text-xs text-primary underline truncate">Facebook</a>}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action bar */}
+            <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border/40">
+              {/* WhatsApp */}
+              {(user.phone || user.whatsapp_number) && (
+                <a
+                  href={`https://wa.me/91${(user.phone || user.whatsapp_number).replace(/\D/g, '').replace(/^91/, '')}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold hover:bg-green-500/20 transition"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                  WhatsApp
+                </a>
+              )}
+
+              {/* Set Plan */}
+              <button
+                onClick={() => setShowSetPlan(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary/10 border border-primary/30 text-primary text-xs font-bold hover:bg-primary/20 transition"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Set Plan
+              </button>
+
+              {/* Quick upgrade if free */}
+              {!isPro && (
+                <button
+                  onClick={handleQuickUpgrade}
+                  disabled={upgrading}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-bold hover:bg-yellow-500/20 transition disabled:opacity-50"
+                >
+                  {upgrading ? '…' : '⬆ Quick PRO (₹1,499)'}
+                </button>
+              )}
+
+              {/* Spacer */}
+              <span className="flex-1" />
+
+              {/* User ID */}
+              <span className="text-[10px] text-zinc-700 font-mono hidden md:inline">{user.id.slice(0, 8)}…</span>
+
+              {/* Delete */}
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold hover:bg-red-500/20 transition disabled:opacity-50"
+              >
+                {deleting
+                  ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
+                  : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                }
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+function Row2({ label, value, small }: { label: string; value?: string | null; small?: boolean }) {
+  if (!value) return null;
+  return (
+    <div className="flex gap-2">
+      <span className="text-zinc-600 w-16 flex-shrink-0 text-xs">{label}</span>
+      <span className={`text-zinc-300 ${small ? 'text-xs' : 'text-sm'} break-words min-w-0`}>{value}</span>
     </div>
   );
 }
 
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'pro' | 'free' | 'onboarded'>('all');
   const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -272,17 +533,26 @@ export default function AdminUsersPage() {
 
   return (
     <div className="max-w-5xl">
+      {showCreate && <CreateUserModal onClose={() => setShowCreate(false)} onCreated={fetchUsers} />}
+
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+      <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-extrabold">Users</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {users.length} total · {proCount} pro · {onboardedCount} onboarded
-          </p>
+          <p className="text-sm text-zinc-500 mt-1">{users.length} total · {proCount} pro · {onboardedCount} onboarded</p>
         </div>
-        <button onClick={fetchUsers} className="px-4 py-2 rounded-xl bg-surface border border-border text-sm font-semibold hover:border-primary/40 transition">
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={fetchUsers} className="px-3 py-2 rounded-xl bg-surface border border-border text-sm font-semibold hover:border-zinc-600 transition">
+            Refresh
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-extrabold transition flex items-center gap-1.5"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create User
+          </button>
+        </div>
       </div>
 
       {/* Summary chips */}
@@ -310,13 +580,11 @@ export default function AdminUsersPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        {search && (
-          <button onClick={() => setSearch('')} className="text-zinc-600 hover:text-zinc-400 text-xs ml-2">✕</button>
-        )}
+        {search && <button onClick={() => setSearch('')} className="text-zinc-600 hover:text-zinc-400 text-xs ml-2">✕</button>}
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-4 flex-wrap">
+      <div className="flex gap-2 mb-5 flex-wrap">
         {([
           { key: 'all', label: 'All' },
           { key: 'pro', label: '✦ Pro' },
@@ -332,7 +600,7 @@ export default function AdminUsersPage() {
         ))}
       </div>
 
-      {/* Users list */}
+      {/* List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -342,7 +610,7 @@ export default function AdminUsersPage() {
       ) : (
         <div className="rounded-2xl border border-border overflow-hidden">
           {filtered.map(u => (
-            <Row key={u.id} user={u} onPlanChange={fetchUsers} />
+            <Row key={u.id} user={u} onRefresh={fetchUsers} />
           ))}
         </div>
       )}
