@@ -42,6 +42,7 @@ function VideoSection() {
         <video
           ref={videoRef}
           src="/demo.mp4"
+          poster="/demo-thumb.jpg"
           className="w-full h-full object-cover"
           playsInline
           preload="metadata"
