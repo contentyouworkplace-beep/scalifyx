@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 import OnboardingStep1 from './OnboardingStep1';
 import OnboardingStep2 from './OnboardingStep2';
 import OnboardingStep3 from './OnboardingStep3';
@@ -66,6 +67,53 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  // Fetch existing profile data and pre-populate form
+  useEffect(() => {
+    if (!user?.id) { setLoadingProfile(false); return; }
+    supabase
+      .from('profiles')
+      .select(`
+        business_name, business_category, business_city, whatsapp_number,
+        email, business_address, google_maps_link, business_description,
+        logo_url, instagram_url, facebook_url, existing_website_url,
+        services, gallery_images, domain_purchased, domain_name
+      `)
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data: profile, error }) => {
+        if (!error && profile) {
+          setData({
+            business_name: profile.business_name || '',
+            business_category: profile.business_category || '',
+            business_city: profile.business_city || '',
+            whatsapp_number: profile.whatsapp_number || user.phone || '',
+            email: profile.email || user.email || '',
+            business_address: profile.business_address || '',
+            google_maps_link: profile.google_maps_link || '',
+            business_description: profile.business_description || '',
+            logo_url: profile.logo_url || '',
+            instagram_url: profile.instagram_url || '',
+            facebook_url: profile.facebook_url || '',
+            existing_website_url: profile.existing_website_url || '',
+            services: Array.isArray(profile.services) ? profile.services : [],
+            gallery_images: Array.isArray(profile.gallery_images) ? profile.gallery_images : [],
+            domain_purchased: profile.domain_purchased ?? false,
+            domain_name: profile.domain_name || '',
+          });
+        }
+        setLoadingProfile(false);
+      });
+  }, [user?.id, user?.email, user?.phone]);
+
+  if (loadingProfile) {
+    return (
+      <div className="rounded-2xl bg-card border border-border p-8 flex items-center justify-center min-h-[300px]">
+        <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const updateData = (updates: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...updates }));

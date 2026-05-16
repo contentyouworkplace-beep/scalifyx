@@ -4,288 +4,186 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
-import React from 'react';
-import { registerAdminForNotifications, notificationsEnabled as checkNotificationsEnabled } from '../../lib/notifications';
 
-function formatRevenue(val: number) {
-  if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
-  if (val >= 1000) return `₹${(val / 1000).toFixed(1)}K`;
-  return `₹${val}`;
-}
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
+function timeAgo(d: string) {
+  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
 }
 
-function PeopleIcon({ className }: { className?: string }) {
-  return <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-}
-function GlobeIcon({ className }: { className?: string }) {
-  return <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
-}
-function CardIcon({ className }: { className?: string }) {
-  return <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>;
-}
-function AlertIcon({ className }: { className?: string }) {
-  return <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>;
-}
-function PersonAddIcon({ className }: { className?: string }) {
-  return <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>;
-}
-function ChatBubbleIcon({ className }: { className?: string }) {
-  return <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
-}
-function CashIcon({ className }: { className?: string }) {
-  return <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>;
-}
-function BellIcon({ className }: { className?: string }) {
-  return <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
+function fmt(n: number) {
+  if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+  if (n >= 1000) return `₹${(n / 1000).toFixed(1)}K`;
+  return `₹${n}`;
 }
 
-interface ActivityItem {
-  icon: 'person-add' | 'card' | 'globe';
-  text: string;
-  time: string;
-  color: string;
+function pct(a: number, b: number) {
+  if (!b) return '0%';
+  return `${Math.round((a / b) * 100)}%`;
 }
 
-interface SignupItem {
+interface Signup {
   id: string;
   name: string;
   email: string;
   phone: string;
+  plan: string;
+  business_name?: string;
+  business_city?: string;
   created_at: string;
 }
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
-  const [dashStats, setDashStats] = useState({
-    totalFreeTrialUsers: 0,
-    domainPurchasedUsers: 0,
-    uniquePaidUsers: 0,
-    trialExpiredNotUpgraded: 0,
-    monthlyNewUsers: 0,
-    monthlyRevenue: 0,
-    totalRevenue: 0,
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalUsers: 0, proUsers: 0, totalRevenue: 0,
+    monthlyRevenue: 0, monthlyNewUsers: 0,
   });
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
-  const [recentSignups, setRecentSignups] = useState<SignupItem[]>([]);
+  const [signups, setSignups] = useState<Signup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [requestingNotifications, setRequestingNotifications] = useState(false);
 
-  const fetchDashboard = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
-      const [statsData, activityData] = await Promise.all([
+      const [dash, activity, usersData] = await Promise.all([
         apiFetch('/admin/dashboard'),
         apiFetch('/admin/activity'),
+        apiFetch('/admin/users'),
       ]);
-      setDashStats({
-        totalFreeTrialUsers: statsData.metrics?.totalFreeTrialUsers || 0,
-        domainPurchasedUsers: statsData.metrics?.domainPurchasedUsers || 0,
-        uniquePaidUsers: statsData.metrics?.uniquePaidUsers || 0,
-        trialExpiredNotUpgraded: statsData.metrics?.trialExpiredNotUpgraded || 0,
-        monthlyNewUsers: statsData.metrics?.monthly?.newUsers || 0,
-        monthlyRevenue: statsData.metrics?.monthly?.revenue || 0,
-        totalRevenue: statsData.metrics?.totalRevenue || 0,
+      setStats({
+        totalUsers: dash.totals?.totalUsers || 0,
+        proUsers: dash.metrics?.uniquePaidUsers || 0,
+        totalRevenue: dash.metrics?.totalRevenue || 0,
+        monthlyRevenue: dash.metrics?.monthly?.revenue || 0,
+        monthlyNewUsers: dash.metrics?.monthly?.newUsers || 0,
       });
-
-      const items: ActivityItem[] = [];
-      (activityData.recentUsers || []).forEach((u: any) =>
-        items.push({ icon: 'person-add', text: `New user: ${u.name || u.phone || 'Unknown'}`, time: u.created_at, color: '#22C55E' })
-      );
-      (activityData.recentPayments || []).forEach((p: any) =>
-        items.push({ icon: 'card', text: `Payment: ₹${p.amount} — ${p.profiles?.name || 'User'}`, time: p.created_at, color: '#F59E0B' })
-      );
-      (activityData.recentSites || []).forEach((s: any) =>
-        items.push({ icon: 'globe', text: `Website: ${s.business_name}`, time: s.created_at, color: '#6366F1' })
-      );
-      items.sort((a: ActivityItem, b: ActivityItem) => new Date(b.time).getTime() - new Date(a.time).getTime());
-      setActivity(items.slice(0, 8));
-
-      // Set recent signups from activity data
-      const signups = (activityData.recentUsers || []).map((u: any) => ({
+      // Use full user data for recent signups
+      const recent = (usersData.users || []).slice(0, 8).map((u: any) => ({
         id: u.id,
         name: u.name || 'Unknown',
         email: u.email || '',
-        phone: u.phone || '',
+        phone: u.phone || u.whatsapp_number || '',
+        plan: u.plan || u.subscription?.plan || 'free',
+        business_name: u.business_name || '',
+        business_city: u.business_city || '',
         created_at: u.created_at,
       }));
-      setRecentSignups(signups);
-
-      // Check notification status
-      setNotificationsEnabled(checkNotificationsEnabled());
+      setSignups(recent);
     } catch (e) {
-      console.error('Dashboard fetch error:', e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const handleEnableNotifications = async () => {
-    setRequestingNotifications(true);
-    try {
-      const success = await registerAdminForNotifications();
-      if (success) {
-        setNotificationsEnabled(true);
-      } else {
-        console.error('Failed to register for notifications');
-      }
-    } catch (error) {
-      console.error('Error enabling notifications:', error);
-    } finally {
-      setRequestingNotifications(false);
-    }
-  };
-
-  useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
+  useEffect(() => { load(); }, [load]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  const statCards = [
-    { icon: PeopleIcon, label: 'Free Trial Users', value: dashStats.totalFreeTrialUsers.toLocaleString(), color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { icon: GlobeIcon, label: 'Domain Purchases', value: dashStats.domainPurchasedUsers.toLocaleString(), color: 'text-green-400', bg: 'bg-green-400/10' },
-    { icon: CardIcon, label: 'Paid Users', value: dashStats.uniquePaidUsers.toLocaleString(), color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
-    { icon: AlertIcon, label: 'Trial Expired (Not Upgraded)', value: dashStats.trialExpiredNotUpgraded.toLocaleString(), color: 'text-red-400', bg: 'bg-red-400/10' },
-    { icon: PeopleIcon, label: 'Monthly New Users / Revenue', value: `${dashStats.monthlyNewUsers} users / ${formatRevenue(dashStats.monthlyRevenue)}`, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { icon: CashIcon, label: 'Total Lifetime Revenue', value: formatRevenue(dashStats.totalRevenue), color: 'text-orange-400', bg: 'bg-orange-400/10' },
-  ];
-
-  const quickActions = [
-    { icon: PersonAddIcon, label: 'Users', href: '/admin/users' },
-    { icon: ChatBubbleIcon, label: 'Chats', href: '/admin/chats' },
-    { icon: CardIcon, label: 'Subscriptions', href: '/admin/subscriptions' },
-    { icon: CashIcon, label: 'Payments', href: '/admin/payments' },
-    { icon: BellIcon, label: 'Notifications', href: '/admin/notifications' },
-  ];
-
-  const activityIconMap: Record<string, React.FC<{ className?: string }>> = {
-    'person-add': PersonAddIcon,
-    'card': CardIcon,
-    'globe': GlobeIcon,
-  };
+  const convRate = pct(stats.proUsers, stats.totalUsers);
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+    <div className="max-w-4xl">
+
+      {/* Top greeting */}
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold text-primary uppercase tracking-wider">Admin Panel</p>
-          <h1 className="text-xl md:text-2xl font-bold mt-0.5">Welcome, {user?.name || 'Admin'}</h1>
+          <p className="text-xs font-bold uppercase tracking-widest text-zinc-600 mb-1">Scalify Admin</p>
+          <h1 className="text-2xl font-extrabold">Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, {user?.name?.split(' ')[0] || 'Admin'}</h1>
         </div>
-        <button
-          onClick={logout}
-          className="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center text-zinc-400 hover:text-white transition"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <button onClick={() => load()} className="w-9 h-9 rounded-xl bg-surface border border-border flex items-center justify-center text-zinc-500 hover:text-white transition">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </button>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-7">
-        {statCards.map((card) => (
-          <div key={card.label} className="p-4 rounded-2xl bg-surface border border-border">
-            <div className={`w-9 h-9 rounded-[10px] ${card.bg} flex items-center justify-center mb-3`}>
-              <card.icon className={card.color} />
-            </div>
-            <div className="text-xl md:text-2xl font-bold">{card.value}</div>
-            <div className="text-xs text-zinc-500 mt-0.5">{card.label}</div>
+      {/* ── Hero Revenue Card ───────────────────────────────── */}
+      <div className="rounded-3xl bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/30 p-6 mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-primary/70 mb-1">Total Revenue</p>
+        <div className="flex items-end gap-4">
+          <span className="text-5xl font-black text-white">{fmt(stats.totalRevenue)}</span>
+          <div className="mb-1 text-sm text-zinc-400">
+            <span className="text-green-400 font-bold">{fmt(stats.monthlyRevenue)}</span> this month
+          </div>
+        </div>
+      </div>
+
+      {/* ── 4 Metric Cards ───────────────────────────────────── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {[
+          { label: 'Total Users', value: stats.totalUsers.toLocaleString(), color: 'text-white', sub: `${stats.monthlyNewUsers} this month` },
+          { label: 'Pro Users', value: stats.proUsers.toLocaleString(), color: 'text-primary', sub: 'paying customers' },
+          { label: 'Conversion', value: convRate, color: 'text-yellow-400', sub: 'free → paid' },
+          { label: 'MRR', value: fmt(stats.monthlyRevenue), color: 'text-green-400', sub: 'monthly revenue' },
+        ].map((card) => (
+          <div key={card.label} className="rounded-2xl bg-surface border border-border p-4">
+            <div className={`text-2xl font-extrabold ${card.color}`}>{card.value}</div>
+            <div className="text-xs font-semibold text-white mt-1">{card.label}</div>
+            <div className="text-[11px] text-zinc-600 mt-0.5">{card.sub}</div>
           </div>
         ))}
       </div>
 
-      {/* Notification Permission Banner */}
-      {!notificationsEnabled && (
-        <div className="mb-7 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <BellIcon className="text-blue-400" />
-              <div>
-                <p className="text-sm font-semibold text-white">Get instant signup notifications</p>
-                <p className="text-xs text-blue-200 mt-0.5">Enable browser notifications to get alerted when users sign up</p>
-              </div>
-            </div>
-            <button
-              onClick={handleEnableNotifications}
-              disabled={requestingNotifications}
-              className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-400 transition disabled:opacity-50"
-            >
-              {requestingNotifications ? 'Setting up...' : 'Enable'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      <h2 className="text-base font-bold mb-3">Manage</h2>
-      <div className="flex justify-between mb-7">
-        {quickActions.map((action) => (
-          <Link key={action.label} href={action.href} className="flex flex-col items-center group">
-            <div className="w-12 h-12 rounded-[14px] bg-surface border border-border flex items-center justify-center mb-1.5 group-hover:border-primary/50 transition">
-              <action.icon className="text-primary" />
-            </div>
-            <span className="text-[11px] text-zinc-500 font-medium text-center">{action.label}</span>
+      {/* ── Quick Nav ─────────────────────────────────────────── */}
+      <div className="grid grid-cols-4 gap-2 mb-8">
+        {[
+          { href: '/admin/users', label: 'Users', emoji: '👥' },
+          { href: '/admin/payments', label: 'Payments', emoji: '💳' },
+          { href: '/admin/subscriptions', label: 'Subs', emoji: '📋' },
+          { href: '/admin/notifications', label: 'Notify', emoji: '🔔' },
+        ].map((nav) => (
+          <Link key={nav.href} href={nav.href}
+            className="flex flex-col items-center gap-2 py-3 px-2 rounded-2xl bg-surface border border-border hover:border-primary/40 hover:bg-primary/5 transition text-center group">
+            <span className="text-2xl">{nav.emoji}</span>
+            <span className="text-xs font-semibold text-zinc-400 group-hover:text-white transition">{nav.label}</span>
           </Link>
         ))}
       </div>
 
-      {/* Recent Signups */}
-      <h2 className="text-base font-bold mb-3">Recent Signups</h2>
-      <div className="rounded-2xl bg-surface border border-border p-4 mb-7">
-        {recentSignups.length === 0 ? (
-          <p className="text-zinc-500 text-center py-4 text-sm">No recent signups</p>
-        ) : (
-          <div className="space-y-3">
-            {recentSignups.map((signup) => (
-              <div key={signup.id} className="p-3 rounded-xl bg-card border border-border/50 hover:border-border transition">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{signup.name}</p>
-                    <p className="text-xs text-zinc-500 mt-1 truncate">{signup.email}</p>
-                    {signup.phone && <p className="text-xs text-zinc-500 truncate">{signup.phone}</p>}
-                  </div>
-                  <div className="ml-3 text-right flex-shrink-0">
-                    <p className="text-xs text-zinc-400 whitespace-nowrap">{timeAgo(signup.created_at)}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* ── Recent Signups ────────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-extrabold uppercase tracking-widest text-zinc-500">Recent Signups</h2>
+        <Link href="/admin/users" className="text-xs text-primary font-semibold hover:underline">See all →</Link>
       </div>
-
-      {/* Recent Activity */}
-      <h2 className="text-base font-bold mb-3">Recent Activity</h2>
-      <div className="rounded-2xl bg-surface border border-border p-4">
-        {activity.length === 0 ? (
-          <p className="text-zinc-500 text-center py-4 text-sm">No recent activity</p>
+      <div className="rounded-2xl border border-border overflow-hidden">
+        {signups.length === 0 ? (
+          <div className="p-8 text-center text-sm text-zinc-600">No signups yet</div>
         ) : (
-          activity.map((item, i) => {
-            const Icon = activityIconMap[item.icon] || PeopleIcon;
-            return (
-              <div key={i} className={`flex items-center py-3 ${i < activity.length - 1 ? 'border-b border-border' : ''}`}>
-                <div className="w-9 h-9 rounded-[10px] flex items-center justify-center mr-3" style={{ backgroundColor: item.color + '20' }}>
-                  <Icon className="" />
+          signups.map((s, i) => (
+            <div key={s.id} className={`flex items-center gap-3 px-4 py-3 ${i < signups.length - 1 ? 'border-b border-border' : ''} hover:bg-surface/60 transition`}>
+              {/* Avatar */}
+              <div className="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center font-bold text-sm bg-primary/10 text-primary">
+                {(s.name || '?')[0].toUpperCase()}
+              </div>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold truncate">{s.name}</span>
+                  {s.business_name && (
+                    <span className="text-xs text-zinc-500 truncate hidden sm:inline">· {s.business_name}</span>
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium truncate">{item.text}</p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">{timeAgo(item.time)}</p>
+                <div className="text-xs text-zinc-600 truncate mt-0.5">
+                  {s.phone || s.email}{s.business_city ? ` · ${s.business_city}` : ''}
                 </div>
               </div>
-            );
-          })
+              {/* Plan badge + time */}
+              <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
+                  s.plan === 'pro' ? 'bg-primary/20 text-primary' : 'bg-zinc-800 text-zinc-500'
+                }`}>
+                  {s.plan === 'pro' ? 'PRO' : 'FREE'}
+                </span>
+                <span className="text-[10px] text-zinc-600">{timeAgo(s.created_at)}</span>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>
