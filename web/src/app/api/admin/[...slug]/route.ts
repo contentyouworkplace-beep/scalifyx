@@ -284,6 +284,46 @@ async function handleExtend(req: Request, subId: string) {
   return Response.json({ success: true });
 }
 
+// ── GET /api/admin/offers ─────────────────────────────────────────────────────
+async function handleGetOffers(req: Request) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+  const { data, error } = await db().from('offers').select('*').order('sort_order', { ascending: true });
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ success: true, offers: data || [] });
+}
+
+// ── POST /api/admin/offers ────────────────────────────────────────────────────
+async function handleCreateOffer(req: Request) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+  let body: any;
+  try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
+  const { data, error } = await db().from('offers').insert(body).select().maybeSingle();
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ success: true, offer: data });
+}
+
+// ── PUT /api/admin/offers/:id ─────────────────────────────────────────────────
+async function handleUpdateOffer(req: Request, offerId: string) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+  let body: any;
+  try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
+  const { error } = await db().from('offers').update(body).eq('id', offerId);
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ success: true });
+}
+
+// ── DELETE /api/admin/offers/:id ──────────────────────────────────────────────
+async function handleDeleteOffer(req: Request, offerId: string) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+  const { error } = await db().from('offers').delete().eq('id', offerId);
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ success: true });
+}
+
 // ── POST /api/admin/users/:id/apply-coupon ────────────────────────────────────
 async function handleApplyCoupon(req: Request, userId: string) {
   const auth = await requireAdmin(req);
@@ -333,6 +373,7 @@ export async function GET(req: Request, { params }: { params: { slug: string[] }
   if (endpoint === '/subscriptions') return handleSubscriptions(req);
   if (endpoint === '/payments') return handlePayments(req);
   if (endpoint === '/notifications') return handleNotifications(req);
+  if (endpoint === '/offers') return handleGetOffers(req);
 
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
@@ -342,6 +383,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
   const endpoint = `/${slug.join('/')}`;
 
   if (endpoint === '/users') return handleCreateUser(req);
+  if (endpoint === '/offers') return handleCreateOffer(req);
 
   // /users/:id/set-plan
   if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'set-plan') return handleSetPlan(req, slug[1]);
@@ -357,11 +399,20 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
 
+export async function PUT(req: Request, { params }: { params: { slug: string[] } }) {
+  const slug = params.slug;
+  // /offers/:id
+  if (slug.length === 2 && slug[0] === 'offers') return handleUpdateOffer(req, slug[1]);
+  return Response.json({ error: 'Not found' }, { status: 404 });
+}
+
 export async function DELETE(req: Request, { params }: { params: { slug: string[] } }) {
   const slug = params.slug;
   // /users/:id
   if (slug.length === 2 && slug[0] === 'users') return handleDeleteUser(req, slug[1]);
   // /users/:id/remove-coupon
   if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'remove-coupon') return handleRemoveCoupon(req, slug[1]);
+  // /offers/:id
+  if (slug.length === 2 && slug[0] === 'offers') return handleDeleteOffer(req, slug[1]);
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
