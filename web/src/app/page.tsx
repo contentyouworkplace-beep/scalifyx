@@ -800,62 +800,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── PORTFOLIO SECTION ── */}
-      <section className="py-28 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex items-center gap-3 justify-center mb-6">
-              <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Built & Live</span>
-              <span className="h-px w-8 bg-zinc-800" />
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] mb-4">
-              Beautiful Websites<br />
-              <span className="text-green-400">We've Built</span>
-            </h2>
-            <p className="text-zinc-500 text-lg max-w-2xl mx-auto">750+ businesses across industries. All starting at ₹1,499/month.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {DEMO_WEBSITES.map((demo, idx) => (
-              <a
-                key={idx}
-                href={demo.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group relative rounded-2xl overflow-hidden border border-border hover:border-green-500/50 transition-all duration-300 h-64 sm:h-72"
-              >
-                <Image
-                  src={demo.image}
-                  alt={demo.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-
-                <div className="absolute inset-0 flex flex-col justify-between p-4">
-                  <div />
-                  <div className="bg-gradient-to-t from-black/80 to-transparent pt-8 pb-2">
-                    <h3 className="text-white font-semibold text-lg">{demo.title}</h3>
-                    <p className="text-green-400 text-sm">{demo.subtitle}</p>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40">
-                  <div className="text-center">
-                    <svg className="w-12 h-12 text-green-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                    <p className="text-white text-sm font-semibold">Click to explore</p>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-
-          <p className="text-center text-zinc-500 text-sm mt-10">All live websites built with our service. Click any to see them in action.</p>
-        </div>
-      </section>
-
       {/* ── FINAL CTA ── */}
       <section className="py-32 px-4 sm:px-6 border-y border-border">
         <div className="max-w-3xl mx-auto text-center">
