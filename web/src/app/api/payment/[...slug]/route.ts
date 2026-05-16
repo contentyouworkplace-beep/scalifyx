@@ -86,10 +86,38 @@ async function handleOffers() {
   return Response.json({ offers: FALLBACK_OFFERS });
 }
 
+function getCoupon(user: { id: string; created_at?: string }) {
+  if (!user.created_at) return null;
+  const createdAt = new Date(user.created_at);
+  const now = new Date();
+  const mins = (now.getTime() - createdAt.getTime()) / 60000;
+  const digits = user.id.replace(/[^0-9]/g, '').padEnd(6, '0');
+  const tier1Code = 'SCALE' + digits.slice(0, 3);
+  const tier2Code = 'DEAL' + digits.slice(3, 6);
+
+  if (mins < 10) {
+    return {
+      tier: 1, code: tier1Code, price: 899, discount: 600,
+      expiresAt: new Date(createdAt.getTime() + 10 * 60000).toISOString(),
+      label: 'Welcome Offer',
+    };
+  }
+  if (mins < 24 * 60) {
+    return {
+      tier: 2, code: tier2Code, price: 1199, discount: 300,
+      expiresAt: new Date(createdAt.getTime() + 24 * 3600000).toISOString(),
+      label: '24-Hour Exclusive',
+    };
+  }
+  return null;
+}
+
 // ─── GET /payment/status ───────────────────────────────────────────────────────
 async function handleStatus(req: Request) {
   const user = await getUser(req);
   if (!user) return Response.json(FREE_STATUS);
+
+  const coupon = getCoupon(user);
 
   const { data: sub } = await db()
     .from('subscriptions')
@@ -100,7 +128,7 @@ async function handleStatus(req: Request) {
     .limit(1)
     .maybeSingle();
 
-  if (!sub) return Response.json(FREE_STATUS);
+  if (!sub) return Response.json({ ...FREE_STATUS, coupon });
 
   const now = new Date();
   const endDate = new Date(sub.end_date);
@@ -118,6 +146,7 @@ async function handleStatus(req: Request) {
     success: true,
     subscription: { status, plan: sub.plan, expiryDate: sub.end_date, daysLeft, startDate: sub.start_date },
     payments: payments || [],
+    coupon,
   });
 }
 
@@ -198,15 +227,21 @@ async function handleCreateOrder(req: Request) {
     });
   }
 
+  const coupon = getCoupon(user);
+  const amount = coupon ? coupon.price * 100 : 149900;
+  const description = coupon
+    ? `Scalify Pro — ₹${coupon.price} (${coupon.label})`
+    : 'Scalify Pro — ₹1,499/month';
+
   try {
     const credentials = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
     const rzRes = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Basic ${credentials}` },
       body: JSON.stringify({
-        amount: 149900,
+        amount,
         currency: 'INR',
-        notes: { userId: user.id, email: user.email || '' },
+        notes: { userId: user.id, email: user.email || '', description },
       }),
     });
 
@@ -226,6 +261,8 @@ async function handleCreateOrder(req: Request) {
       amount: rzData.amount,
       currency: rzData.currency,
       keyId,
+      description,
+      displayPrice: coupon ? coupon.price : 1499,
     });
   } catch (err) {
     console.error('Razorpay request exception:', err);

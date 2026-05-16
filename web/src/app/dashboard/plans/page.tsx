@@ -28,6 +28,15 @@ interface SubStatus {
   startDate: string | null;
 }
 
+interface CouponInfo {
+  tier: 1 | 2;
+  code: string;
+  price: number;
+  discount: number;
+  expiresAt: string;
+  label: string;
+}
+
 interface PaymentRecord {
   id: string;
   amount: number;
@@ -35,6 +44,153 @@ interface PaymentRecord {
   created_at: string;
 }
 
+// ── Animated digit block ──────────────────────────────────────────────────────
+function DigitBlock({ value, label }: { value: string; label: string }) {
+  const [display, setDisplay] = useState(value);
+  const [flip, setFlip] = useState(false);
+  const prev = useRef(value);
+
+  useEffect(() => {
+    if (prev.current !== value) {
+      setFlip(true);
+      const t = setTimeout(() => { setDisplay(value); setFlip(false); prev.current = value; }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [value]);
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className={`relative w-14 h-16 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center overflow-hidden transition-transform duration-150 ${flip ? 'scale-y-90' : 'scale-y-100'}`}>
+        <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
+        <span className="text-3xl font-black text-white tabular-nums leading-none">{display}</span>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+      </div>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-1.5">{label}</span>
+    </div>
+  );
+}
+
+// ── Coupon banner ─────────────────────────────────────────────────────────────
+function CouponBanner({ coupon, onPay, loading }: { coupon: CouponInfo; onPay: () => void; loading: boolean }) {
+  const [timeLeft, setTimeLeft] = useState(Math.max(0, new Date(coupon.expiresAt).getTime() - Date.now()));
+  const [expired, setExpired] = useState(timeLeft <= 0);
+
+  useEffect(() => {
+    if (expired) return;
+    const tick = () => {
+      const diff = Math.max(0, new Date(coupon.expiresAt).getTime() - Date.now());
+      setTimeLeft(diff);
+      if (diff === 0) setExpired(true);
+    };
+    const iv = setInterval(tick, 1000);
+    return () => clearInterval(iv);
+  }, [coupon.expiresAt, expired]);
+
+  const secs = Math.floor(timeLeft / 1000);
+  const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+  const s = (secs % 60).toString().padStart(2, '0');
+
+  if (expired) return null;
+
+  const isTier1 = coupon.tier === 1;
+
+  return (
+    <div className={`relative rounded-3xl overflow-hidden mb-6 border ${isTier1 ? 'border-yellow-500/40 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-600/10' : 'border-blue-500/40 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-blue-600/10'}`}>
+      {/* Glow orbs */}
+      <div className={`absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-30 ${isTier1 ? 'bg-yellow-500' : 'bg-blue-500'}`} />
+      <div className={`absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-3xl opacity-20 ${isTier1 ? 'bg-orange-500' : 'bg-indigo-500'}`} />
+
+      <div className="relative p-5 sm:p-6">
+        {/* Header */}
+        <div className="flex items-start gap-3 mb-4">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${isTier1 ? 'bg-yellow-500/20' : 'bg-blue-500/20'}`}>
+            {isTier1 ? '🎉' : '⚡'}
+          </div>
+          <div>
+            <div className={`text-xs font-extrabold uppercase tracking-widest mb-0.5 ${isTier1 ? 'text-yellow-400' : 'text-blue-400'}`}>
+              {isTier1 ? 'Exclusive Welcome Offer' : 'Last Chance — 24-Hour Deal'}
+            </div>
+            <h3 className="text-lg font-extrabold text-white leading-tight">
+              {isTier1 ? "Congratulations! You've unlocked ₹600 OFF" : "You still have a special offer — ₹300 OFF"}
+            </h3>
+          </div>
+        </div>
+
+        {/* Coupon code */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex-1 flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-4 py-3">
+            <span className="text-lg font-black tracking-widest text-white">{coupon.code}</span>
+          </div>
+          <div className={`flex items-center gap-1.5 px-3 py-3 rounded-xl font-extrabold text-xs ${isTier1 ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
+            APPLIED
+          </div>
+        </div>
+
+        {/* Price display */}
+        <div className="flex items-baseline gap-3 mb-5">
+          <span className="text-zinc-500 line-through text-lg">₹1,499</span>
+          <span className={`text-5xl font-black ${isTier1 ? 'text-yellow-400' : 'text-blue-400'}`}>₹{coupon.price}</span>
+          <span className="text-zinc-400 text-sm">/first month</span>
+          <span className={`ml-auto px-2.5 py-1 rounded-lg text-xs font-extrabold ${isTier1 ? 'bg-red-500 text-white' : 'bg-red-500 text-white'}`}>
+            SAVE ₹{coupon.discount}
+          </span>
+        </div>
+
+        {/* Countdown */}
+        <div className="mb-5">
+          <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${isTier1 ? 'text-yellow-400/70' : 'text-blue-400/70'}`}>
+            ⏰ Offer expires in
+          </p>
+          <div className="flex items-center gap-2">
+            {isTier1 ? (
+              <>
+                <DigitBlock value={m} label="min" />
+                <span className="text-3xl font-black text-white/30 mb-4">:</span>
+                <DigitBlock value={s} label="sec" />
+              </>
+            ) : (
+              <>
+                <DigitBlock value={h} label="hrs" />
+                <span className="text-3xl font-black text-white/30 mb-4">:</span>
+                <DigitBlock value={m} label="min" />
+                <span className="text-3xl font-black text-white/30 mb-4">:</span>
+                <DigitBlock value={s} label="sec" />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={onPay}
+          disabled={loading}
+          className={`w-full py-4 rounded-2xl font-extrabold text-base transition active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg ${
+            isTier1
+              ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black shadow-yellow-500/25'
+              : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white shadow-blue-500/25'
+          }`}
+        >
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              🔥 Pay ₹{coupon.price} & Activate Now
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </>
+          )}
+        </button>
+
+        <p className="text-center text-xs text-zinc-600 mt-3">
+          Then ₹1,499/month · No auto-debit · Cancel anytime
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function PlansPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -43,6 +199,7 @@ export default function PlansPage() {
   const [subStatus, setSubStatus] = useState<SubStatus | null>(null);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [coupon, setCoupon] = useState<CouponInfo | null>(null);
 
   const fetchOffers = async () => {
     try {
@@ -59,6 +216,7 @@ export default function PlansPage() {
       if (data.success) {
         setSubStatus(data.subscription);
         setPayments(data.payments || []);
+        if (data.coupon) setCoupon(data.coupon);
       }
     } catch (error) {
       console.error('Failed to fetch status:', error);
@@ -70,8 +228,6 @@ export default function PlansPage() {
     await Promise.all([fetchOffers(), fetchStatus()]);
     setFetchingOffers(false);
   }, [fetchStatus]);
-
-  const autoCheckout = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -85,25 +241,15 @@ export default function PlansPage() {
 
     if (params.get('checkout') === '1') {
       window.history.replaceState({}, '', '/dashboard/plans');
-      autoCheckout.current = true;
     }
 
     loadData();
   }, [loadData, fetchStatus]);
 
-  // Auto-open Razorpay after data loads when coming from signup
-  useEffect(() => {
-    if (autoCheckout.current && !fetchingOffers) {
-      autoCheckout.current = false;
-      handlePayNow();
-    }
-  }, [fetchingOffers]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const paidOffers = offers.filter(o => o.plan_type === 'pro' && !o.is_user_offer);
   const userOffers = offers.filter((o: any) => o.is_user_offer);
 
   const isActive = subStatus?.status === 'active';
-  const isTrial = false; // trial removed — treat as free
   const isExpired = subStatus?.status === 'expired';
   const isFree = !subStatus || subStatus.status === 'free' || subStatus.status === 'trial';
 
@@ -123,32 +269,32 @@ export default function PlansPage() {
       const data = await apiFetch('/payment/create-order', { method: 'POST' });
 
       if (!data.success) {
-        // Razorpay not configured — open WhatsApp fallback
         if (data.whatsappFallback) {
           window.open(data.whatsappFallback, '_blank');
         } else {
           toast.error(data.error || 'Failed to initiate payment');
         }
+        setLoading(false);
         return;
       }
 
       const loaded = await loadRazorpay();
       if (!loaded) {
         toast.error('Payment gateway failed to load. Try again or contact support.');
+        setLoading(false);
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rzp = new (window as any).Razorpay({
         key: data.keyId,
         amount: data.amount,
         currency: data.currency,
         order_id: data.orderId,
         name: 'Scalify',
-        description: 'Scalify Pro — ₹1,499/month',
+        description: data.description || 'Scalify Pro',
         image: 'https://scalifyapp.com/logo.png',
         prefill: { email: user?.email || '', name: user?.name || '' },
-        theme: { color: '#6366F1' },
+        theme: { color: '#22c55e' },
         modal: { ondismiss: () => setLoading(false) },
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
           try {
@@ -161,6 +307,9 @@ export default function PlansPage() {
               }),
             });
             if (verify.success) {
+              if (typeof window !== 'undefined' && (window as any).fbq) {
+                (window as any).fbq('track', 'Purchase', { value: data.displayPrice || 1499, currency: 'INR' });
+              }
               toast.success('Payment successful! Scalify Pro activated!', { duration: 5000 });
               fetchStatus();
             } else {
@@ -212,18 +361,24 @@ export default function PlansPage() {
 
   return (
     <div className="max-w-lg mx-auto md:max-w-2xl pb-28">
+
+      {/* ── Coupon Banner (free/expired users only) ── */}
+      {(isFree || isExpired) && coupon && (
+        <CouponBanner coupon={coupon} onPay={handlePayNow} loading={loading} />
+      )}
+
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-2xl md:text-[28px] font-extrabold leading-tight">
-          {isActive || isTrial ? 'Your Plan' : <>One Plan.<br />Everything You Need.</>}
+          {isActive ? 'Your Plan' : <>One Plan.<br />Everything You Need.</>}
         </h1>
         <p className="text-sm text-zinc-500 mt-1.5">
-          {isActive ? 'Your subscription is active' : isTrial ? "You're on a free trial" : isExpired ? 'Your plan has expired' : 'No confusing tiers. Just one powerful plan.'}
+          {isActive ? 'Your subscription is active' : isExpired ? 'Your plan has expired' : 'No confusing tiers. Just one powerful plan.'}
         </p>
       </div>
 
       {/* Current Plan Badge for Free Users */}
-      {isFree && (
+      {isFree && !coupon && (
         <div className="rounded-2xl p-4 mb-5 bg-zinc-800/40 border border-zinc-700/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-zinc-700/50 flex items-center justify-center">
@@ -238,50 +393,54 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Status Banner */}
-      {(isActive || isTrial || isExpired) && (
-        <div className={`rounded-2xl p-5 mb-4 border ${
-          isActive ? 'bg-green-500/5 border-green-500/30' : isTrial ? 'bg-yellow-500/5 border-yellow-500/30' : 'bg-red-500/5 border-red-500/30'
-        }`}>
+      {/* Active subscription status */}
+      {isActive && (
+        <div className="rounded-2xl p-5 mb-4 border bg-green-500/5 border-green-500/30">
           <div className="flex items-center gap-3">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isActive ? '#22c55e' : isTrial ? '#F59E0B' : '#ef4444'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {isActive ? <><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></> :
-               isTrial ? <><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></> :
-               <><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></>}
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>
             </svg>
             <div className="flex-1">
-              <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wide">
-                {isActive ? 'Active' : isTrial ? 'Free Trial' : 'Expired'}
-              </div>
-              <div className="text-lg font-bold">{subStatus?.plan === 'pro' ? 'Scalify Pro' : 'Trial Plan'}</div>
+              <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wide">Active</div>
+              <div className="text-lg font-bold">Scalify Pro</div>
             </div>
-            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-              isActive ? 'bg-green-500/20 text-green-400' : isTrial ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-400'
-            }`}>
-              {isActive || isTrial ? `${subStatus?.daysLeft}d left` : 'Expired'}
+            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-green-500/20 text-green-400">
+              {subStatus?.daysLeft}d left
             </span>
           </div>
-
           {subStatus?.expiryDate && (
             <div className="mt-4 pt-3 border-t border-border space-y-1.5 text-sm">
               {subStatus.startDate && (
                 <div className="flex justify-between"><span className="text-zinc-500">Started</span><span className="font-semibold">{formatDate(subStatus.startDate)}</span></div>
               )}
-              <div className="flex justify-between"><span className="text-zinc-500">{isExpired ? 'Expired on' : 'Expires on'}</span><span className="font-semibold">{formatDate(subStatus.expiryDate)}</span></div>
+              <div className="flex justify-between"><span className="text-zinc-500">Expires on</span><span className="font-semibold">{formatDate(subStatus.expiryDate)}</span></div>
             </div>
-          )}
-
-          {(isExpired || isTrial) && (
-            <button onClick={handlePayNow} disabled={loading} className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl font-bold transition hover:bg-primary-dark disabled:opacity-50">
-              {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> :
-                <>{isExpired ? 'Renew Now' : 'Upgrade to Pro'}</>}
-            </button>
           )}
         </div>
       )}
 
+      {/* Expired status */}
+      {isExpired && (
+        <div className="rounded-2xl p-5 mb-4 border bg-red-500/5 border-red-500/30">
+          <div className="flex items-center gap-3">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+            </svg>
+            <div className="flex-1">
+              <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wide">Expired</div>
+              <div className="text-lg font-bold">Scalify Pro</div>
+            </div>
+            <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-500/20 text-red-400">Expired</span>
+          </div>
+          {subStatus?.expiryDate && (
+            <div className="mt-4 pt-3 border-t border-border text-sm">
+              <div className="flex justify-between"><span className="text-zinc-500">Expired on</span><span className="font-semibold">{formatDate(subStatus.expiryDate)}</span></div>
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* 🎁 Custom Offers (sent by admin specifically for this user) */}
+      {/* Custom Offers (admin-sent) */}
       {userOffers.length > 0 && (
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-3">
@@ -298,9 +457,7 @@ export default function PlansPage() {
 
               return (
                 <div key={offer.id} className="relative rounded-2xl p-5 bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/40 overflow-hidden">
-                  {/* Glow */}
                   <div className="absolute -top-6 -right-6 w-24 h-24 bg-green-500/20 rounded-full blur-2xl pointer-events-none" />
-
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-500/20 text-green-400 text-[10px] font-extrabold tracking-wider rounded-full mb-2">
@@ -313,7 +470,6 @@ export default function PlansPage() {
                       <span className="flex-shrink-0 px-2 py-1 bg-red-500 text-white text-xs font-extrabold rounded-lg">{discount}% OFF</span>
                     )}
                   </div>
-
                   <div className="flex items-baseline gap-2 mt-3">
                     <span className="text-4xl font-extrabold text-green-400">₹{offer.price}</span>
                     {offer.original_price > offer.price && (
@@ -321,14 +477,12 @@ export default function PlansPage() {
                     )}
                     <span className="text-zinc-500 text-sm">/month</span>
                   </div>
-
                   {hoursLeft !== null && (
                     <div className="flex items-center gap-1.5 mt-2 text-xs text-yellow-400 font-semibold">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                       Expires in {hoursLeft < 24 ? `${hoursLeft}h` : `${Math.ceil(hoursLeft / 24)}d`}
                     </div>
                   )}
-
                   <button
                     onClick={handlePayNow}
                     disabled={loading}
@@ -374,10 +528,7 @@ export default function PlansPage() {
             )}
 
             <div className="border-t border-border my-5" />
-
-            <p className="text-xs text-zinc-500 italic mb-4">
-              Pay manually each month — no auto-debit
-            </p>
+            <p className="text-xs text-zinc-500 italic mb-4">Pay manually each month — no auto-debit</p>
 
             {offer.features.length > 0 && (
               <>
@@ -435,14 +586,14 @@ export default function PlansPage() {
       </div>
 
       {/* Cancel Sub */}
-      {(isActive || isTrial) && (
+      {isActive && (
         <button onClick={handleCancel} disabled={cancelLoading} className="block mx-auto text-sm text-red-400 font-semibold underline mb-6 disabled:opacity-50">
           {cancelLoading ? 'Cancelling...' : 'Cancel Subscription'}
         </button>
       )}
 
-      {/* Sticky Bottom Subscribe Button */}
-      {(isFree || isExpired || isTrial) && paidOffers.length > 0 && (
+      {/* Sticky Bottom Subscribe Button (no coupon active) */}
+      {(isFree || isExpired) && !coupon && paidOffers.length > 0 && (
         <div className="fixed bottom-16 md:bottom-0 left-0 right-0 md:left-64 z-40 bg-bg border-t border-border px-5 py-3 flex flex-col items-center">
           <button
             onClick={handlePayNow}
@@ -450,7 +601,7 @@ export default function PlansPage() {
             className="w-full max-w-lg flex items-center justify-center gap-2 py-4 bg-primary text-white rounded-2xl font-bold text-base transition hover:bg-primary-dark disabled:opacity-50"
           >
             {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> :
-              <>{isExpired ? 'Renew Now' : isTrial ? 'Upgrade to Pro' : 'Subscribe Now'} — ₹{paidOffers[0].price}/mo
+              <>{isExpired ? 'Renew Now' : 'Subscribe Now'} — ₹{paidOffers[0].price}/mo
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </>}
           </button>

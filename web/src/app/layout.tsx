@@ -5,9 +5,9 @@ import { Toaster } from 'react-hot-toast';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'Scalify — Professional Website in 60 Seconds',
-  description: 'Get a professional, SEO-optimized website for your business in 60 seconds. Just chat with our AI and go live. Starting at ₹199/month.',
-  keywords: 'website builder, AI website, business website, SEO, cheap website',
+  title: 'Scalify — Professional Business Website Starting ₹1,499/month',
+  description: 'Get a professional, SEO-optimized website for your business. AI-powered website + Google SEO + WhatsApp leads. All starting at ₹1,499/month. Live in 60 seconds.',
+  keywords: 'website builder, AI website, business website, SEO, professional website India',
   icons: {
     icon: '/icon.png',
     shortcut: '/favicon.png',

@@ -382,15 +382,25 @@ export default function LandingPage() {
               </div>
 
               <div className="rounded-3xl border border-green-500/20 bg-gradient-to-b from-zinc-900 to-zinc-950 p-8 shadow-2xl shadow-green-500/5">
-                {/* Plan name */}
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400 mb-4">Growth Plan</p>
+                {/* Plan name + urgency */}
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400">Growth Plan</p>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2.5 py-1 rounded-full">
+                    🔥 First 1000 users
+                  </span>
+                </div>
 
                 {/* Price */}
-                <div className="flex items-end gap-1 mb-2">
+                <div className="flex items-end gap-2 mb-1">
+                  <span className="text-zinc-500 line-through text-xl">₹2,499</span>
                   <span className="text-4xl font-extrabold text-white leading-none">₹1,499</span>
                   <span className="text-zinc-500 text-sm mb-1">/month</span>
                 </div>
-                <p className="text-zinc-600 text-xs mb-8">Billed monthly · Cancel anytime</p>
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="px-2 py-0.5 bg-red-500 text-white text-[11px] font-extrabold rounded-md">40% OFF</span>
+                  <span className="text-green-400 text-xs font-semibold">You save ₹12,000/year</span>
+                </div>
+                <p className="text-zinc-600 text-xs mb-8">Billed monthly · Cancel anytime · No auto-debit</p>
 
                 {/* Feature list */}
                 <ul className="space-y-3.5 mb-9">
