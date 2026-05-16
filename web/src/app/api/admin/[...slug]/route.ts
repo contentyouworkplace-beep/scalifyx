@@ -97,20 +97,40 @@ async function handleDeleteUser(req: Request, userId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
 
-  // Delete related data
+  // Delete auth user first — this prevents FK constraint errors on cascaded tables
+  const { error: authErr } = await db().auth.admin.deleteUser(userId);
+  if (authErr) {
+    console.error('Auth delete error:', authErr);
+    return Response.json({ error: authErr.message }, { status: 500 });
+  }
+
+  // Wipe all remaining rows (ON DELETE CASCADE handles most, this catches the rest)
   await Promise.allSettled([
+    db().from('website_progress').delete().eq('user_id', userId),
+    db().from('task_comments').delete().eq('user_id', userId),
     db().from('subscriptions').delete().eq('user_id', userId),
     db().from('payments').delete().eq('user_id', userId),
     db().from('websites').delete().eq('user_id', userId),
+    db().from('notifications').delete().eq('user_id', userId),
+    db().from('profiles').delete().eq('id', userId),
   ]);
-  await db().from('profiles').delete().eq('id', userId);
 
-  // Delete auth user
-  const { error } = await db().auth.admin.deleteUser(userId);
-  if (error) {
-    console.error('Auth delete error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
+  return Response.json({ success: true });
+}
+
+// ── POST /api/admin/users/:id/set-password ────────────────────────────────────
+async function handleSetPassword(req: Request, userId: string) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+
+  let body: { password: string };
+  try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
+
+  const { password } = body;
+  if (!password || password.length < 6) return Response.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
+
+  const { error } = await db().auth.admin.updateUserById(userId, { password });
+  if (error) return Response.json({ error: error.message }, { status: 500 });
 
   return Response.json({ success: true });
 }
@@ -297,6 +317,8 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
   if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'set-plan') return handleSetPlan(req, slug[1]);
   // /users/:id/manual-upgrade
   if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'manual-upgrade') return handleManualUpgrade(req, slug[1]);
+  // /users/:id/set-password
+  if (slug.length === 3 && slug[0] === 'users' && slug[2] === 'set-password') return handleSetPassword(req, slug[1]);
   // /subscriptions/:id/extend  (also used as /payment/admin/extend/:id)
   if (slug.length === 3 && slug[0] === 'subscriptions' && slug[2] === 'extend') return handleExtend(req, slug[1]);
 

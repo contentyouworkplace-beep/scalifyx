@@ -156,6 +156,77 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
   );
 }
 
+// ── Set Password Modal ────────────────────────────────────────────────────────
+function SetPasswordModal({ user, onClose }: { user: User; onClose: () => void }) {
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
+    setSaving(true);
+    try {
+      await apiFetch(`/admin/users/${user.id}/set-password`, {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      });
+      toast.success('Password updated');
+      onClose();
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to set password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-xs rounded-2xl bg-zinc-900 border border-border shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="text-lg font-extrabold">Set Password</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">{user.name || user.email}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center text-sm transition">✕</button>
+        </div>
+
+        <p className="text-xs text-zinc-500 mb-4 leading-relaxed">
+          Passwords are hashed — this sets a new password for the user. Share it with them via WhatsApp.
+        </p>
+
+        <div>
+          <label className="text-xs font-semibold text-zinc-500 mb-1 block">New Password</label>
+          <div className="relative">
+            <input
+              type={showPw ? 'text' : 'password'}
+              placeholder="Min 6 characters"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-primary/60 pr-10"
+              autoFocus
+            />
+            <button type="button" onClick={() => setShowPw(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition">
+              {showPw
+                ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
+        </div>
+
+        <button
+          onClick={submit}
+          disabled={saving || password.length < 6}
+          className="w-full mt-4 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-extrabold text-sm transition disabled:opacity-50 flex items-center justify-center gap-2"
+        >
+          {saving ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Set Password'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Set Plan Modal ────────────────────────────────────────────────────────────
 function SetPlanModal({ user, onClose, onDone }: { user: User; onClose: () => void; onDone: () => void }) {
   const [plan, setPlan] = useState<'free' | 'pro'>('pro');
@@ -265,6 +336,7 @@ function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
   const [deleting, setDeleting] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
   const [showSetPlan, setShowSetPlan] = useState(false);
+  const [showSetPassword, setShowSetPassword] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm(`Delete ${user.name || user.email}?\n\nThis permanently removes the user, their subscription, and all data. This cannot be undone.`)) return;
@@ -299,6 +371,9 @@ function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
     <>
       {showSetPlan && (
         <SetPlanModal user={user} onClose={() => setShowSetPlan(false)} onDone={onRefresh} />
+      )}
+      {showSetPassword && (
+        <SetPasswordModal user={user} onClose={() => setShowSetPassword(false)} />
       )}
 
       <div className="border-b border-border last:border-0">
@@ -450,6 +525,15 @@ function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                   {upgrading ? '…' : '⬆ Quick PRO (₹1,499)'}
                 </button>
               )}
+
+              {/* Set Password */}
+              <button
+                onClick={() => setShowSetPassword(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold hover:bg-zinc-700 hover:text-white transition"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Password
+              </button>
 
               {/* Work tracker */}
               <Link
