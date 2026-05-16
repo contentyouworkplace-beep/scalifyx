@@ -41,7 +41,7 @@ export default function AdminPaymentsPage() {
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/payment/admin/all');
+      const data = await apiFetch('/admin/payments');
       setPayments((data.payments || []).map((p: any) => ({
         id: p.id,
         userName: p.profiles?.name || 'Unknown',

@@ -46,9 +46,8 @@ export default function AdminDashboard() {
 
   const load = useCallback(async () => {
     try {
-      const [dash, activity, usersData] = await Promise.all([
+      const [dash, usersData] = await Promise.all([
         apiFetch('/admin/dashboard'),
-        apiFetch('/admin/activity'),
         apiFetch('/admin/users'),
       ]);
       setStats({
@@ -58,7 +57,6 @@ export default function AdminDashboard() {
         monthlyRevenue: dash.metrics?.monthly?.revenue || 0,
         monthlyNewUsers: dash.metrics?.monthly?.newUsers || 0,
       });
-      // Use full user data for recent signups
       const recent = (usersData.users || []).slice(0, 8).map((u: any) => ({
         id: u.id,
         name: u.name || 'Unknown',

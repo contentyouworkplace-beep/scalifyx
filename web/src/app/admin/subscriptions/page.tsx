@@ -50,7 +50,7 @@ export default function AdminSubscriptionsPage() {
   const fetchSubs = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/payment/admin/subscriptions');
+      const data = await apiFetch('/admin/subscriptions');
       setSubs((data.subscriptions || []).map((s: any) => ({
         id: s.id,
         userName: s.profiles?.name || 'Unknown',
@@ -72,7 +72,7 @@ export default function AdminSubscriptionsPage() {
     if (!confirm(`Extend ${sub.userName}'s subscription by 30 days?`)) return;
     setExtending(sub.id);
     try {
-      await apiFetch(`/payment/admin/extend/${sub.id}`, { method: 'POST', body: JSON.stringify({ days: 30 }) });
+      await apiFetch(`/admin/subscriptions/${sub.id}/extend`, { method: 'POST', body: JSON.stringify({ days: 30 }) });
       toast.success('Extended by 30 days');
       fetchSubs();
     } catch {
