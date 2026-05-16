@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { apiFetch } from '@/lib/api';
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -21,19 +20,8 @@ const PLAN_FEATURES = [
   '24/7 Priority Support',
 ];
 
-function loadRazorpay(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if ((window as any).Razorpay) return resolve(true);
-    const s = document.createElement('script');
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    s.onload = () => resolve(true);
-    s.onerror = () => resolve(false);
-    document.body.appendChild(s);
-  });
-}
-
 export function SignupModal({ isOpen, onClose }: SignupModalProps) {
-  const { signUp, user } = useAuth();
+  const { signUp } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -42,7 +30,6 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
-  const [paymentDismissed, setPaymentDismissed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -53,7 +40,6 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
       setPassword('');
       setError('');
       setLoading(false);
-      setPaymentDismissed(false);
     }
   }, [isOpen]);
 
@@ -68,77 +54,6 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
     }, 400);
     return () => clearInterval(interval);
   }, [loading]);
-
-  const openRazorpay = async (prefill: { email: string; name: string }) => {
-    try {
-      const data = await apiFetch('/payment/create-order', { method: 'POST' });
-
-      if (!data.success) {
-        if (data.whatsappFallback) {
-          window.open(data.whatsappFallback, '_blank');
-          setLoading(false);
-          return;
-        }
-        setError(data.error || 'Failed to initiate payment. Please try again.');
-        setLoading(false);
-        return;
-      }
-
-      const loaded = await loadRazorpay();
-      if (!loaded) {
-        setError('Payment gateway failed to load. Please refresh and try again.');
-        setLoading(false);
-        return;
-      }
-
-      setLoading(false);
-
-      const rzp = new (window as any).Razorpay({
-        key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
-        order_id: data.orderId,
-        name: 'Scalify',
-        description: 'Scalify Pro — ₹1,499/month',
-        image: 'https://scalifyapp.com/logo.png',
-        prefill,
-        theme: { color: '#22c55e' },
-        modal: {
-          ondismiss: () => setPaymentDismissed(true),
-        },
-        handler: async (response: {
-          razorpay_order_id: string;
-          razorpay_payment_id: string;
-          razorpay_signature: string;
-        }) => {
-          try {
-            const verify = await apiFetch('/payment/verify', {
-              method: 'POST',
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            });
-            if (verify.success) {
-              if (typeof window !== 'undefined' && (window as any).fbq) {
-                (window as any).fbq('track', 'Purchase', { value: 1499, currency: 'INR' });
-              }
-              router.replace('/dashboard');
-            } else {
-              setError(verify.error || 'Payment verification failed. Contact support on WhatsApp.');
-            }
-          } catch {
-            setError('Verification failed. Please contact support on WhatsApp.');
-          }
-        },
-      });
-      rzp.open();
-    } catch (err: any) {
-      setError(err.message || 'Failed to initiate payment. Please try again.');
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,17 +79,8 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
       (window as any).fbq('track', 'Lead');
     }
 
-    await openRazorpay({ email, name });
-  };
-
-  const handleRetryPayment = () => {
-    setPaymentDismissed(false);
-    setError('');
-    setLoading(true);
-    openRazorpay({
-      email: user?.email || email,
-      name: user?.name || name,
-    });
+    // Redirect to plans page — Razorpay will auto-open once session is ready
+    router.replace('/dashboard/plans?checkout=1');
   };
 
   if (!isOpen) return null;
@@ -209,25 +115,8 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
             </p>
           </div>
 
-          {/* Payment dismissed — retry state */}
-          {paymentDismissed && (
-            <div className="mb-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4">
-              <p className="text-sm text-yellow-400 font-semibold mb-1">Payment not completed</p>
-              <p className="text-xs text-zinc-400 mb-3">Your account was created. Complete payment to access your dashboard.</p>
-              {error && <p className="text-xs text-red-400 mb-3">{error}</p>}
-              <button
-                onClick={handleRetryPayment}
-                disabled={loading}
-                className="w-full rounded-lg bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-2.5 transition disabled:opacity-50"
-              >
-                {loading ? 'Opening payment...' : 'Complete Payment — ₹1,499'}
-              </button>
-            </div>
-          )}
-
           {/* Signup form */}
-          {!paymentDismissed && (
-            <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="block text-sm font-semibold text-white mb-2">Company Name</label>
                 <input
@@ -327,7 +216,6 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
                 {loading ? loadingText : 'Create Account & Pay ₹1,499 →'}
               </button>
             </form>
-          )}
 
           {/* Footer */}
           <div className="mt-4 pt-4 border-t border-border">

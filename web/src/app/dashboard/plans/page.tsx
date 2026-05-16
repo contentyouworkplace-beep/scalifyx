@@ -2,7 +2,7 @@
 
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { DiamondIcon, ShieldIcon, CheckCircleIcon } from '../../../components/Icons';
 
@@ -71,17 +71,33 @@ export default function PlansPage() {
     setFetchingOffers(false);
   }, [fetchStatus]);
 
+  const autoCheckout = useRef(false);
+
   useEffect(() => {
-    loadData();
-    // Handle Razorpay redirect back after payment
     const params = new URLSearchParams(window.location.search);
+
     if (params.get('payment') === 'success') {
       toast.success('Payment successful! Your Pro plan is being activated.', { duration: 6000 });
       window.history.replaceState({}, '', '/dashboard/plans');
       const poll = setInterval(() => { fetchStatus(); }, 3000);
       setTimeout(() => clearInterval(poll), 30000);
     }
+
+    if (params.get('checkout') === '1') {
+      window.history.replaceState({}, '', '/dashboard/plans');
+      autoCheckout.current = true;
+    }
+
+    loadData();
   }, [loadData, fetchStatus]);
+
+  // Auto-open Razorpay after data loads when coming from signup
+  useEffect(() => {
+    if (autoCheckout.current && !fetchingOffers) {
+      autoCheckout.current = false;
+      handlePayNow();
+    }
+  }, [fetchingOffers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const paidOffers = offers.filter(o => o.plan_type === 'pro' && !o.is_user_offer);
   const userOffers = offers.filter((o: any) => o.is_user_offer);
