@@ -99,7 +99,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
     if (typeof window !== 'undefined' && (window as any).fbq) {
       (window as any).fbq('track', 'Lead');
     }
-    router.replace('/signup-success');
+    router.replace('/dashboard/plans?checkout=1');
   };
 
   return (

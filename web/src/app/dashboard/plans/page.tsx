@@ -7,6 +7,116 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { DiamondIcon, ShieldIcon, CheckCircleIcon } from '../../../components/Icons';
 
+// ── Video Player ──────────────────────────────────────────────────────────────
+function VideoSection() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); }
+    flashControls();
+  };
+
+  const flashControls = () => {
+    setShowControls(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setPlaying(p => { if (p) setShowControls(false); return p; }), 2500);
+  };
+
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  return (
+    <div className="mb-6">
+      <div
+        className="relative w-full rounded-2xl overflow-hidden border-2 border-white/20 bg-black cursor-pointer group"
+        style={{ aspectRatio: '16/9' }}
+        onClick={togglePlay}
+        onMouseMove={flashControls}
+      >
+        <video
+          ref={videoRef}
+          src="/demo.mp4"
+          className="w-full h-full object-cover"
+          playsInline
+          preload="metadata"
+          onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+          onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
+          onEnded={() => { setPlaying(false); setShowControls(true); }}
+        />
+
+        {/* Big play button overlay when paused */}
+        {!playing && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-2xl">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#000" className="ml-1">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+            </div>
+          </div>
+        )}
+
+        {/* Controls bar */}
+        <div className={`absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${showControls || !playing ? 'opacity-100' : 'opacity-0'}`}>
+          {/* Progress bar */}
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            value={currentTime}
+            onChange={e => {
+              const v = videoRef.current;
+              if (v) { v.currentTime = Number(e.target.value); setCurrentTime(Number(e.target.value)); }
+            }}
+            onClick={e => e.stopPropagation()}
+            className="w-full h-1 accent-white mb-2 cursor-pointer"
+          />
+          <div className="flex items-center gap-3">
+            {/* Play/pause */}
+            <button
+              onClick={e => { e.stopPropagation(); togglePlay(); }}
+              className="text-white hover:text-zinc-300 transition flex-shrink-0"
+            >
+              {playing ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              )}
+            </button>
+            {/* Time */}
+            <span className="text-xs text-white/80 tabular-nums">{fmt(currentTime)} / {fmt(duration)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── WhatsApp CTA ──────────────────────────────────────────────────────────────
+function WhatsAppCTA() {
+  return (
+    <a
+      href="https://wa.me/916353583148?text=Hi%2C%20I%20have%20a%20question%20before%20buying%20the%20Scalify%20membership"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-[#25D366] hover:bg-[#20b858] transition active:scale-[0.99] shadow-lg shadow-green-500/20 mb-6"
+    >
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421-7.403h-.004a9.87 9.87 0 00-5.031 1.378L2 18l1.382-4.882A9.86 9.86 0 012.086 8.978C2.086 3.95 6.036 0 11.064 0c2.427 0 4.706.945 6.42 2.66a9.01 9.01 0 012.651 6.403c-.002 5.029-3.952 9.319-8.084 9.319z"/>
+      </svg>
+      <div className="text-left">
+        <div className="text-white font-extrabold text-base leading-tight">Still Deciding? Chat With Us</div>
+        <div className="text-white/80 text-xs">We'll answer any question before you buy</div>
+      </div>
+    </a>
+  );
+}
+
 interface Offer {
   id: string;
   name: string;
@@ -385,6 +495,12 @@ export default function PlansPage() {
       {(isFree || isExpired) && coupon && (
         <CouponBanner coupon={coupon} onPay={handlePayNow} loading={loading} />
       )}
+
+      {/* ── Demo Video (free/expired users only) ── */}
+      {(isFree || isExpired) && <VideoSection />}
+
+      {/* ── WhatsApp CTA (free/expired users only) ── */}
+      {(isFree || isExpired) && <WhatsAppCTA />}
 
       {/* Header */}
       <div className="mb-5">
