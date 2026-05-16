@@ -103,9 +103,9 @@ export default function PlansPage() {
   const userOffers = offers.filter((o: any) => o.is_user_offer);
 
   const isActive = subStatus?.status === 'active';
-  const isTrial = subStatus?.status === 'trial';
+  const isTrial = false; // trial removed — treat as free
   const isExpired = subStatus?.status === 'expired';
-  const isFree = !subStatus || subStatus.status === 'free';
+  const isFree = !subStatus || subStatus.status === 'free' || subStatus.status === 'trial';
 
   const loadRazorpay = (): Promise<boolean> =>
     new Promise((resolve) => {

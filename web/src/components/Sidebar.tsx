@@ -49,11 +49,9 @@ export function Sidebar({ variant }: { variant: 'user' | 'admin' }) {
       <div className="px-6 py-4 border-b border-border">
         <div className="text-sm font-medium truncate">{user?.name || 'User'}</div>
         <div className="text-xs text-zinc-500 truncate">{user?.email}</div>
-        {variant === 'user' && user?.plan && (
-          <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full font-medium ${
-            user.plan === 'pro' ? 'bg-primary/10 text-primary' : 'bg-zinc-700 text-zinc-300'
-          }`}>
-            {user.plan.toUpperCase()}
+        {variant === 'user' && user?.plan === 'pro' && (
+          <span className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full font-medium bg-primary/10 text-primary">
+            PRO
           </span>
         )}
       </div>
