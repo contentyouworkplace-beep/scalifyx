@@ -106,10 +106,10 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
     <div id="signup-form" className="rounded-2xl border border-border bg-card p-5 sm:p-6">
       <div className="mb-4">
         <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-[1.15] mb-2">
-          Start Your 7-Day Free Trial
+          Get Your Business Online Today
         </h2>
         <p className="text-xs sm:text-sm text-zinc-500">
-          No credit card required. Access all features instantly.
+          Website + SEO + WhatsApp leads — starting at ₹1,499/month
         </p>
       </div>
 
@@ -159,7 +159,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           disabled={loading}
           className="w-full rounded-lg bg-green-500 px-3 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-green-400 active:scale-[0.99] disabled:opacity-50"
         >
-          {loading ? loadingText : 'Start Free Trial'}
+          {loading ? loadingText : 'Get Started — ₹1,499/month'}
         </button>
       </form>
 
@@ -206,8 +206,8 @@ const FAQS = [
     a: 'Yes! You get a free subdomain (yourbusiness.scalifyapp.com) instantly. If you want your own domain, buy it from GoDaddy or Hostinger (₹500–800/year) and we connect it for free.',
   },
   {
-    q: 'Do I need a credit card to sign up?',
-    a: 'No credit card required to create your account. You only pay when you\'re ready to go live — ₹1,499/month. No hidden charges, no setup fee.',
+    q: 'How do I pay?',
+    a: 'Payment is via Razorpay — India\'s most trusted payment gateway. Pay ₹1,499/month manually each month. No auto-debit, no hidden charges, no setup fee. Cancel anytime.',
   },
   {
     q: 'Is Scalify legitimate? Can I trust you?',
@@ -323,7 +323,7 @@ export default function LandingPage() {
               onClick={() => setShowSignupModal(true)}
               className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-lg transition"
             >
-              Start 7-Day Free Trial
+              Get Started
             </button>
           </div>
         </div>
@@ -366,7 +366,7 @@ export default function LandingPage() {
             </div>
 
             <div className="text-sm text-zinc-600">
-              <p className="mb-2">✓ No credit card required · ✓ Auto-trial activation · ✓ Cancel anytime</p>
+              <p className="mb-2">✓ Secure payment via Razorpay · ✓ No auto-debit · ✓ Cancel anytime</p>
               <p className="text-xs text-zinc-700">{spotsLeft} launch spots remaining — Act now to secure yours</p>
             </div>
           </div>
@@ -422,10 +422,10 @@ export default function LandingPage() {
                   onClick={() => setShowSignupModal(true)}
                   className="block w-full text-center bg-green-500 hover:bg-green-400 text-black font-extrabold text-sm py-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/20 hover:shadow-green-400/30 tracking-wide"
                 >
-                  Start 7-Day Free Trial
+                  Get Started — ₹1,499/month
                 </button>
 
-                <p className="text-center text-zinc-600 text-xs mt-4">No credit card required</p>
+                <p className="text-center text-zinc-600 text-xs mt-4">Secure payment · No auto-debit · Cancel anytime</p>
               </div>
             </div>
           </div>
@@ -519,7 +519,7 @@ export default function LandingPage() {
               onClick={() => setShowSignupModal(true)}
               className="px-10 py-4 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition"
             >
-              Start 7-Day Free Trial
+              Get Started — ₹1,499/month
             </button>
             <p className="mt-3 text-zinc-700 text-sm">Only {spotsLeft} launch seats remaining</p>
           </div>
@@ -687,7 +687,7 @@ export default function LandingPage() {
               onClick={() => setShowSignupModal(true)}
               className="px-7 py-3.5 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-xl transition"
             >
-              Start 7-Day Free Trial
+              Get Started — ₹1,499/month
             </button>
           </div>
         </div>
@@ -714,8 +714,8 @@ export default function LandingPage() {
             {[
               {
                 step: '01',
-                title: 'Tell Us Who You Are',
-                desc: 'Name, phone, email. Done in under 30 seconds. No credit card. No paperwork. Your account is live the moment you hit submit.',
+                title: 'Create Your Account',
+                desc: 'Name, phone, email, password — done in 30 seconds. Pay securely via Razorpay and your account goes live instantly.',
                 cta: true,
               },
               {
@@ -740,7 +740,7 @@ export default function LandingPage() {
                     onClick={() => setShowSignupModal(true)}
                     className="mt-6 w-full py-3 bg-green-500 hover:bg-green-400 text-white rounded-xl font-bold text-sm transition"
                   >
-                    Start 7-Day Free Trial
+                    Get Started — ₹1,499/month
                   </button>
                 )}
               </div>
@@ -878,10 +878,10 @@ export default function LandingPage() {
             onClick={() => setShowSignupModal(true)}
             className="px-14 py-5 bg-green-500 hover:bg-green-400 text-white text-lg font-extrabold rounded-2xl transition"
           >
-            Start 7-Day Free Trial
+            Get Started — ₹1,499/month
           </button>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-700">
-            {['No credit card required', 'Cancel anytime', 'Live in 60 seconds'].map((t) => (
+            {['Secure payment via Razorpay', 'Cancel anytime', 'No auto-debit'].map((t) => (
               <span key={t} className="flex items-center gap-2">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                   <path d="M20 6L9 17l-5-5" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />

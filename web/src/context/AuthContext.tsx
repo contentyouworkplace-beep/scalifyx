@@ -96,20 +96,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.warn(`⚠️ Profile query error (code: ${error.code}):`, error.message);
         if (error.code === 'PGRST116') {
-          console.log('📝 Profile not found, creating fallback profile with plan=trial');
+          console.log('📝 Profile not found, creating fallback profile with plan=free');
           const { data: authUser } = await supabase.auth.getUser();
           const email = authUser?.user?.email || '';
           const name = authUser?.user?.user_metadata?.name || '';
           const { data: newProfile, error: insertError } = await supabase
             .from('profiles')
-            .upsert({ id: userId, email, name, plan: 'trial' }, { onConflict: 'id' })
+            .upsert({ id: userId, email, name, plan: 'free' }, { onConflict: 'id' })
             .select()
             .single();
           if (insertError) {
             console.error('❌ Fallback profile creation error:', insertError);
             throw insertError;
           }
-          console.log('✅ Fallback profile created with plan=trial');
+          console.log('✅ Fallback profile created with plan=free');
           data = newProfile;
         } else {
           throw error;

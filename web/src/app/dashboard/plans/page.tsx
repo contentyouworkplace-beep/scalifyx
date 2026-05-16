@@ -38,7 +38,6 @@ interface PaymentRecord {
 export default function PlansPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [trialLoading, setTrialLoading] = useState(false);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [fetchingOffers, setFetchingOffers] = useState(true);
   const [subStatus, setSubStatus] = useState<SubStatus | null>(null);
@@ -58,18 +57,6 @@ export default function PlansPage() {
     try {
       const data = await apiFetch('/payment/status');
       if (data.success) {
-        // If authenticated user has no subscription, auto-start their trial
-        if (data.subscription?.status === 'free') {
-          const trial = await apiFetch('/payment/start-trial', { method: 'POST', body: JSON.stringify({}) });
-          if (trial.success) {
-            const refreshed = await apiFetch('/payment/status');
-            if (refreshed.success) {
-              setSubStatus(refreshed.subscription);
-              setPayments(refreshed.payments || []);
-              return;
-            }
-          }
-        }
         setSubStatus(data.subscription);
         setPayments(data.payments || []);
       }
@@ -96,7 +83,6 @@ export default function PlansPage() {
     }
   }, [loadData, fetchStatus]);
 
-  const trialOffer = offers.find(o => o.plan_type === 'trial' && !o.is_user_offer);
   const paidOffers = offers.filter(o => o.plan_type === 'pro' && !o.is_user_offer);
   const userOffers = offers.filter((o: any) => o.is_user_offer);
 
@@ -104,25 +90,6 @@ export default function PlansPage() {
   const isTrial = subStatus?.status === 'trial';
   const isExpired = subStatus?.status === 'expired';
   const isFree = !subStatus || subStatus.status === 'free';
-
-  const handleStartTrial = async () => {
-    setTrialLoading(true);
-    try {
-      const data = await apiFetch('/payment/start-trial', {
-        method: 'POST',
-        body: JSON.stringify({ offerId: trialOffer?.id }),
-      });
-      if (data.success) {
-        toast.success(`Trial Activated! Your ${trialOffer?.trial_days || 7}-day free trial is now active.`);
-        fetchStatus();
-      }
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to start trial';
-      toast.error(msg);
-    } finally {
-      setTrialLoading(false);
-    }
-  };
 
   const loadRazorpay = (): Promise<boolean> =>
     new Promise((resolve) => {
@@ -297,48 +264,6 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Trial Card */}
-      {isFree && trialOffer && (
-        <div className="rounded-2xl p-5 mb-4 bg-yellow-500/5 border border-yellow-500/30">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/20 text-yellow-500 text-[11px] font-extrabold tracking-wide rounded-full mb-2.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            FREE TRIAL
-          </span>
-          <div className="text-lg font-bold">{trialOffer.name}</div>
-          {trialOffer.description && <p className="text-sm text-zinc-500 mt-0.5">{trialOffer.description}</p>}
-          <div className="flex items-baseline gap-1.5 mt-2">
-            <span className="text-3xl font-extrabold text-yellow-500">FREE</span>
-            <span className="text-sm text-zinc-500">for {trialOffer.trial_days} days</span>
-          </div>
-          {paidOffers.length > 0 && (
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-sm text-zinc-500 font-semibold">Then</span>
-              {paidOffers[0].original_price > paidOffers[0].price && (
-                <span className="text-sm text-zinc-500 line-through">₹{paidOffers[0].original_price}</span>
-              )}
-              <span className="text-lg font-extrabold text-primary">₹{paidOffers[0].price}/mo</span>
-            </div>
-          )}
-          {trialOffer.features.length > 0 && (
-            <div className="mt-3 space-y-1.5">
-              {trialOffer.features.map((f, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-                  <span>{f}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <button
-            onClick={handleStartTrial}
-            disabled={trialLoading}
-            className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-yellow-500/20 border border-yellow-500/30 text-yellow-500 rounded-xl font-bold transition hover:bg-yellow-500/30 disabled:opacity-50"
-          >
-            {trialLoading ? <div className="w-5 h-5 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /> :
-              <>Start Free Trial <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>}
-          </button>
-        </div>
-      )}
 
       {/* 🎁 Custom Offers (sent by admin specifically for this user) */}
       {userOffers.length > 0 && (

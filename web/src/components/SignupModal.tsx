@@ -3,27 +3,37 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { apiFetch } from '@/lib/api';
 
 interface SignupModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface Offer {
-  id: string;
-  name: string;
-  description?: string;
-  plan_type?: string;
-  price?: number;
-  original_price?: number;
-  trial_days?: number;
-  features: string[];
-  is_active?: boolean;
-  sort_order?: number;
+const PLAN_FEATURES = [
+  'AI-Powered Business Website',
+  'Local SEO & Google Indexing',
+  'WhatsApp Lead Capture',
+  'Mobile-First Design',
+  'SSL & Managed Hosting',
+  'Analytics Dashboard',
+  'Custom Domain Ready',
+  '24/7 Priority Support',
+];
+
+function loadRazorpay(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) return resolve(true);
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
 }
 
 export function SignupModal({ isOpen, onClose }: SignupModalProps) {
-  const { signUp } = useAuth();
+  const { signUp, user } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -32,30 +42,17 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
-  const [offer, setOffer] = useState<Offer | null>(null);
+  const [paymentDismissed, setPaymentDismissed] = useState(false);
 
-  // Fetch offers when modal opens
   useEffect(() => {
     if (isOpen) {
-      const fetchOffers = async () => {
-        try {
-          const response = await fetch('/api/offers');
-          const data = await response.json();
-          const activeOffer = data.offers?.[0];
-          if (activeOffer) {
-            setOffer(activeOffer);
-          }
-        } catch (err) {
-          console.error('Failed to fetch offers:', err);
-        }
-      };
-
-      fetchOffers();
       setName('');
       setPhone('');
       setEmail('');
       setPassword('');
       setError('');
+      setLoading(false);
+      setPaymentDismissed(false);
     }
   }, [isOpen]);
 
@@ -71,6 +68,76 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
     return () => clearInterval(interval);
   }, [loading]);
 
+  const openRazorpay = async (prefill: { email: string; name: string }) => {
+    try {
+      const data = await apiFetch('/payment/create-order', { method: 'POST' });
+
+      if (!data.success) {
+        if (data.whatsappFallback) {
+          window.open(data.whatsappFallback, '_blank');
+          setLoading(false);
+          return;
+        }
+        setError(data.error || 'Failed to initiate payment. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const loaded = await loadRazorpay();
+      if (!loaded) {
+        setError('Payment gateway failed to load. Please refresh and try again.');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+
+      const rzp = new (window as any).Razorpay({
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.orderId,
+        name: 'Scalify',
+        description: 'Scalify Pro — ₹1,499/month',
+        image: 'https://scalifyapp.com/logo.png',
+        prefill,
+        theme: { color: '#22c55e' },
+        modal: {
+          ondismiss: () => setPaymentDismissed(true),
+        },
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            const verify = await apiFetch('/payment/verify', {
+              method: 'POST',
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            if (verify.success) {
+              if (typeof window !== 'undefined' && (window as any).fbq) {
+                (window as any).fbq('track', 'Purchase', { value: 1499, currency: 'INR' });
+              }
+              router.replace('/dashboard');
+            } else {
+              setError(verify.error || 'Payment verification failed. Contact support on WhatsApp.');
+            }
+          } catch {
+            setError('Verification failed. Please contact support on WhatsApp.');
+          }
+        },
+      });
+      rzp.open();
+    } catch (err: any) {
+      setError(err.message || 'Failed to initiate payment. Please try again.');
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,14 +162,25 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
     if (typeof window !== 'undefined' && (window as any).fbq) {
       (window as any).fbq('track', 'Lead');
     }
-    router.replace('/signup-success');
+
+    await openRazorpay({ email, name });
+  };
+
+  const handleRetryPayment = () => {
+    setPaymentDismissed(false);
+    setError('');
+    setLoading(true);
+    openRazorpay({
+      email: user?.email || email,
+      name: user?.name || name,
+    });
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[75vh] rounded-3xl border border-border bg-card shadow-2xl overflow-y-auto">
+      <div className="w-full max-w-lg max-h-[85vh] rounded-3xl border border-border bg-card shadow-2xl overflow-y-auto">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -115,83 +193,100 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
           </svg>
         </button>
 
-        <div className="p-4 lg:p-6">
-          {/* Header with trial offer */}
-          <div className="mb-6 pb-6 border-b border-border">
+        <div className="p-5 lg:p-6">
+          {/* Header */}
+          <div className="mb-5 pb-5 border-b border-border">
             <div className="flex items-center gap-2 mb-3">
               <span className="h-px w-5 bg-green-500" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-green-400">Growth Plan</span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-green-400">Growth Plan — ₹1,499/month</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
-              Start Your 7-Day <span className="text-green-400">Free Trial</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-1">
+              Create Your Account
             </h2>
             <p className="text-zinc-400 text-sm">
-              No credit card required — Get full access instantly
+              One step to get your business live on Google
             </p>
           </div>
 
-          {/* Signup form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">Company Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-                placeholder="Your business name"
-              />
+          {/* Payment dismissed — retry state */}
+          {paymentDismissed && (
+            <div className="mb-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4">
+              <p className="text-sm text-yellow-400 font-semibold mb-1">Payment not completed</p>
+              <p className="text-xs text-zinc-400 mb-3">Your account was created. Complete payment to access your dashboard.</p>
+              {error && <p className="text-xs text-red-400 mb-3">{error}</p>}
+              <button
+                onClick={handleRetryPayment}
+                disabled={loading}
+                className="w-full rounded-lg bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-2.5 transition disabled:opacity-50"
+              >
+                {loading ? 'Opening payment...' : 'Complete Payment — ₹1,499'}
+              </button>
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">WhatsApp Number</label>
-              <div className="flex rounded-xl border border-border bg-inputBg overflow-hidden focus-within:border-green-500/50 transition">
-                <span className="flex items-center px-4 text-zinc-500 text-sm border-r border-border select-none">+91</span>
+          {/* Signup form */}
+          {!paymentDismissed && (
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">Company Name</label>
                 <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
-                  className="flex-1 py-3 px-4 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
-                  placeholder="10-digit number"
+                  className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+                  placeholder="Your business name"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-                placeholder="your@email.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-                placeholder="Min 6 characters"
-              />
-            </div>
-
-            {error && (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">WhatsApp Number</label>
+                <div className="flex rounded-xl border border-border bg-inputBg overflow-hidden focus-within:border-green-500/50 transition">
+                  <span className="flex items-center px-4 text-zinc-500 text-sm border-r border-border select-none">+91</span>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    required
+                    className="flex-1 py-3 px-4 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
+                    placeholder="10-digit number"
+                  />
+                </div>
               </div>
-            )}
 
-            {offer && offer.features && offer.features.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-1.5">
-                {offer.features.slice(0, 12).map((feature, idx) => (
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+                  placeholder="Min 6 characters"
+                />
+              </div>
+
+              {error && (
+                <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                  {error}
+                </div>
+              )}
+
+              {/* Feature list */}
+              <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 pt-1">
+                {PLAN_FEATURES.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-1.5">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5 text-green-400">
                       <circle cx="8" cy="8" r="7.5" fill="none" stroke="currentColor" strokeWidth="1.5"/>
@@ -201,21 +296,21 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
                   </div>
                 ))}
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3 transition active:scale-[0.99] disabled:opacity-50 mt-4"
-            >
-              {loading ? loadingText : 'Activate My 7 Days Free Trial'}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-green-500 hover:bg-green-400 text-white font-bold text-sm py-3.5 transition active:scale-[0.99] disabled:opacity-50 mt-2"
+              >
+                {loading ? loadingText : 'Create Account & Pay ₹1,499 →'}
+              </button>
+            </form>
+          )}
 
-          {/* Footer info */}
+          {/* Footer */}
           <div className="mt-4 pt-4 border-t border-border">
             <p className="text-center text-xs text-zinc-600">
-              ✓ No credit card required · ✓ Cancel anytime
+              ✓ Secure payment via Razorpay · ✓ Cancel anytime · ✓ No auto-debit
             </p>
           </div>
         </div>
