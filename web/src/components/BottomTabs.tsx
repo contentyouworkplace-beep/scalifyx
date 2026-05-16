@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, ChatBotIcon, DiamondIcon, UserIcon, ChartIcon, UsersIcon, MessageIcon, TagIcon, CreditCardIcon } from '@/components/Icons';
+import { HomeIcon, ClipboardIcon, DiamondIcon, UserIcon, ChartIcon, UsersIcon, TagIcon, CreditCardIcon } from '@/components/Icons';
 import React from 'react';
 
 const userTabs = [
   { href: '/dashboard', label: 'Home', Icon: HomeIcon },
-  { href: '/dashboard/chat', label: 'AI Chat', Icon: ChatBotIcon },
+  { href: '/dashboard/work', label: 'Work', Icon: ClipboardIcon },
   { href: '/dashboard/plans', label: 'Plans', Icon: DiamondIcon },
   { href: '/dashboard/profile', label: 'Profile', Icon: UserIcon },
 ];
@@ -15,7 +15,6 @@ const userTabs = [
 const adminTabs = [
   { href: '/admin', label: 'Dashboard', Icon: ChartIcon },
   { href: '/admin/users', label: 'Users', Icon: UsersIcon },
-  { href: '/admin/chats', label: 'Chats', Icon: MessageIcon },
   { href: '/admin/offers', label: 'Offers', Icon: TagIcon },
   { href: '/admin/payments', label: 'Payments', Icon: CreditCardIcon },
 ];

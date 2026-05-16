@@ -13,6 +13,7 @@ import React from 'react';
 
 const userLinks = [
   { href: '/dashboard', label: 'Home', icon: HomeIcon },
+  { href: '/dashboard/work', label: 'Work', icon: ClipboardIcon },
   { href: '/dashboard/website', label: 'My Website', icon: GlobeIcon },
   { href: '/dashboard/plans', label: 'Plans', icon: DiamondIcon },
   { href: '/dashboard/profile', label: 'Profile', icon: UserIcon },
@@ -23,7 +24,6 @@ const userLinks = [
 const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: ChartIcon },
   { href: '/admin/users', label: 'Users', icon: UsersIcon },
-  { href: '/admin/chats', label: 'Chats', icon: MessageIcon },
   { href: '/admin/offers', label: 'Offers', icon: TagIcon },
   { href: '/admin/payments', label: 'Payments', icon: CreditCardIcon },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: ClipboardIcon },

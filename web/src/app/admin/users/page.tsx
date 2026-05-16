@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../../../lib/api';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 interface User {
@@ -449,6 +450,15 @@ function Row({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                   {upgrading ? '…' : '⬆ Quick PRO (₹1,499)'}
                 </button>
               )}
+
+              {/* Work tracker */}
+              <Link
+                href={`/admin/users/${user.id}/work`}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold hover:bg-zinc-700 hover:text-white transition"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Work
+              </Link>
 
               {/* Spacer */}
               <span className="flex-1" />
