@@ -38,7 +38,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
 
       const supabase = createClient(supabaseUrl, anonKey);
 
-      const { email, password, name, phone } = body;
+      const { email, password, name, phone, business_category } = body;
       if (!email || !password) {
         return Response.json({ error: 'Email and password required' }, { status: 400 });
       }
@@ -83,6 +83,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
             email,
             name: name || '',
             phone: phone || '',
+            business_category: business_category || '',
             plan: 'free',
           })
           .select();

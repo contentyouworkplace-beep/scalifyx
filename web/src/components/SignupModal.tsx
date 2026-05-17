@@ -25,6 +25,7 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
   const { signUp } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,6 +37,7 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
   useEffect(() => {
     if (isOpen) {
       setName('');
+      setCategory('');
       setPhone('');
       setEmail('');
       setPassword('');
@@ -61,6 +63,7 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
     setError('');
     const nameError = validateCompanyName(name);
     if (nameError) { setError(nameError); return; }
+    if (!category.trim()) { setError('Please enter your business category.'); return; }
     if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
       setError('Please enter a valid WhatsApp number.'); return;
     }
@@ -69,7 +72,7 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
 
     setLoading(true);
-    const result = await signUp(email, password, name, phone);
+    const result = await signUp(email, password, name, phone, category);
 
     if (!result.success) {
       setError(result.error || 'Something went wrong. Please try again.');
@@ -120,14 +123,30 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
           {/* Signup form */}
           <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-sm font-semibold text-white mb-2">Company Name</label>
+                <label className="block text-sm font-semibold text-white mb-1">
+                  Company Name <span className="text-zinc-500 font-normal text-xs">(don't write your personal name)</span>
+                </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                   className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-                  placeholder="Your business name"
+                  placeholder="e.g. Sharma Electricals, Priya Salon"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-white mb-1">
+                  Business Category <span className="text-zinc-500 font-normal text-xs">(what type of business?)</span>
+                </label>
+                <input
+                  type="text"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-border bg-inputBg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+                  placeholder="e.g. Salon, Restaurant, Clinic, Gym"
                 />
               </div>
 

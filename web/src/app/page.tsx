@@ -50,6 +50,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
   const { signUp } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -82,6 +83,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
     setError('');
     const nameError = validateCompanyName(name);
     if (nameError) { setError(nameError); return; }
+    if (!category.trim()) { setError('Please enter your business category.'); return; }
     if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
       setError('Please enter a valid WhatsApp number.'); return;
     }
@@ -90,7 +92,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
 
     setLoading(true);
-    const result = await signUp(email, password, name, phone);
+    const result = await signUp(email, password, name, phone, category);
 
     if (!result.success) {
       setError(result.error || 'Something went wrong. Please try again.');
@@ -116,14 +118,32 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-2.5 mb-4">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-          placeholder="Company name"
-        />
+        <div>
+          <label className="block text-xs font-semibold text-zinc-400 mb-1">
+            Company Name <span className="text-zinc-600 font-normal">(don't write your personal name)</span>
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+            placeholder="e.g. Sharma Electricals, Priya Salon"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-zinc-400 mb-1">
+            Business Category <span className="text-zinc-600 font-normal">(what type of business?)</span>
+          </label>
+          <input
+            type="text"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+            className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
+            placeholder="e.g. Salon, Restaurant, Clinic, Gym"
+          />
+        </div>
         <div className="flex rounded-lg border border-border bg-inputBg overflow-hidden focus-within:border-green-500/50 transition">
           <span className="flex items-center px-3 text-zinc-500 text-xs sm:text-sm border-r border-border select-none">+91</span>
           <input
