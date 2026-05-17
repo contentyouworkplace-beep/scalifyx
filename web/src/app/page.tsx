@@ -10,7 +10,7 @@ import {
   ChatBotIcon, PhoneIcon, SearchIcon, GlobeIcon,
   ChartIcon, WhatsAppIcon, ShieldIcon, HeadsetIcon,
 } from '@/components/Icons';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { validateCompanyName } from '@/lib/validateCompanyName';
@@ -269,6 +269,84 @@ function FAQSection() {
   );
 }
 
+function VideoPlayer() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flashControls = useCallback(() => {
+    setShowControls(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => {
+      setPlaying(p => { if (p) setShowControls(false); return p; });
+    }, 2500);
+  }, []);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) { v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); }
+    flashControls();
+  };
+
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  return (
+    <div
+      className="relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black cursor-pointer shadow-2xl shadow-black/40"
+      style={{ aspectRatio: '16/9' }}
+      onClick={togglePlay}
+      onMouseMove={flashControls}
+    >
+      <video
+        ref={videoRef}
+        src="/demo.mp4"
+        poster="/demo-thumb.jpg"
+        className="w-full h-full object-cover"
+        playsInline
+        preload="metadata"
+        onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
+        onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
+        onEnded={() => { setPlaying(false); setShowControls(true); }}
+      />
+
+      {!playing && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-2xl hover:scale-105 transition">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#000" className="ml-1">
+              <polygon points="5,3 19,12 5,21" />
+            </svg>
+          </div>
+        </div>
+      )}
+
+      <div className={`absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${showControls || !playing ? 'opacity-100' : 'opacity-0'}`}>
+        <input
+          type="range" min={0} max={duration || 100} value={currentTime}
+          onChange={e => {
+            const v = videoRef.current;
+            if (v) { v.currentTime = Number(e.target.value); setCurrentTime(Number(e.target.value)); }
+          }}
+          onClick={e => e.stopPropagation()}
+          className="w-full h-1 accent-green-400 mb-2 cursor-pointer"
+        />
+        <div className="flex items-center gap-3">
+          <button onClick={e => { e.stopPropagation(); togglePlay(); }} className="text-white hover:text-zinc-300 transition">
+            {playing
+              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+            }
+          </button>
+          <span className="text-xs text-white/70 tabular-nums">{fmt(currentTime)} / {fmt(duration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const spotsLeft = useSpotsTaken();
   const [showSignupModal, setShowSignupModal] = useState(false);
@@ -371,13 +449,9 @@ export default function LandingPage() {
               We build your website, set up Local SEO, and connect every lead directly to your WhatsApp — in 60 seconds.
             </p>
 
-            <div className="space-y-4 mb-10">
-              <a
-                href="#features"
-                className="block w-full text-center px-7 py-4 rounded-xl border border-border text-white text-base font-semibold hover:border-white/25 transition"
-              >
-                See How It Works ↓
-              </a>
+            {/* Demo video */}
+            <div className="mb-8">
+              <VideoPlayer />
             </div>
 
             <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600 mb-8 pb-8 border-b border-border">
