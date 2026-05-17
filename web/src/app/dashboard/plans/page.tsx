@@ -74,6 +74,42 @@ function DigitBlock({ value, label }: { value: string; label: string }) {
 }
 
 // ── Coupon banner ─────────────────────────────────────────────────────────────
+const GLITTER_COLORS = ['#facc15', '#f97316', '#22c55e', '#818cf8', '#fb7185', '#38bdf8', '#fbbf24'];
+
+function CouponGlitter() {
+  const [pieces, setPieces] = useState<React.CSSProperties[]>([]);
+  const ran = useRef(false);
+  useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+    setPieces(Array.from({ length: 40 }, (_, i) => ({
+      position: 'absolute' as const,
+      left: `${Math.random() * 100}%`,
+      top: `-${5 + Math.random() * 5}%`,
+      width: `${5 + Math.random() * 6}px`,
+      height: `${5 + Math.random() * 6}px`,
+      borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+      backgroundColor: GLITTER_COLORS[i % GLITTER_COLORS.length],
+      transform: `rotate(${Math.random() * 360}deg)`,
+      animation: `glitterFall ${1.4 + Math.random() * 1.2}s ease-in ${Math.random() * 1.5}s forwards`,
+      opacity: 0,
+      pointerEvents: 'none' as const,
+      zIndex: 10,
+    })));
+  }, []);
+  return (
+    <>
+      <style>{`
+        @keyframes glitterFall {
+          0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+          100% { opacity: 0; transform: translateY(320px) rotate(540deg); }
+        }
+      `}</style>
+      {pieces.map((s, i) => <div key={i} style={s} />)}
+    </>
+  );
+}
+
 function CouponBanner({ coupon, onPay, loading }: { coupon: CouponInfo; onPay: () => void; loading: boolean }) {
   const [timeLeft, setTimeLeft] = useState(Math.max(0, new Date(coupon.expiresAt).getTime() - Date.now()));
   const [expired, setExpired] = useState(timeLeft <= 0);
@@ -100,6 +136,8 @@ function CouponBanner({ coupon, onPay, loading }: { coupon: CouponInfo; onPay: (
 
   return (
     <div className={`relative rounded-3xl overflow-hidden mb-6 border ${isTier1 ? 'border-yellow-500/40 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-600/10' : 'border-blue-500/40 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-blue-600/10'}`}>
+      {/* Glitter */}
+      <CouponGlitter />
       {/* Glow orbs */}
       <div className={`absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-30 ${isTier1 ? 'bg-yellow-500' : 'bg-blue-500'}`} />
       <div className={`absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-3xl opacity-20 ${isTier1 ? 'bg-orange-500' : 'bg-indigo-500'}`} />
