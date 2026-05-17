@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { apiFetch } from '@/lib/api';
 
 const COLORS = ['#22c55e', '#4ade80', '#facc15', '#f97316', '#818cf8', '#38bdf8', '#fb7185'];
 
@@ -52,6 +53,41 @@ function PaymentSuccessContent() {
   const router = useRouter();
   const params = useSearchParams();
   const amount = params.get('amount') || '1499';
+  const pid = params.get('pid') || '';
+
+  const [verified, setVerified] = useState(false);
+  const pixelFired = useRef(false);
+
+  useEffect(() => {
+    apiFetch('/payment/status')
+      .then((data) => {
+        const plan = data.subscription?.plan;
+        const status = data.subscription?.status;
+        if (plan === 'pro' && status === 'active') {
+          setVerified(true);
+          // Fire client-side Purchase pixel once — deduplicates with server CAPI via same eventID
+          if (!pixelFired.current && typeof window !== 'undefined' && (window as any).fbq) {
+            const eventId = pid ? `purchase_${pid}` : `purchase_success_${Date.now()}`;
+            (window as any).fbq('track', 'Purchase', { value: Number(amount), currency: 'INR' }, { eventID: eventId });
+            pixelFired.current = true;
+          }
+        } else {
+          // Not a paid user — bounce back to plans
+          router.replace('/dashboard/plans');
+        }
+      })
+      .catch(() => {
+        router.replace('/dashboard/plans');
+      });
+  }, [router, amount, pid]);
+
+  if (!verified) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 relative overflow-hidden">
@@ -80,7 +116,7 @@ function PaymentSuccessContent() {
           {[
             { icon: '✅', title: 'Pro Plan Activated', sub: 'All features unlocked immediately' },
             { icon: '📅', title: 'Valid for 30 Days', sub: 'Renews monthly · cancel anytime' },
-            { icon: '💬', title: 'Team Will Contact You', sub: 'We\'ll reach out on WhatsApp within 24h' },
+            { icon: '💬', title: 'Team Will Contact You', sub: "We'll reach out on WhatsApp within 24h" },
           ].map(({ icon, title, sub }) => (
             <div key={title} className="flex items-center gap-3">
               <span className="text-xl w-8 text-center flex-shrink-0">{icon}</span>

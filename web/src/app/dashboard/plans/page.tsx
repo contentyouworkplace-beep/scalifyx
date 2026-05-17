@@ -434,14 +434,10 @@ export default function PlansPage() {
               }),
             });
             if (verify.success) {
-              // Fire client-side pixel first (server-side CAPI already fired in /payment/verify)
-              if (typeof window !== 'undefined' && (window as any).fbq) {
-                (window as any).fbq('track', 'Purchase', { value: data.displayPrice || 1499, currency: 'INR' }, { eventID: purchaseEventId });
-              }
               // Update AuthContext immediately so paywall unlocks on redirect
               updateUser({ plan: 'pro' });
-              // Redirect to success page
-              router.replace(`/payment-success?amount=${data.displayPrice || 1499}`);
+              // Pass payment_id so success page can fire pixel with correct dedup eventID
+              router.replace(`/payment-success?amount=${data.displayPrice || 1499}&pid=${response.razorpay_payment_id}`);
             } else {
               toast.error(verify.error || 'Payment verification failed. Contact support.');
             }
