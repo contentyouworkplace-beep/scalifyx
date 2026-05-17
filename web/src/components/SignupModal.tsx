@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { validateCompanyName } from '@/lib/validateCompanyName';
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -58,7 +59,8 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) { setError('Please enter your company name.'); return; }
+    const nameError = validateCompanyName(name);
+    if (nameError) { setError(nameError); return; }
     if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
       setError('Please enter a valid WhatsApp number.'); return;
     }

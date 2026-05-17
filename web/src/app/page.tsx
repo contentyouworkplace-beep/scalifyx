@@ -13,6 +13,7 @@ import {
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { validateCompanyName } from '@/lib/validateCompanyName';
 
 const TOTAL_LAUNCH_SEATS = 1000;
 const SPOTS_TAKEN_KEY = 'sxSpotsTaken';
@@ -79,7 +80,8 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) { setError('Please enter your company name.'); return; }
+    const nameError = validateCompanyName(name);
+    if (nameError) { setError(nameError); return; }
     if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
       setError('Please enter a valid WhatsApp number.'); return;
     }
