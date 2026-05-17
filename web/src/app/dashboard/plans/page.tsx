@@ -153,7 +153,7 @@ function CouponBanner({ coupon, onPay, loading }: { coupon: CouponInfo; onPay: (
               {isTier1 ? 'Exclusive Welcome Offer' : 'Last Chance — 24-Hour Deal'}
             </div>
             <h3 className="text-lg font-extrabold text-white leading-tight">
-              {isTier1 ? "Congratulations! You've unlocked ₹600 OFF" : "You still have a special offer — ₹300 OFF"}
+              {isTier1 ? `Congratulations! You've unlocked ₹${coupon.discount} OFF` : `You still have a special offer — ₹${coupon.discount} OFF`}
             </h3>
           </div>
         </div>
