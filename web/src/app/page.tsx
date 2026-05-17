@@ -64,6 +64,13 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
     'Add Your Custom Domain',
     'Free Hosting',
     'Website Maintenance',
+    'On-Page & Technical SEO',
+    'Google Search Console Setup',
+    'Mobile Responsive Design',
+    'SSL Certificate',
+    'Priority Chat Support',
+    'Monthly Analytics & SEO Report',
+    'Google Map Integration',
   ];
 
   useEffect(() => {
@@ -523,16 +530,18 @@ export default function LandingPage() {
                 {/* Feature list */}
                 <ul className="space-y-3.5 mb-9">
                   {[
-                    'AI-Powered Business Website',
-                    'Local SEO & Google Search Indexing',
-                    'WhatsApp Lead Capture — Instant',
-                    'Mobile-First Responsive Design',
-                    'SSL Security & Managed Hosting',
-                    'Analytics & Visitor Dashboard',
-                    'Custom Domain Ready',
-                    '10+ Professional Templates',
-                    'Monthly Updates & Improvements',
-                    '24/7 Priority Support',
+                    'Website + Search Engine Optimization',
+                    'Unlimited Pages Professional Website',
+                    'Add Your Custom Domain',
+                    'Free Hosting',
+                    'Website Maintenance',
+                    'On-Page & Technical SEO',
+                    'Google Search Console Setup',
+                    'Mobile Responsive Design',
+                    'SSL Certificate',
+                    'Priority Chat Support',
+                    'Monthly Analytics & SEO Report',
+                    'Google Map Integration',
                   ].map((item) => (
                     <li key={item} className="flex items-center gap-3">
                       <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center">

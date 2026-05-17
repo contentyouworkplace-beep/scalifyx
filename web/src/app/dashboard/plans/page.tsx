@@ -110,122 +110,145 @@ function CouponGlitter() {
   );
 }
 
-function CouponBanner({ coupon, onPay, loading }: { coupon: CouponInfo; onPay: () => void; loading: boolean }) {
-  const [timeLeft, setTimeLeft] = useState(Math.max(0, new Date(coupon.expiresAt).getTime() - Date.now()));
-  const [expired, setExpired] = useState(timeLeft <= 0);
+function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
+  offer: any; coupon: CouponInfo | null; onPay: () => void; loading: boolean; canSubscribe: boolean;
+}) {
+  const [timeLeft, setTimeLeft] = useState(
+    coupon ? Math.max(0, new Date(coupon.expiresAt).getTime() - Date.now()) : 0
+  );
+  const [couponExpired, setCouponExpired] = useState(!coupon || timeLeft <= 0);
 
   useEffect(() => {
-    if (expired) return;
-    const tick = () => {
+    if (!coupon || couponExpired) return;
+    const iv = setInterval(() => {
       const diff = Math.max(0, new Date(coupon.expiresAt).getTime() - Date.now());
       setTimeLeft(diff);
-      if (diff === 0) setExpired(true);
-    };
-    const iv = setInterval(tick, 1000);
+      if (diff === 0) setCouponExpired(true);
+    }, 1000);
     return () => clearInterval(iv);
-  }, [coupon.expiresAt, expired]);
+  }, [coupon, couponExpired]);
 
+  const showCoupon = canSubscribe && coupon && !couponExpired;
   const secs = Math.floor(timeLeft / 1000);
-  const h = Math.floor(secs / 3600).toString().padStart(2, '0');
-  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+  const m = Math.floor(secs / 60).toString().padStart(2, '0');
   const s = (secs % 60).toString().padStart(2, '0');
 
-  if (expired) return null;
-
-  const isTier1 = coupon.tier === 1;
-
   return (
-    <div className={`relative rounded-3xl overflow-hidden mb-6 border ${isTier1 ? 'border-yellow-500/40 bg-gradient-to-br from-yellow-500/10 via-orange-500/5 to-yellow-600/10' : 'border-blue-500/40 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-blue-600/10'}`}>
-      {/* Glitter */}
-      <CouponGlitter />
-      {/* Glow orbs */}
-      <div className={`absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-30 ${isTier1 ? 'bg-yellow-500' : 'bg-blue-500'}`} />
-      <div className={`absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-3xl opacity-20 ${isTier1 ? 'bg-orange-500' : 'bg-indigo-500'}`} />
+    <div className={`rounded-3xl overflow-hidden mb-6 border ${showCoupon ? 'border-yellow-500/40' : 'border-primary/30'} bg-card`}>
 
-      <div className="relative p-5 sm:p-6">
-        {/* Header */}
-        <div className="flex items-start gap-3 mb-4">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${isTier1 ? 'bg-yellow-500/20' : 'bg-blue-500/20'}`}>
-            {isTier1 ? '🎉' : '⚡'}
+      {/* ── Coupon section (when active) ── */}
+      {showCoupon && coupon && (
+        <div className="relative overflow-hidden bg-gradient-to-br from-yellow-500/15 via-orange-500/8 to-yellow-600/12 p-5 border-b border-yellow-500/20">
+          <CouponGlitter />
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-20 bg-yellow-500 pointer-events-none" />
+
+          {/* Badge */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">🎉</span>
+            <span className="text-xs font-extrabold uppercase tracking-widest text-yellow-400">Exclusive Welcome Offer</span>
           </div>
-          <div>
-            <div className={`text-xs font-extrabold uppercase tracking-widest mb-0.5 ${isTier1 ? 'text-yellow-400' : 'text-blue-400'}`}>
-              {isTier1 ? 'Exclusive Welcome Offer' : 'Last Chance — 24-Hour Deal'}
+
+          {/* Coupon code */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2.5">
+              <span className="text-base font-black tracking-widest text-white">{coupon.code}</span>
             </div>
-            <h3 className="text-lg font-extrabold text-white leading-tight">
-              {isTier1 ? `Congratulations! You've unlocked ₹${coupon.discount} OFF` : `You still have a special offer — ₹${coupon.discount} OFF`}
-            </h3>
+            <div className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-green-500/20 text-green-400 border border-green-500/30 text-xs font-extrabold">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
+              APPLIED
+            </div>
           </div>
-        </div>
 
-        {/* Coupon code */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-4 py-3">
-            <span className="text-lg font-black tracking-widest text-white">{coupon.code}</span>
+          {/* Price */}
+          <div className="flex items-baseline gap-3 mb-4">
+            <span className="text-zinc-500 line-through text-lg">₹1,499</span>
+            <span className="text-5xl font-black text-yellow-400">₹{coupon.price}</span>
+            <span className="text-zinc-400 text-sm">/first month</span>
+            <span className="ml-auto px-2.5 py-1 rounded-lg text-xs font-extrabold bg-red-500 text-white">SAVE ₹{coupon.discount}</span>
           </div>
-          <div className={`flex items-center gap-1.5 px-3 py-3 rounded-xl font-extrabold text-xs ${isTier1 ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
-            APPLIED
+
+          {/* Countdown */}
+          <div className="mb-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-yellow-400/70 mb-2">⏰ Offer expires in</p>
+            <div className="flex items-center gap-2">
+              <DigitBlock value={m} label="min" />
+              <span className="text-3xl font-black text-white/30 mb-4">:</span>
+              <DigitBlock value={s} label="sec" />
+            </div>
           </div>
-        </div>
 
-        {/* Price display */}
-        <div className="flex items-baseline gap-3 mb-5">
-          <span className="text-zinc-500 line-through text-lg">₹1,499</span>
-          <span className={`text-5xl font-black ${isTier1 ? 'text-yellow-400' : 'text-blue-400'}`}>₹{coupon.price}</span>
-          <span className="text-zinc-400 text-sm">/first month</span>
-          <span className={`ml-auto px-2.5 py-1 rounded-lg text-xs font-extrabold ${isTier1 ? 'bg-red-500 text-white' : 'bg-red-500 text-white'}`}>
-            SAVE ₹{coupon.discount}
-          </span>
+          {/* CTA */}
+          <button
+            onClick={onPay}
+            disabled={loading}
+            className="w-full py-4 rounded-2xl font-extrabold text-base transition active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black shadow-yellow-500/25 mb-2"
+          >
+            {loading
+              ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              : <>🔥 Pay ₹{coupon.price} & Activate Now →</>}
+          </button>
+          <p className="text-center text-xs text-yellow-400/50">Then ₹1,499/month · No auto-debit · Cancel anytime</p>
         </div>
+      )}
 
-        {/* Countdown */}
-        <div className="mb-5">
-          <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${isTier1 ? 'text-yellow-400/70' : 'text-blue-400/70'}`}>
-            ⏰ Offer expires in
-          </p>
-          <div className="flex items-center gap-2">
-            {isTier1 ? (
-              <>
-                <DigitBlock value={m} label="min" />
-                <span className="text-3xl font-black text-white/30 mb-4">:</span>
-                <DigitBlock value={s} label="sec" />
-              </>
-            ) : (
-              <>
-                <DigitBlock value={h} label="hrs" />
-                <span className="text-3xl font-black text-white/30 mb-4">:</span>
-                <DigitBlock value={m} label="min" />
-                <span className="text-3xl font-black text-white/30 mb-4">:</span>
-                <DigitBlock value={s} label="sec" />
-              </>
-            )}
-          </div>
-        </div>
+      {/* ── Plan details ── */}
+      <div className="p-6">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-[11px] font-extrabold tracking-wider rounded-full mb-4">
+          <DiamondIcon size={12} /> BEST VALUE
+        </span>
+        <div className="text-[22px] font-bold">{offer.name}</div>
+        {offer.description && <p className="text-sm text-zinc-500 mt-1">{offer.description}</p>}
 
-        {/* CTA */}
-        <button
-          onClick={onPay}
-          disabled={loading}
-          className={`w-full py-4 rounded-2xl font-extrabold text-base transition active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg ${
-            isTier1
-              ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black shadow-yellow-500/25'
-              : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white shadow-blue-500/25'
-          }`}
-        >
-          {loading ? (
-            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              🔥 Pay ₹{coupon.price} & Activate Now
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </>
+        {/* Price — dimmed when coupon active, full when no coupon */}
+        <div className={`flex items-baseline gap-1.5 mt-3 mb-1 ${showCoupon ? 'opacity-40' : ''}`}>
+          {offer.original_price > offer.price && (
+            <span className="text-lg text-zinc-500 line-through">₹{offer.original_price}</span>
           )}
-        </button>
+          <span className={`font-extrabold text-primary leading-none ${showCoupon ? 'text-2xl' : 'text-[42px]'}`}>₹{offer.price}</span>
+          <span className="text-zinc-500">/month</span>
+          {showCoupon && <span className="text-xs text-yellow-400/60 ml-1">after offer ends</span>}
+        </div>
 
-        <p className="text-center text-xs text-zinc-600 mt-3">
-          Then ₹1,499/month · No auto-debit · Cancel anytime
-        </p>
+        {!showCoupon && offer.original_price > offer.price && (
+          <div className="flex items-center gap-2 mt-2 mb-2">
+            <span className="px-2.5 py-1 bg-red-500 text-white text-xs font-extrabold rounded-lg">
+              {Math.round(((offer.original_price - offer.price) / offer.original_price) * 100)}% OFF
+            </span>
+            <span className="text-sm text-primary font-semibold">You save ₹{(offer.original_price - offer.price) * 12}/year</span>
+          </div>
+        )}
+
+        <div className="border-t border-border my-4" />
+        <p className="text-xs text-zinc-500 italic mb-4">Pay manually each month — no auto-debit</p>
+
+        {offer.features.length > 0 && (
+          <>
+            <div className="text-xs text-zinc-500 font-bold tracking-wider uppercase mb-3">Everything included:</div>
+            <div className="space-y-2.5 mb-5">
+              {offer.features.map((f: string, i: number) => (
+                <div key={i} className="flex items-center gap-2.5">
+                  <div className="w-[22px] h-[22px] rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary"><path d="M20 6L9 17l-5-5"/></svg>
+                  </div>
+                  <span className="text-sm font-medium">{f}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Subscribe CTA when no coupon and can subscribe */}
+        {canSubscribe && !showCoupon && (
+          <button
+            onClick={onPay}
+            disabled={loading}
+            className="w-full py-4 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold text-base transition disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading
+              ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              : <>Subscribe Now — ₹{offer.price}/month <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -417,10 +440,6 @@ export default function PlansPage() {
   return (
     <div className="max-w-lg mx-auto md:max-w-2xl pb-28">
 
-      {/* ── Coupon Banner (free/expired users only) ── */}
-      {(isFree || isExpired) && coupon && (
-        <CouponBanner coupon={coupon} onPay={handlePayNow} loading={loading} />
-      )}
 
 
       {/* Header */}
@@ -554,56 +573,16 @@ export default function PlansPage() {
         </div>
       )}
 
-      {/* Paid Plan Cards */}
-      {paidOffers.map((offer, idx) => {
-        const discountPercent = offer.original_price > offer.price
-          ? Math.round(((offer.original_price - offer.price) / offer.original_price) * 100)
-          : 0;
-
-        return (
-          <div key={offer.id} className="rounded-3xl p-6 bg-card border border-primary/30 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-[11px] font-extrabold tracking-wider rounded-full mb-4">
-              <DiamondIcon size={12} /> {idx === 0 ? 'BEST VALUE' : 'POPULAR'}
-            </span>
-            <div className="text-[22px] font-bold">{offer.name}</div>
-            {offer.description && <p className="text-sm text-zinc-500 mt-1">{offer.description}</p>}
-
-            <div className="flex items-baseline gap-1.5 mt-2">
-              {offer.original_price > offer.price && (
-                <span className="text-lg text-zinc-500 line-through">₹{offer.original_price}</span>
-              )}
-              <span className="text-[42px] font-extrabold text-primary leading-none">₹{offer.price}</span>
-              <span className="text-zinc-500">/month</span>
-            </div>
-
-            {discountPercent > 0 && (
-              <div className="flex items-center gap-2 mt-2">
-                <span className="px-2.5 py-1 bg-red-500 text-white text-xs font-extrabold rounded-lg">{discountPercent}% OFF</span>
-                <span className="text-sm text-primary font-semibold">You save ₹{(offer.original_price - offer.price) * 12}/year</span>
-              </div>
-            )}
-
-            <div className="border-t border-border my-5" />
-            <p className="text-xs text-zinc-500 italic mb-4">Pay manually each month — no auto-debit</p>
-
-            {offer.features.length > 0 && (
-              <>
-                <div className="text-xs text-zinc-500 font-bold tracking-wider uppercase mb-3">Everything included:</div>
-                <div className="space-y-2.5">
-                  {offer.features.map((f: string, i: number) => (
-                    <div key={i} className="flex items-center gap-2.5">
-                      <div className="w-[22px] h-[22px] rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary"><path d="M20 6L9 17l-5-5"/></svg>
-                      </div>
-                      <span className="text-sm font-medium">{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        );
-      })}
+      {/* Plan Card */}
+      {paidOffers.length > 0 && (
+        <UnifiedPlanCard
+          offer={paidOffers[0]}
+          coupon={(isFree || isExpired) ? coupon : null}
+          onPay={handlePayNow}
+          loading={loading}
+          canSubscribe={isFree || isExpired}
+        />
+      )}
 
       {/* Payment History */}
       {payments.length > 0 && (
