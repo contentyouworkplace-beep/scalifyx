@@ -99,7 +99,7 @@ function getCoupon(user: { id: string; created_at?: string }) {
   if (mins < 10) {
     return {
       tier: 1, code: tier1Code, price: 199, discount: 1300,
-      expiresAt: new Date(createdAt.getTime() + 10 * 60000).toISOString(),
+      expiresAt: new Date(createdAt.getTime() + 7 * 60000).toISOString(),
       label: 'Welcome Offer',
     };
   }
