@@ -296,9 +296,18 @@ async function handleCreateOrder(req: Request) {
   } else {
     coupon = await getWelcomeCoupon(user);
   }
+
+  // Apply ticking price (+₹10 every 3 sec since signup, capped at ₹1,499)
+  // Mirrors frontend calc — server-authoritative so Razorpay shows the correct live price
+  if (coupon && coupon.tier === 1 && user.created_at) {
+    const secsElapsed = (Date.now() - new Date(user.created_at).getTime()) / 1000;
+    const tickingPrice = Math.min(coupon.price + Math.floor(secsElapsed / 3) * 10, 1499);
+    coupon = { ...coupon, price: tickingPrice, discount: 1499 - tickingPrice };
+  }
+
   const amount = coupon ? coupon.price * 100 : 149900;
   const description = coupon
-    ? `Scalify Pro — ₹${coupon.price} (${coupon.label})`
+    ? `Scalify Pro — ₹${coupon.price} first month (${coupon.label})`
     : 'Scalify Pro — ₹1,499/month';
 
   try {

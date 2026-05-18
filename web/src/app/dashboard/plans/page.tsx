@@ -156,10 +156,10 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
           <CouponGlitter />
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-20 bg-yellow-500 pointer-events-none" />
 
-          {/* Badge */}
+          {/* Badge row */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">🎉</span>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-yellow-400">Exclusive Welcome Offer</span>
+            <span className="text-xs font-extrabold uppercase tracking-widest text-yellow-400">Welcome Offer</span>
             {isTicking && (
               <span className="ml-auto flex items-center gap-1 text-[10px] font-extrabold text-red-400 animate-pulse">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
@@ -167,6 +167,14 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
               </span>
             )}
           </div>
+
+          {/* Headline */}
+          <p className="text-sm font-bold text-white mb-1">
+            Start your first month at a special price 👇
+          </p>
+          <p className="text-xs text-zinc-400 mb-4">
+            This discounted price is only for your <span className="text-yellow-400 font-bold">first month</span>. After that, regular price of <span className="text-white font-semibold">₹1,499/month</span> applies.
+          </p>
 
           {/* Coupon code */}
           <div className="flex items-center gap-3 mb-4">
@@ -180,26 +188,29 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
           </div>
 
           {/* ── TICKING PRICE (hero) ── */}
-          <div className="mb-4">
+          <div className="mb-1">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-zinc-500 line-through text-base">₹1,499</span>
               <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-red-500 text-white">SAVE ₹{1499 - tickingPrice}</span>
             </div>
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-end gap-2">
               <span className={`font-black text-yellow-400 tabular-nums transition-all duration-300 ${isTicking ? 'text-6xl' : 'text-5xl'}`}>
                 ₹{tickingPrice}
               </span>
-              <span className="text-zinc-400 text-sm">/first month</span>
+              <div className="mb-2 flex flex-col">
+                <span className="text-xs font-extrabold text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-md border border-yellow-500/30">FIRST MONTH</span>
+                <span className="text-zinc-500 text-xs mt-0.5">then ₹1,499/mo</span>
+              </div>
             </div>
             {isTicking && (
               <p className="text-xs text-red-400/80 mt-1 font-semibold">
-                ↑ Price goes up ₹10 every 3 seconds — lock it in now
+                ↑ +₹10 every 3 seconds — the longer you wait, the more you pay
               </p>
             )}
           </div>
 
           {/* ── Timer (secondary) ── */}
-          <div className="flex items-center gap-3 mb-4 px-3 py-2.5 rounded-xl bg-black/30 border border-white/5">
+          <div className="flex items-center gap-3 mb-4 mt-3 px-3 py-2.5 rounded-xl bg-black/30 border border-white/5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-yellow-400/70 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
             <span className="text-xs text-yellow-400/70 font-semibold">Offer expires in</span>
             <div className="flex items-center gap-1 ml-auto">
@@ -217,9 +228,9 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
           >
             {loading
               ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              : <>🔥 Pay ₹{tickingPrice} & Activate Now →</>}
+              : <>🔥 Lock in ₹{tickingPrice} for First Month →</>}
           </button>
-          <p className="text-center text-xs text-yellow-400/50">Then ₹1,499/month · No auto-debit · Cancel anytime</p>
+          <p className="text-center text-xs text-yellow-400/50">No auto-debit · Cancel anytime · ₹1,499/mo from 2nd month</p>
         </div>
       )}
 
