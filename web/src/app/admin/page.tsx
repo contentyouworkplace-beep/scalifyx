@@ -43,12 +43,18 @@ export default function AdminDashboard() {
   });
   const [signups, setSignups] = useState<Signup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ab, setAb] = useState<{
+    total: number; threshold: number; decided: boolean; winner: number | null;
+    a: { price: number; payments: number; revenue: number };
+    b: { price: number; payments: number; revenue: number };
+  } | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [dash, usersData] = await Promise.all([
+      const [dash, usersData, abData] = await Promise.all([
         apiFetch('/admin/dashboard'),
         apiFetch('/admin/users'),
+        apiFetch('/admin/ab-test').catch(() => null),
       ]);
       setStats({
         totalUsers: dash.totals?.totalUsers || 0,
@@ -57,6 +63,7 @@ export default function AdminDashboard() {
         monthlyRevenue: dash.metrics?.monthly?.revenue || 0,
         monthlyNewUsers: dash.metrics?.monthly?.newUsers || 0,
       });
+      if (abData?.ab) setAb(abData.ab);
       const recent = (usersData.users || []).slice(0, 8).map((u: any) => ({
         id: u.id,
         name: u.name || 'Unknown',
@@ -127,6 +134,70 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* ── A/B Test Widget ──────────────────────────────────── */}
+      {ab && (
+        <div className="rounded-2xl border border-border bg-surface p-5 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Welcome Offer A/B Test</p>
+              <p className="text-sm font-semibold text-white mt-0.5">
+                {ab.decided
+                  ? <span className="text-green-400">✅ Winner decided — ₹{ab.winner} wins</span>
+                  : <span className="text-yellow-400">🧪 Testing in progress ({ab.total}/{ab.threshold} payments)</span>}
+              </p>
+            </div>
+            {/* Progress bar */}
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs text-zinc-500">{ab.total}/{ab.threshold}</span>
+              <div className="w-24 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${Math.min(100, (ab.total / ab.threshold) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Variant A */}
+            <div className={`rounded-xl p-4 border ${ab.decided && ab.winner === ab.a.price ? 'border-green-500/50 bg-green-500/5' : 'border-border'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-400">Variant A</span>
+                {ab.decided && ab.winner === ab.a.price && <span className="text-[10px] text-green-400 font-bold">🏆 WINNER</span>}
+              </div>
+              <div className="text-3xl font-black text-white">₹{ab.a.price}</div>
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-500">Payments</span>
+                  <span className="font-semibold text-white">{ab.a.payments}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-500">Revenue</span>
+                  <span className="font-semibold text-primary">{fmt(ab.a.revenue)}</span>
+                </div>
+              </div>
+            </div>
+            {/* Variant B */}
+            <div className={`rounded-xl p-4 border ${ab.decided && ab.winner === ab.b.price ? 'border-green-500/50 bg-green-500/5' : 'border-border'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-400">Variant B</span>
+                {ab.decided && ab.winner === ab.b.price && <span className="text-[10px] text-green-400 font-bold">🏆 WINNER</span>}
+              </div>
+              <div className="text-3xl font-black text-white">₹{ab.b.price}</div>
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-500">Payments</span>
+                  <span className="font-semibold text-white">{ab.b.payments}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-500">Revenue</span>
+                  <span className="font-semibold text-purple-400">{fmt(ab.b.revenue)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Quick Nav ─────────────────────────────────────────── */}
       <div className="grid grid-cols-4 gap-2 mb-8">

@@ -363,6 +363,37 @@ async function handleNotifications(req: Request) {
   return Response.json({ success: true, notifications: data || [] });
 }
 
+// ── GET /api/admin/ab-test ────────────────────────────────────────────────────
+async function handleAbTest(req: Request) {
+  const auth = await requireAdmin(req);
+  if (auth instanceof Response) return auth;
+
+  const { data: payments } = await db()
+    .from('payments')
+    .select('amount')
+    .in('amount', [499, 899])
+    .eq('status', 'completed');
+
+  const count499 = (payments || []).filter((p: any) => Number(p.amount) === 499).length;
+  const count899 = (payments || []).filter((p: any) => Number(p.amount) === 899).length;
+  const total = count499 + count899;
+  const revenue499 = count499 * 499;
+  const revenue899 = count899 * 899;
+  const winner = total >= 20 ? (revenue499 >= revenue899 ? 499 : 899) : null;
+
+  return Response.json({
+    success: true,
+    ab: {
+      total,
+      threshold: 20,
+      decided: total >= 20,
+      winner,
+      a: { price: 499, payments: count499, revenue: revenue499 },
+      b: { price: 899, payments: count899, revenue: revenue899 },
+    },
+  });
+}
+
 // ── Router ────────────────────────────────────────────────────────────────────
 
 export async function GET(req: Request, { params }: { params: { slug: string[] } }) {
@@ -374,6 +405,7 @@ export async function GET(req: Request, { params }: { params: { slug: string[] }
   if (endpoint === '/payments') return handlePayments(req);
   if (endpoint === '/notifications') return handleNotifications(req);
   if (endpoint === '/offers') return handleGetOffers(req);
+  if (endpoint === '/ab-test') return handleAbTest(req);
 
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
