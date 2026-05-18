@@ -371,25 +371,29 @@ async function handleAbTest(req: Request) {
   const { data: payments } = await db()
     .from('payments')
     .select('amount')
-    .in('amount', [499, 899])
+    .in('amount', [299, 499, 899])
     .eq('status', 'completed');
 
+  const count299 = (payments || []).filter((p: any) => Number(p.amount) === 299).length;
   const count499 = (payments || []).filter((p: any) => Number(p.amount) === 499).length;
   const count899 = (payments || []).filter((p: any) => Number(p.amount) === 899).length;
-  const total = count499 + count899;
+  const total = count299 + count499 + count899;
+  const revenue299 = count299 * 299;
   const revenue499 = count499 * 499;
   const revenue899 = count899 * 899;
-  const winner = total >= 20 ? (revenue499 >= revenue899 ? 499 : 899) : null;
+  const maxRev = Math.max(revenue299, revenue499, revenue899);
+  const winner = total >= 30 ? (maxRev === revenue299 ? 299 : maxRev === revenue499 ? 499 : 899) : null;
 
   return Response.json({
     success: true,
     ab: {
       total,
-      threshold: 20,
-      decided: total >= 20,
+      threshold: 30,
+      decided: total >= 30,
       winner,
-      a: { price: 499, payments: count499, revenue: revenue499 },
-      b: { price: 899, payments: count899, revenue: revenue899 },
+      a: { price: 299, payments: count299, revenue: revenue299 },
+      b: { price: 499, payments: count499, revenue: revenue499 },
+      c: { price: 899, payments: count899, revenue: revenue899 },
     },
   });
 }
