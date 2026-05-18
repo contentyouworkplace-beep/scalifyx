@@ -119,22 +119,12 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
   );
   const [couponExpired, setCouponExpired] = useState(!coupon || timeLeft <= 0);
 
-  // Ticking price — based on userCreatedAt (server-authoritative, refresh-proof)
-  const calcTickingPrice = (basePrice: number, createdAt: string) => {
-    const secs = (Date.now() - new Date(createdAt).getTime()) / 1000;
-    return Math.min(basePrice + Math.floor(secs / 3) * 10, 1499);
-  };
-  const [tickingPrice, setTickingPrice] = useState(() =>
-    coupon?.userCreatedAt ? calcTickingPrice(coupon.price, coupon.userCreatedAt) : coupon?.price || 1499
-  );
-
   useEffect(() => {
     if (!coupon || couponExpired) return;
     const iv = setInterval(() => {
       const diff = Math.max(0, new Date(coupon.expiresAt).getTime() - Date.now());
       setTimeLeft(diff);
-      if (diff === 0) { setCouponExpired(true); return; }
-      if (coupon.userCreatedAt) setTickingPrice(calcTickingPrice(coupon.price, coupon.userCreatedAt));
+      if (diff === 0) setCouponExpired(true);
     }, 1000);
     return () => clearInterval(iv);
   }, [coupon, couponExpired]);
@@ -143,9 +133,6 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
   const secs = Math.floor(timeLeft / 1000);
   const m = Math.floor(secs / 60).toString().padStart(2, '0');
   const s = (secs % 60).toString().padStart(2, '0');
-
-  // Is the price actively ticking (below cap)?
-  const isTicking = showCoupon && coupon && tickingPrice < 1499;
 
   return (
     <div className={`rounded-3xl overflow-hidden mb-6 border ${showCoupon ? 'border-yellow-500/40' : 'border-primary/30'} bg-card`}>
@@ -156,24 +143,16 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
           <CouponGlitter />
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full blur-3xl opacity-20 bg-yellow-500 pointer-events-none" />
 
-          {/* Badge row */}
+          {/* Badge */}
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">🎉</span>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-yellow-400">Welcome Offer</span>
-            {isTicking && (
-              <span className="ml-auto flex items-center gap-1 text-[10px] font-extrabold text-red-400 animate-pulse">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
-                PRICE RISING
-              </span>
-            )}
+            <span className="text-xs font-extrabold uppercase tracking-widest text-yellow-400">Exclusive Welcome Offer</span>
           </div>
 
           {/* Headline */}
-          <p className="text-sm font-bold text-white mb-1">
-            Start your first month at a special price 👇
-          </p>
+          <p className="text-sm font-bold text-white mb-1">Start your first month at a special price</p>
           <p className="text-xs text-zinc-400 mb-4">
-            This discounted price is only for your <span className="text-yellow-400 font-bold">first month</span>. After that, regular price of <span className="text-white font-semibold">₹1,499/month</span> applies.
+            This offer is only for your <span className="text-yellow-400 font-bold">first month</span>. From month 2, regular price of <span className="text-white font-semibold">₹1,499/month</span> applies.
           </p>
 
           {/* Coupon code */}
@@ -187,35 +166,25 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
             </div>
           </div>
 
-          {/* ── TICKING PRICE (hero) ── */}
-          <div className="mb-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-zinc-500 line-through text-base">₹1,499</span>
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-red-500 text-white">SAVE ₹{1499 - tickingPrice}</span>
+          {/* Price */}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-zinc-500 line-through text-lg">₹1,499</span>
+            <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-red-500 text-white">SAVE ₹{coupon.discount}</span>
+          </div>
+          <div className="flex items-end gap-2 mb-4">
+            <span className="text-6xl font-black text-yellow-400 tabular-nums">₹{coupon.price}</span>
+            <div className="mb-2 flex flex-col gap-0.5">
+              <span className="text-[11px] font-extrabold text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-md border border-yellow-500/30">FIRST MONTH ONLY</span>
+              <span className="text-zinc-500 text-xs">then ₹1,499/mo</span>
             </div>
-            <div className="flex items-end gap-2">
-              <span className={`font-black text-yellow-400 tabular-nums transition-all duration-300 ${isTicking ? 'text-6xl' : 'text-5xl'}`}>
-                ₹{tickingPrice}
-              </span>
-              <div className="mb-2 flex flex-col">
-                <span className="text-xs font-extrabold text-yellow-300 bg-yellow-500/20 px-2 py-0.5 rounded-md border border-yellow-500/30">FIRST MONTH</span>
-                <span className="text-zinc-500 text-xs mt-0.5">then ₹1,499/mo</span>
-              </div>
-            </div>
-            {isTicking && (
-              <p className="text-xs text-red-400/80 mt-1 font-semibold">
-                ↑ +₹10 every 3 seconds — the longer you wait, the more you pay
-              </p>
-            )}
           </div>
 
-          {/* ── Timer (secondary) ── */}
-          <div className="flex items-center gap-3 mb-4 mt-3 px-3 py-2.5 rounded-xl bg-black/30 border border-white/5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-yellow-400/70 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            <span className="text-xs text-yellow-400/70 font-semibold">Offer expires in</span>
-            <div className="flex items-center gap-1 ml-auto">
+          {/* Countdown */}
+          <div className="mb-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-yellow-400/70 mb-2">⏰ Offer expires in</p>
+            <div className="flex items-center gap-2">
               <DigitBlock value={m} label="min" />
-              <span className="text-xl font-black text-white/30 mb-3">:</span>
+              <span className="text-3xl font-black text-white/30 mb-4">:</span>
               <DigitBlock value={s} label="sec" />
             </div>
           </div>
@@ -228,7 +197,7 @@ function UnifiedPlanCard({ offer, coupon, onPay, loading, canSubscribe }: {
           >
             {loading
               ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-              : <>🔥 Lock in ₹{tickingPrice} for First Month →</>}
+              : <>🔥 Get First Month for ₹{coupon.price} →</>}
           </button>
           <p className="text-center text-xs text-yellow-400/50">No auto-debit · Cancel anytime · ₹1,499/mo from 2nd month</p>
         </div>
