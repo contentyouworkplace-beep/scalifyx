@@ -47,7 +47,6 @@ export default function AdminDashboard() {
     total: number; threshold: number; decided: boolean; winner: number | null;
     a: { price: number; payments: number; revenue: number };
     b: { price: number; payments: number; revenue: number };
-    c: { price: number; payments: number; revenue: number };
   } | null>(null);
 
   const load = useCallback(async () => {
@@ -159,28 +158,27 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { variant: ab.a, label: 'A', color: 'blue' },
-              { variant: ab.b, label: 'B', color: 'purple' },
-              { variant: ab.c, label: 'C', color: 'orange' },
+              { variant: ab.a, label: 'A', color: 'blue' as const },
+              { variant: ab.b, label: 'B', color: 'purple' as const },
             ].map(({ variant, label, color }) => (
-              <div key={label} className={`rounded-xl p-3 border ${ab.decided && ab.winner === variant.price ? 'border-green-500/50 bg-green-500/5' : 'border-border'}`}>
-                <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-                  <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md bg-${color}-500/20 text-${color}-400`}>
-                    {label}
+              <div key={label} className={`rounded-xl p-4 border ${ab.decided && ab.winner === variant.price ? 'border-green-500/50 bg-green-500/5' : 'border-border'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md ${color === 'blue' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                    Variant {label}
                   </span>
-                  {ab.decided && ab.winner === variant.price && <span className="text-[10px] text-green-400 font-bold">🏆</span>}
+                  {ab.decided && ab.winner === variant.price && <span className="text-[10px] text-green-400 font-bold">🏆 WINNER</span>}
                 </div>
-                <div className="text-2xl font-black text-white">₹{variant.price}</div>
+                <div className="text-3xl font-black text-white">₹{variant.price}</div>
                 <div className="mt-2 space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-zinc-500">Paid</span>
+                    <span className="text-zinc-500">Payments</span>
                     <span className="font-semibold text-white">{variant.payments}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-zinc-500">Rev</span>
-                    <span className={`font-semibold text-${color}-400`}>{fmt(variant.revenue)}</span>
+                    <span className="text-zinc-500">Revenue</span>
+                    <span className={`font-semibold ${color === 'blue' ? 'text-blue-400' : 'text-purple-400'}`}>{fmt(variant.revenue)}</span>
                   </div>
                 </div>
               </div>

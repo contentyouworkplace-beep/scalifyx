@@ -38,7 +38,6 @@ interface CouponInfo {
   discount: number;
   expiresAt: string;
   label: string;
-  userCreatedAt?: string;
 }
 
 interface PaymentRecord {

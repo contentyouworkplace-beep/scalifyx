@@ -85,8 +85,8 @@ async function handleOffers() {
   return Response.json({ offers: FALLBACK_OFFERS });
 }
 
-// ─── A/B test: ₹299 vs ₹499 vs ₹899 welcome offer ───────────────────────────
-// Assigns variant by hashing userId (3-way). After 30 AB payments, picks winner
+// ─── A/B test: ₹899 vs ₹999 welcome offer ───────────────────────────────────
+// Assigns variant by hashing userId (50/50). After 20 AB payments, picks winner
 // by total revenue. Winner sticks for all future users.
 async function getWelcomeCoupon(user: { id: string; created_at?: string }) {
   if (!user.created_at) return null;
@@ -100,26 +100,21 @@ async function getWelcomeCoupon(user: { id: string; created_at?: string }) {
     const { data: abPayments } = await db()
       .from('payments')
       .select('amount')
-      .in('amount', [299, 499, 899])
+      .in('amount', [899, 999])
       .eq('status', 'completed');
 
-    const count299 = (abPayments || []).filter((p: any) => Number(p.amount) === 299).length;
-    const count499 = (abPayments || []).filter((p: any) => Number(p.amount) === 499).length;
     const count899 = (abPayments || []).filter((p: any) => Number(p.amount) === 899).length;
-    const total = count299 + count499 + count899;
+    const count999 = (abPayments || []).filter((p: any) => Number(p.amount) === 999).length;
+    const total = count899 + count999;
 
-    let price: 299 | 499 | 899;
-    if (total >= 30) {
+    let price: 899 | 999;
+    if (total >= 20) {
       // Winner decided by total revenue
-      const rev299 = count299 * 299;
-      const rev499 = count499 * 499;
-      const rev899 = count899 * 899;
-      const maxRev = Math.max(rev299, rev499, rev899);
-      price = maxRev === rev299 ? 299 : maxRev === rev499 ? 499 : 899;
+      price = count899 * 899 >= count999 * 999 ? 899 : 999;
     } else {
-      // 3-way deterministic split by user ID hash
+      // 50/50 deterministic split by user ID hash
       const hash = user.id.replace(/-/g, '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-      price = hash % 3 === 0 ? 299 : hash % 3 === 1 ? 499 : 899;
+      price = hash % 2 === 0 ? 899 : 999;
     }
 
     return {
@@ -129,8 +124,7 @@ async function getWelcomeCoupon(user: { id: string; created_at?: string }) {
       discount: 1499 - price,
       expiresAt: new Date(createdAt.getTime() + 7 * 60000).toISOString(),
       label: 'Welcome Offer',
-      userCreatedAt: user.created_at,
-      ab: { count299, count499, count899, total, winner: total >= 30 ? price : null },
+      ab: { count899, count999, total, winner: total >= 20 ? price : null },
     };
   }
 
@@ -142,7 +136,6 @@ async function getWelcomeCoupon(user: { id: string; created_at?: string }) {
       discount: 300,
       expiresAt: new Date(createdAt.getTime() + 24 * 3600000).toISOString(),
       label: '24-Hour Exclusive',
-      userCreatedAt: user.created_at,
     };
   }
   return null;
