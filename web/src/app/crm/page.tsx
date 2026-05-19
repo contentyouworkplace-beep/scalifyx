@@ -68,17 +68,23 @@ function Dashboard({ refreshKey }: { refreshKey: number }) {
   const DashCard = ({ w, rank, accent }: { w: DashWork; rank: number; accent: string }) => {
     const d = fmtDeadline(w.deadline);
     return (
-      <div className="flex items-center gap-3 p-3 rounded-2xl" style={{ background: 'var(--card)' }}>
-        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+      <div className="flex items-start gap-3 p-3 rounded-2xl" style={{ background: 'var(--card)' }}>
+        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
           style={{ background: accent + '20', color: accent }}>{rank}</span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>{w.title}</p>
           <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{w.crm_clients?.name || '—'}</p>
         </div>
         {d && (
-          <span className="text-xs font-semibold whitespace-nowrap" style={{ color: d.diff < 0 ? '#EF4444' : d.diff <= 1 ? '#F59E0B' : 'var(--text-secondary)' }}>
-            {d.diff < 0 ? `${Math.abs(d.diff)}d late` : d.diff === 0 ? 'Today' : `${d.diff}d`}
-          </span>
+          <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+            <span className="text-xs font-semibold whitespace-nowrap"
+              style={{ color: d.diff < 0 ? '#EF4444' : d.diff <= 1 ? '#F59E0B' : 'var(--text-secondary)' }}>
+              {d.diff < 0 ? `${Math.abs(d.diff)}d late` : d.diff === 0 ? 'Today' : `${d.diff}d left`}
+            </span>
+            <span className="text-xs whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>
+              {d.dateLabel}{d.hasTime ? ` · ${d.timeLabel}` : ''}
+            </span>
+          </div>
         )}
       </div>
     );
