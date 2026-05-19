@@ -4,16 +4,20 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+const CRM_EMAIL = 'rahulmedhe05@gmail.com';
+
 export default function CrmLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
+
+  const allowed = user?.email === CRM_EMAIL;
 
   useEffect(() => {
     if (!isLoading) {
       if (!user) router.replace('/login');
-      else if (!isAdmin) router.replace('/dashboard');
+      else if (!allowed) router.replace('/dashboard');
     }
-  }, [user, isLoading, isAdmin, router]);
+  }, [user, isLoading, allowed, router]);
 
   if (isLoading) {
     return (
@@ -23,7 +27,7 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user || !isAdmin) return null;
+  if (!user || !allowed) return null;
 
   return <>{children}</>;
 }
