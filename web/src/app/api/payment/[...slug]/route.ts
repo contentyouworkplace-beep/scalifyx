@@ -109,8 +109,8 @@ async function getWelcomeCoupon(user: { id: string; created_at?: string }) {
 
     let price: 899 | 999;
     if (total >= 20) {
-      // Winner decided by total revenue
-      price = count899 * 899 >= count999 * 999 ? 899 : 999;
+      // Winner decided by which price more users paid
+      price = count899 >= count999 ? 899 : 999;
     } else {
       // 50/50 deterministic split by user ID hash
       const hash = user.id.replace(/-/g, '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -132,8 +132,8 @@ async function getWelcomeCoupon(user: { id: string; created_at?: string }) {
     return {
       tier: 2 as const,
       code: 'DEAL' + digits.slice(3, 6),
-      price: 1199,
-      discount: 300,
+      price: 1299,
+      discount: 200,
       expiresAt: new Date(createdAt.getTime() + 24 * 3600000).toISOString(),
       label: '24-Hour Exclusive',
     };
