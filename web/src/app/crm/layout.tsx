@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-const CRM_EMAIL = 'rahulmedhe05@gmail.com';
+const CRM_EMAIL = 'contentyouworkplace@gmail.com';
 
 export default function CrmLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
