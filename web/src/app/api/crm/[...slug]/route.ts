@@ -139,21 +139,30 @@ async function handleDeleteWork(req: Request) {
   return Response.json({ ok: true });
 }
 
-// ── GET /api/crm/tasks?work_id=x ─────────────────────────────────────────────
+// ── GET /api/crm/tasks?work_id=x  OR  ?client_id=x (bulk) ───────────────────
 async function handleGetTasks(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
 
   const url = new URL(req.url);
   const workId = url.searchParams.get('work_id');
-  if (!workId) return Response.json({ error: 'work_id required' }, { status: 400 });
+  const clientId = url.searchParams.get('client_id');
+
+  if (clientId) {
+    // Bulk: all tasks for all works of a client in one query
+    const { data: works } = await db().from('crm_works').select('id').eq('client_id', clientId);
+    const workIds = (works || []).map((w: any) => w.id);
+    if (workIds.length === 0) return Response.json({ tasks: [] });
+    const { data, error } = await db()
+      .from('crm_tasks').select('*').in('work_id', workIds).order('created_at', { ascending: true });
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ tasks: data });
+  }
+
+  if (!workId) return Response.json({ error: 'work_id or client_id required' }, { status: 400 });
 
   const { data, error } = await db()
-    .from('crm_tasks')
-    .select('*')
-    .eq('work_id', workId)
-    .order('created_at', { ascending: true });
-
+    .from('crm_tasks').select('*').eq('work_id', workId).order('created_at', { ascending: true });
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ tasks: data });
 }
