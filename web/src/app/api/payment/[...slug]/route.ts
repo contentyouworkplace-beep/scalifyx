@@ -326,10 +326,12 @@ async function handleVerifyPayment(req: Request) {
   const end = new Date(now);
   end.setDate(end.getDate() + 30);
 
+  const paidAmount = body.amount || 1499;
+
   const { error: subErr } = await db().from('subscriptions').insert({
     user_id: user.id,
     plan: 'pro',
-    amount: 1499,
+    amount: paidAmount,
     status: 'active',
     start_date: now.toISOString(),
     end_date: end.toISOString(),
@@ -347,14 +349,13 @@ async function handleVerifyPayment(req: Request) {
     await db().from('payments').upsert({
       user_id: user.id,
       razorpay_payment_id,
-      amount: 1499,
+      amount: paidAmount,
       status: 'completed',
       plan: 'pro',
     }, { onConflict: 'razorpay_payment_id' });
   }
 
   // Server-side Purchase event — deduplicates with client fbq('track','Purchase')
-  const paidAmount = body.amount || 1499;
   sendCapiEvent({
     eventName: 'Purchase',
     eventId: body.event_id || razorpay_payment_id || `purchase_${user.id}`,
