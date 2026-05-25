@@ -32,17 +32,16 @@ async function requireAdmin(req: Request): Promise<{ user: any; jwt: string } | 
 async function handleDashboard(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const [allUsers, paidSubs, monthlyNewUsers, allPayments, monthlyPayments] = await Promise.all([
-    adb.from('profiles').select('id', { count: 'exact', head: true }),
-    adb.from('subscriptions').select('user_id').eq('plan', 'pro').in('status', ['active', 'expiring']),
-    adb.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', monthStart.toISOString()),
-    adb.from('payments').select('amount').eq('status', 'completed'),
-    adb.from('payments').select('amount').eq('status', 'completed').gte('created_at', monthStart.toISOString()),
+    db().from('profiles').select('id', { count: 'exact', head: true }),
+    db().from('subscriptions').select('user_id').eq('plan', 'pro').in('status', ['active', 'expiring']),
+    db().from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', monthStart.toISOString()),
+    db().from('payments').select('amount').eq('status', 'completed'),
+    db().from('payments').select('amount').eq('status', 'completed').gte('created_at', monthStart.toISOString()),
   ]);
 
   const uniquePaidUsers = new Set((paidSubs.data || []).map((s: any) => s.user_id)).size;
@@ -63,9 +62,8 @@ async function handleDashboard(req: Request) {
 async function handleGetUsers(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
-  const { data: profiles, error } = await adb
+  const { data: profiles, error } = await db()
     .from('profiles')
     .select(`
       id, name, email, phone, plan, role,
@@ -80,7 +78,7 @@ async function handleGetUsers(req: Request) {
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
   const userIds = (profiles || []).map((u: any) => u.id);
-  const { data: allSubs } = await adb
+  const { data: allSubs } = await db()
     .from('subscriptions')
     .select('user_id, plan, status, end_date, amount, start_date')
     .in('user_id', userIds)
@@ -103,7 +101,6 @@ async function handleGetUsers(req: Request) {
 async function handleDeleteUser(req: Request, userId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
   if (!SERVICE_KEY) return Response.json({ error: 'Service key not configured' }, { status: 503 });
 
@@ -116,13 +113,13 @@ async function handleDeleteUser(req: Request, userId: string) {
 
   // Wipe all remaining rows (ON DELETE CASCADE handles most, this catches the rest)
   await Promise.allSettled([
-    adb.from('website_progress').delete().eq('user_id', userId),
-    adb.from('task_comments').delete().eq('user_id', userId),
-    adb.from('subscriptions').delete().eq('user_id', userId),
-    adb.from('payments').delete().eq('user_id', userId),
-    adb.from('websites').delete().eq('user_id', userId),
-    adb.from('notifications').delete().eq('user_id', userId),
-    adb.from('profiles').delete().eq('id', userId),
+    db().from('website_progress').delete().eq('user_id', userId),
+    db().from('task_comments').delete().eq('user_id', userId),
+    db().from('subscriptions').delete().eq('user_id', userId),
+    db().from('payments').delete().eq('user_id', userId),
+    db().from('websites').delete().eq('user_id', userId),
+    db().from('notifications').delete().eq('user_id', userId),
+    db().from('profiles').delete().eq('id', userId),
   ]);
 
   return Response.json({ success: true });
@@ -150,7 +147,6 @@ async function handleSetPassword(req: Request, userId: string) {
 async function handleCreateUser(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
   let body: any;
   try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
@@ -170,7 +166,7 @@ async function handleCreateUser(req: Request) {
   const userId = authData.user.id;
   const selectedPlan = plan || 'free';
 
-  await adb.from('profiles').upsert({
+  await db().from('profiles').upsert({
     id: userId, email, name: name || '', phone: phone || '', plan: selectedPlan,
   });
 
@@ -180,11 +176,11 @@ async function handleCreateUser(req: Request) {
     end.setDate(end.getDate() + 30);
     const paidAmount = Number(amount) || 1499;
 
-    await adb.from('subscriptions').insert({
+    await db().from('subscriptions').insert({
       user_id: userId, plan: 'pro', amount: paidAmount, status: 'active',
       start_date: now.toISOString(), end_date: end.toISOString(), auto_renew: false,
     });
-    await adb.from('payments').insert({
+    await db().from('payments').insert({
       user_id: userId, amount: paidAmount, status: 'completed', plan: 'pro', method: 'manual_admin',
     });
   }
@@ -196,7 +192,6 @@ async function handleCreateUser(req: Request) {
 async function handleSetPlan(req: Request, userId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
   let body: any;
   try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
@@ -205,23 +200,23 @@ async function handleSetPlan(req: Request, userId: string) {
   const selectedPlan = plan || 'free';
   const paidAmount = Number(amount) || 1499;
 
-  await adb.from('subscriptions').update({ status: 'cancelled' }).eq('user_id', userId).eq('status', 'active');
+  await db().from('subscriptions').update({ status: 'cancelled' }).eq('user_id', userId).eq('status', 'active');
 
   if (selectedPlan === 'pro') {
     const now = new Date();
     const end = new Date(now);
     end.setDate(end.getDate() + 30 * Number(months));
 
-    await adb.from('subscriptions').insert({
+    await db().from('subscriptions').insert({
       user_id: userId, plan: 'pro', amount: paidAmount, status: 'active',
       start_date: now.toISOString(), end_date: end.toISOString(), auto_renew: false,
     });
-    await adb.from('payments').insert({
+    await db().from('payments').insert({
       user_id: userId, amount: paidAmount, status: 'completed', plan: 'pro', method: 'manual_admin',
     });
   }
 
-  await adb.from('profiles').update({ plan: selectedPlan }).eq('id', userId);
+  await db().from('profiles').update({ plan: selectedPlan }).eq('id', userId);
   return Response.json({ success: true });
 }
 
@@ -229,18 +224,17 @@ async function handleSetPlan(req: Request, userId: string) {
 async function handleManualUpgrade(req: Request, userId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
   const now = new Date();
   const end = new Date(now);
   end.setDate(end.getDate() + 30);
 
-  await adb.from('subscriptions').update({ status: 'cancelled' }).eq('user_id', userId).eq('status', 'active');
-  await adb.from('subscriptions').insert({
+  await db().from('subscriptions').update({ status: 'cancelled' }).eq('user_id', userId).eq('status', 'active');
+  await db().from('subscriptions').insert({
     user_id: userId, plan: 'pro', amount: 1499, status: 'active',
     start_date: now.toISOString(), end_date: end.toISOString(), auto_renew: false,
   });
-  await adb.from('profiles').update({ plan: 'pro' }).eq('id', userId);
+  await db().from('profiles').update({ plan: 'pro' }).eq('id', userId);
   return Response.json({ success: true });
 }
 
@@ -248,9 +242,8 @@ async function handleManualUpgrade(req: Request, userId: string) {
 async function handleSubscriptions(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
-  const { data, error } = await adb
+  const { data, error } = await db()
     .from('subscriptions')
     .select(`
       id, user_id, plan, status, amount, start_date, end_date, auto_renew, created_at,
@@ -266,9 +259,8 @@ async function handleSubscriptions(req: Request) {
 async function handlePayments(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
-  const { data, error } = await adb
+  const { data, error } = await db()
     .from('payments')
     .select(`
       id, user_id, amount, status, plan, method, created_at,
@@ -285,20 +277,19 @@ async function handlePayments(req: Request) {
 async function handleExtend(req: Request, subId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
   let body: any = {};
   try { body = await req.json(); } catch { /* ok */ }
   const days = Number(body.days) || 30;
 
-  const { data: sub } = await adb.from('subscriptions').select('end_date').eq('id', subId).maybeSingle();
+  const { data: sub } = await db().from('subscriptions').select('end_date').eq('id', subId).maybeSingle();
   if (!sub) return Response.json({ error: 'Subscription not found' }, { status: 404 });
 
   const currentEnd = new Date(sub.end_date);
   const base = currentEnd > new Date() ? currentEnd : new Date();
   base.setDate(base.getDate() + days);
 
-  await adb.from('subscriptions').update({ end_date: base.toISOString(), status: 'active' }).eq('id', subId);
+  await db().from('subscriptions').update({ end_date: base.toISOString(), status: 'active' }).eq('id', subId);
   return Response.json({ success: true });
 }
 
@@ -306,8 +297,7 @@ async function handleExtend(req: Request, subId: string) {
 async function handleGetOffers(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
-  const { data, error } = await adb.from('offers').select('*').order('sort_order', { ascending: true });
+  const { data, error } = await db().from('offers').select('*').order('sort_order', { ascending: true });
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ success: true, offers: data || [] });
 }
@@ -316,10 +306,9 @@ async function handleGetOffers(req: Request) {
 async function handleCreateOffer(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
   let body: any;
   try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
-  const { data, error } = await adb.from('offers').insert(body).select().maybeSingle();
+  const { data, error } = await db().from('offers').insert(body).select().maybeSingle();
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ success: true, offer: data });
 }
@@ -328,10 +317,9 @@ async function handleCreateOffer(req: Request) {
 async function handleUpdateOffer(req: Request, offerId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
   let body: any;
   try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
-  const { error } = await adb.from('offers').update(body).eq('id', offerId);
+  const { error } = await db().from('offers').update(body).eq('id', offerId);
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ success: true });
 }
@@ -340,8 +328,7 @@ async function handleUpdateOffer(req: Request, offerId: string) {
 async function handleDeleteOffer(req: Request, offerId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
-  const { error } = await adb.from('offers').delete().eq('id', offerId);
+  const { error } = await db().from('offers').delete().eq('id', offerId);
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ success: true });
 }
@@ -350,7 +337,6 @@ async function handleDeleteOffer(req: Request, offerId: string) {
 async function handleApplyCoupon(req: Request, userId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
   let body: { price: number; original_price?: number; minutes: number };
   try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
@@ -361,7 +347,7 @@ async function handleApplyCoupon(req: Request, userId: string) {
 
   const expiresAt = new Date(Date.now() + minutes * 60000).toISOString();
 
-  await adb.from('admin_coupons').upsert(
+  await db().from('admin_coupons').upsert(
     { user_id: userId, price, original_price, expires_at: expiresAt },
     { onConflict: 'user_id' }
   );
@@ -373,8 +359,7 @@ async function handleApplyCoupon(req: Request, userId: string) {
 async function handleRemoveCoupon(req: Request, userId: string) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
-  await adb.from('admin_coupons').delete().eq('user_id', userId);
+  await db().from('admin_coupons').delete().eq('user_id', userId);
   return Response.json({ success: true });
 }
 
@@ -382,9 +367,8 @@ async function handleRemoveCoupon(req: Request, userId: string) {
 async function handleNotifications(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
-  const { data } = await adb.from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
+  const { data } = await db().from('notifications').select('*').order('created_at', { ascending: false }).limit(50);
   return Response.json({ success: true, notifications: data || [] });
 }
 
@@ -392,9 +376,8 @@ async function handleNotifications(req: Request) {
 async function handleAbTest(req: Request) {
   const auth = await requireAdmin(req);
   if (auth instanceof Response) return auth;
-  const adb = dbAuth(auth.jwt);
 
-  const { data: payments } = await adb
+  const { data: payments } = await db()
     .from('payments')
     .select('amount')
     .in('amount', [899, 999])
