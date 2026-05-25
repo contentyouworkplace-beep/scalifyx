@@ -275,7 +275,14 @@ export default function PlansPage() {
   const [subStatus, setSubStatus] = useState<SubStatus | null>(null);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [cancelLoading, setCancelLoading] = useState(false);
-  const [coupon, setCoupon] = useState<CouponInfo | null>(null);
+  const [coupon, setCoupon] = useState<CouponInfo | null>(() => ({
+    tier: 1,
+    code: 'SCALE200',
+    price: 1299,
+    discount: 200,
+    expiresAt: new Date(Date.now() + 3600000).toISOString(),
+    label: 'First Month Offer',
+  }));
 
   const fetchOffers = async () => {
     try {

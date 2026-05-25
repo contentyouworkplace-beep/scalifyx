@@ -85,60 +85,16 @@ async function handleOffers() {
   return Response.json({ offers: FALLBACK_OFFERS });
 }
 
-// ─── A/B test: ₹899 vs ₹999 welcome offer ───────────────────────────────────
-// Assigns variant by hashing userId (50/50). After 20 AB payments, picks winner
-// by total revenue. Winner sticks for all future users.
-async function getWelcomeCoupon(user: { id: string; created_at?: string }) {
-  if (!user.created_at) return null;
-  const createdAt = new Date(user.created_at);
-  const now = new Date();
-  const mins = (now.getTime() - createdAt.getTime()) / 60000;
-  const digits = user.id.replace(/[^0-9]/g, '').padEnd(6, '0');
-
-  if (mins < 7) {
-    // Query AB payment counts
-    const { data: abPayments } = await db()
-      .from('payments')
-      .select('amount')
-      .in('amount', [899, 999])
-      .eq('status', 'completed');
-
-    const count899 = (abPayments || []).filter((p: any) => Number(p.amount) === 899).length;
-    const count999 = (abPayments || []).filter((p: any) => Number(p.amount) === 999).length;
-    const total = count899 + count999;
-
-    let price: 899 | 999;
-    if (total >= 20) {
-      // Winner decided by which price more users paid
-      price = count899 >= count999 ? 899 : 999;
-    } else {
-      // 50/50 deterministic split by user ID hash
-      const hash = user.id.replace(/-/g, '').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-      price = hash % 2 === 0 ? 899 : 999;
-    }
-
-    return {
-      tier: 1 as const,
-      code: 'SCALE' + digits.slice(0, 3),
-      price,
-      discount: 1499 - price,
-      expiresAt: new Date(createdAt.getTime() + 7 * 60000).toISOString(),
-      label: 'Welcome Offer',
-      ab: { count899, count999, total, winner: total >= 20 ? price : null },
-    };
-  }
-
-  if (mins < 24 * 60) {
-    return {
-      tier: 2 as const,
-      code: 'DEAL' + digits.slice(3, 6),
-      price: 1299,
-      discount: 200,
-      expiresAt: new Date(createdAt.getTime() + 24 * 3600000).toISOString(),
-      label: '24-Hour Exclusive',
-    };
-  }
-  return null;
+// Always offer ₹1,299 first-month price with a fresh 1-hour window
+function getWelcomeCoupon(_user: { id: string }) {
+  return {
+    tier: 1 as const,
+    code: 'SCALE200',
+    price: 1299,
+    discount: 200,
+    expiresAt: new Date(Date.now() + 3600000).toISOString(),
+    label: 'First Month Offer',
+  };
 }
 
 // ─── GET /payment/status ───────────────────────────────────────────────────────
