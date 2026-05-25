@@ -5,6 +5,7 @@ import { apiFetch } from '../../../../../lib/api';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import TaskChat from '../../../../../components/TaskChat';
 
 interface Comment {
   id: string;
@@ -145,6 +146,8 @@ export default function AdminUserWorkPage() {
           />
         </div>
       </div>
+
+      <TaskChat userId={userId} currentRole="admin" />
 
       {/* Phases */}
       {phases.map(phase => {

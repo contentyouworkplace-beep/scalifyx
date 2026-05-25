@@ -330,8 +330,8 @@ function VideoPlayer() {
     >
       <video
         ref={videoRef}
-        src="/demo.mp4"
-        poster="/demo-thumb.jpg"
+        src="/Landingvideo.mp4"
+        poster="/landing-thumb.jpg"
         className="w-full h-full object-cover"
         playsInline
         preload="metadata"

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../../../lib/api';
 import { useAuth } from '../../../context/AuthContext';
 import toast from 'react-hot-toast';
+import TaskChat from '../../../components/TaskChat';
 
 interface Comment {
   id: string;
@@ -108,6 +109,8 @@ export default function WorkPage() {
           />
         </div>
       </div>
+
+      <TaskChat userId={user!.id} currentRole="user" />
 
       {/* Phases */}
       {phases.map(phase => {

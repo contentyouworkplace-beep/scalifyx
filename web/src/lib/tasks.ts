@@ -1,26 +1,67 @@
 export const TASKS = [
-  // Phase 1 — Setup
-  { key: 'account_created',   phase: 1, phase_name: 'Setup',         title: 'Account Created',                sort: 1  },
-  { key: 'profile_filled',    phase: 1, phase_name: 'Setup',         title: 'Business Profile Filled',        sort: 2  },
-  { key: 'logo_uploaded',     phase: 1, phase_name: 'Setup',         title: 'Logo & Branding Uploaded',       sort: 3  },
-  { key: 'services_added',    phase: 1, phase_name: 'Setup',         title: 'Services Listed',                sort: 4  },
-  { key: 'gallery_added',     phase: 1, phase_name: 'Setup',         title: 'Gallery Photos Added',           sort: 5  },
-  // Phase 2 — Website Build
-  { key: 'design_drafted',    phase: 2, phase_name: 'Website Build', title: 'Website Design Drafted',         sort: 6  },
-  { key: 'content_written',   phase: 2, phase_name: 'Website Build', title: 'Content Written',                sort: 7  },
-  { key: 'mobile_checked',    phase: 2, phase_name: 'Website Build', title: 'Mobile Responsiveness Checked',  sort: 8  },
-  // Phase 3 — Go Live
-  { key: 'domain_connected',  phase: 3, phase_name: 'Go Live',       title: 'Domain Purchased & Connected',   sort: 9  },
-  { key: 'dns_configured',    phase: 3, phase_name: 'Go Live',       title: 'DNS Configured',                 sort: 10 },
-  { key: 'ssl_active',        phase: 3, phase_name: 'Go Live',       title: 'SSL Certificate Active',         sort: 11 },
-  { key: 'website_live',      phase: 3, phase_name: 'Go Live',       title: 'Website Published & Live',       sort: 12 },
-  // Phase 4 — SEO Setup
-  { key: 'gsc_setup',         phase: 4, phase_name: 'SEO Setup',     title: 'Google Search Console Setup',    sort: 13 },
-  { key: 'gmb_optimized',     phase: 4, phase_name: 'SEO Setup',     title: 'Google My Business Optimized',   sort: 14 },
-  { key: 'onpage_seo',        phase: 4, phase_name: 'SEO Setup',     title: 'On-Page SEO Done',               sort: 15 },
-  { key: 'technical_seo',     phase: 4, phase_name: 'SEO Setup',     title: 'Technical SEO Audit',            sort: 16 },
-  { key: 'keywords_targeted', phase: 4, phase_name: 'SEO Setup',     title: 'Local Keywords Targeted',        sort: 17 },
-  // Phase 5 — Ongoing
-  { key: 'first_report',      phase: 5, phase_name: 'Ongoing',       title: 'First Monthly SEO Report Sent',  sort: 18 },
-  { key: 'performance_review',phase: 5, phase_name: 'Ongoing',       title: 'Performance Review Done',        sort: 19 },
+  // Phase 1 — Website Design & Structure
+  { key: 'business_goal_brief',          phase: 1, phase_name: 'Website Design & Structure', title: 'Business goal & audience brief',      description: 'Define website purpose, target audience, conversion goals before touching design',                                         sort: 1  },
+  { key: 'sitemap_planning',             phase: 1, phase_name: 'Website Design & Structure', title: 'Sitemap / page structure planning',    description: 'List all pages needed — Home, Service, About, Contact, Blog, Location pages',                                             sort: 2  },
+  { key: 'competitor_website_analysis',  phase: 1, phase_name: 'Website Design & Structure', title: 'Competitor website analysis',          description: 'Study top 5 competitors — design, navigation, CTA, content structure',                                                    sort: 3  },
+  { key: 'design_develop_website',       phase: 1, phase_name: 'Website Design & Structure', title: 'Design & develop website',             description: 'Build pages with clean HTML structure, proper heading hierarchy (H1–H3)',                                                  sort: 4  },
+  { key: 'speed_optimization',           phase: 1, phase_name: 'Website Design & Structure', title: 'Speed optimization at build',          description: 'Compress images, minify CSS/JS, use lazy loading from day one',                                                            sort: 5  },
+
+  // Phase 2 — Technical SEO Foundation
+  { key: 'https_ssl',                    phase: 2, phase_name: 'Technical SEO Foundation',   title: 'HTTPS & SSL certificate',              description: 'Install SSL, ensure all pages load on https://, fix mixed content warnings',                                               sort: 6  },
+  { key: 'connect_gsc',                  phase: 2, phase_name: 'Technical SEO Foundation',   title: 'Connect Google Search Console',        description: 'Add & verify property, set preferred domain (www vs non-www)',                                                             sort: 7  },
+  { key: 'connect_ga4',                  phase: 2, phase_name: 'Technical SEO Foundation',   title: 'Connect Google Analytics (GA4)',        description: 'Install GA4 tag via GTM or direct, verify events & pageview tracking',                                                    sort: 8  },
+  { key: 'xml_sitemap',                  phase: 2, phase_name: 'Technical SEO Foundation',   title: 'Generate & submit XML sitemap',        description: 'Create sitemap.xml with all indexable pages, submit in GSC',                                                               sort: 9  },
+  { key: 'configure_robots_txt',         phase: 2, phase_name: 'Technical SEO Foundation',   title: 'Configure robots.txt',                 description: 'Block /wp-admin/, /thank-you/, /cart/ etc. Allow all important pages',                                                     sort: 10 },
+  { key: 'canonical_tags',               phase: 2, phase_name: 'Technical SEO Foundation',   title: 'Set canonical tags',                   description: 'Add canonical URL on every page to prevent duplicate content issues',                                                      sort: 11 },
+  { key: 'fix_crawl_errors',             phase: 2, phase_name: 'Technical SEO Foundation',   title: 'Fix crawl errors',                     description: 'Check GSC coverage report — fix 404s, redirect chains, server errors',                                                     sort: 12 },
+  { key: 'core_web_vitals',              phase: 2, phase_name: 'Technical SEO Foundation',   title: 'Core Web Vitals check',                description: 'Run PageSpeed Insights — target LCP < 2.5s, CLS < 0.1, INP < 200ms',                                                       sort: 13 },
+
+  // Phase 3 — Keyword Research
+  { key: 'seed_keyword_brainstorm',      phase: 3, phase_name: 'Keyword Research',            title: 'Seed keyword brainstorming',           description: 'List core topics, services, and locations your business targets to seed the keyword list',                                sort: 14 },
+  { key: 'keyword_research_tools',       phase: 3, phase_name: 'Keyword Research',            title: 'Keyword research (tools)',             description: 'Use Ahrefs / SEMrush / Ubersuggest to build keyword list to 100+ keywords',                                              sort: 15 },
+  { key: 'search_intent_classification', phase: 3, phase_name: 'Keyword Research',            title: 'Search intent classification',         description: 'Tag each keyword as Informational, Navigational, Commercial or Transactional',                                            sort: 16 },
+  { key: 'keyword_clustering',           phase: 3, phase_name: 'Keyword Research',            title: 'Keyword clustering',                   description: 'Group related keywords into clusters — one cluster = one page',                                                           sort: 17 },
+  { key: 'keyword_to_page_mapping',      phase: 3, phase_name: 'Keyword Research',            title: 'Keyword-to-page mapping',              description: 'Assign each cluster to an existing or new page on the site',                                                              sort: 18 },
+  { key: 'competitor_keyword_gap',       phase: 3, phase_name: 'Keyword Research',            title: 'Competitor keyword gap',               description: "Find keywords competitors rank for that you don't — add to content plan",                                                sort: 19 },
+  { key: 'long_tail_keyword_list',       phase: 3, phase_name: 'Keyword Research',            title: 'Long-tail keyword list',               description: 'Build list of 50+ long-tail KWs for blog & FAQ targeting',                                                                sort: 20 },
+
+  // Phase 4 — On-Page Optimization
+  { key: 'title_tag_optimization',       phase: 4, phase_name: 'On-Page Optimization',        title: 'Title tag optimization',               description: '60 chars max, primary KW in first 40 chars, unique per page',                                                              sort: 21 },
+  { key: 'meta_description_optimization',phase: 4, phase_name: 'On-Page Optimization',        title: 'Meta description optimization',        description: '150–155 chars, include KW naturally, strong CTA or value prop',                                                            sort: 22 },
+  { key: 'h1_heading_structure',         phase: 4, phase_name: 'On-Page Optimization',        title: 'H1 & heading structure',               description: 'One H1 per page with main KW, logical H2/H3 breakdown',                                                                   sort: 23 },
+  { key: 'url_structure_cleanup',        phase: 4, phase_name: 'On-Page Optimization',        title: 'URL structure cleanup',                description: 'Short, lowercase, hyphenated — no stop words, no dates in URLs',                                                           sort: 24 },
+  { key: 'image_alt_compression',        phase: 4, phase_name: 'On-Page Optimization',        title: 'Image alt text & compression',         description: 'Descriptive alt text with KW where natural, compress all images < 100KB',                                                 sort: 25 },
+  { key: 'internal_linking_setup',       phase: 4, phase_name: 'On-Page Optimization',        title: 'Internal linking setup',               description: "Link between related pages using descriptive anchor text (not 'click here')",                                             sort: 26 },
+  { key: 'schema_markup',                phase: 4, phase_name: 'On-Page Optimization',        title: 'Schema markup implementation',         description: 'Add LocalBusiness, FAQPage, Article, BreadcrumbList schema as relevant',                                                   sort: 27 },
+  { key: 'content_depth',                phase: 4, phase_name: 'On-Page Optimization',        title: 'Page word count & content depth',      description: 'Match or exceed competitor content depth for target keyword pages',                                                        sort: 28 },
+
+  // Phase 5 — Content Creation & Strategy
+  { key: 'content_audit',                phase: 5, phase_name: 'Content Creation & Strategy', title: 'Content audit (existing site)',        description: 'Review all current pages — keep, improve, merge, or delete each one',                                                      sort: 29 },
+  { key: 'pillar_page_creation',         phase: 5, phase_name: 'Content Creation & Strategy', title: 'Pillar page creation',                 description: 'Write 1500–3000 word comprehensive page per main topic cluster',                                                           sort: 30 },
+  { key: 'service_landing_pages',        phase: 5, phase_name: 'Content Creation & Strategy', title: 'Service / landing pages',              description: 'Create dedicated SEO-optimized page for each service or product',                                                          sort: 31 },
+  { key: 'blog_article_publishing',      phase: 5, phase_name: 'Content Creation & Strategy', title: 'Blog article publishing',              description: 'Publish at least 2–4 articles/week with proper on-page SEO applied',                                                       sort: 32 },
+  { key: 'faq_section_creation',         phase: 5, phase_name: 'Content Creation & Strategy', title: 'FAQ section creation',                 description: 'Add FAQ sections on key pages targeting PAA (People Also Ask) questions',                                                   sort: 33 },
+  { key: 'content_refresh',              phase: 5, phase_name: 'Content Creation & Strategy', title: 'Content refresh & update',             description: 'Update old pages with new data, stats, examples every 3–6 months',                                                         sort: 34 },
+  { key: 'multimedia_content',           phase: 5, phase_name: 'Content Creation & Strategy', title: 'Multimedia content (images/video)',     description: 'Add original images, infographics or video to key pages for engagement',                                                   sort: 35 },
+
+  // Phase 6 — Local SEO
+  { key: 'nap_consistency_audit',        phase: 6, phase_name: 'Local SEO',                   title: 'NAP consistency audit',                description: 'Name, Address, Phone must be identical everywhere online',                                                                 sort: 36 },
+  { key: 'local_citations_building',     phase: 6, phase_name: 'Local SEO',                   title: 'Local citations building',             description: 'List on JustDial, IndiaMart, Sulekha, Yelp, Yellow Pages, niche dirs',                                                     sort: 37 },
+  { key: 'city_area_landing_pages',      phase: 6, phase_name: 'Local SEO',                   title: 'City & area landing pages',            description: 'Create separate optimized pages for each target city or locality',                                                         sort: 38 },
+  { key: 'local_schema',                 phase: 6, phase_name: 'Local SEO',                   title: 'Local schema (LocalBusiness)',          description: 'Add LocalBusiness schema with geo coordinates, address, opening hours',                                                    sort: 39 },
+
+  // Phase 7 — Off-Page & Link Building
+  { key: 'backlink_profile_audit',       phase: 7, phase_name: 'Off-Page & Link Building',    title: 'Backlink profile audit',               description: 'Check existing backlinks in Ahrefs/GSC, disavow toxic or spammy links',                                                   sort: 40 },
+  { key: 'competitor_backlink_analysis', phase: 7, phase_name: 'Off-Page & Link Building',    title: 'Competitor backlink analysis',         description: 'Find who links to competitors — target same sources for your site',                                                        sort: 41 },
+  { key: 'guest_posting_outreach',       phase: 7, phase_name: 'Off-Page & Link Building',    title: 'Guest posting outreach',               description: 'Identify relevant blogs/sites, pitch articles with 1–2 contextual backlinks',                                             sort: 42 },
+  { key: 'directory_niche_submissions',  phase: 7, phase_name: 'Off-Page & Link Building',    title: 'Directory & niche submissions',        description: 'Submit to industry-specific and local directories for authority links',                                                    sort: 43 },
+  { key: 'internal_link_authority_flow', phase: 7, phase_name: 'Off-Page & Link Building',    title: 'Internal link authority flow',         description: 'Push link equity from high-DA pages to pages you want to rank higher',                                                    sort: 44 },
+
+  // Phase 8 — Tracking & Reporting
+  { key: 'rank_tracking_setup',          phase: 8, phase_name: 'Tracking & Reporting',        title: 'Rank tracking setup',                  description: 'Add target keywords in SERPWatcher / Ahrefs / GSC for weekly tracking',                                                    sort: 45 },
+  { key: 'gsc_weekly_review',            phase: 8, phase_name: 'Tracking & Reporting',        title: 'GSC weekly review',                    description: 'Check impressions, clicks, CTR, position — flag drops or opportunities',                                                   sort: 46 },
+  { key: 'ga4_traffic_review',           phase: 8, phase_name: 'Tracking & Reporting',        title: 'GA4 traffic & conversion review',      description: 'Track organic sessions, bounce rate, goal completions weekly',                                                             sort: 47 },
+  { key: 'monthly_seo_report',           phase: 8, phase_name: 'Tracking & Reporting',        title: 'Monthly SEO report creation',          description: 'Compile rankings, traffic, backlinks, content published into client report',                                              sort: 48 },
+  { key: 'content_performance_analysis', phase: 8, phase_name: 'Tracking & Reporting',        title: 'Content performance analysis',         description: 'Identify top & low performing pages — double down or optimize accordingly',                                               sort: 49 },
+  { key: 'seo_task_priority_review',     phase: 8, phase_name: 'Tracking & Reporting',        title: 'SEO task priority review',             description: "Every month re-prioritize tasks based on what's working and what's not",                                                  sort: 50 },
 ];

@@ -148,11 +148,69 @@ async function handleDeleteComment(req: Request, targetUserId: string, commentId
   return Response.json({ success: true });
 }
 
+// ── GET /api/work/:userId/chat ─────────────────────────────────────────────────
+async function handleGetChat(req: Request, targetUserId: string) {
+  const authUser = await getAuthUser(req);
+  if (!authUser) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const profile = await getProfile(authUser.id);
+  const isAdmin = profile?.role === 'admin';
+
+  if (!isAdmin && authUser.id !== targetUserId) {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  const { data, error } = await db()
+    .from('task_comments')
+    .select('id, content, author_name, author_role, created_at')
+    .eq('user_id', targetUserId)
+    .eq('task_key', '__chat__')
+    .order('created_at', { ascending: true });
+
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ success: true, messages: data || [] });
+}
+
+// ── POST /api/work/:userId/chat ────────────────────────────────────────────────
+async function handleSendChat(req: Request, targetUserId: string) {
+  const authUser = await getAuthUser(req);
+  if (!authUser) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const profile = await getProfile(authUser.id);
+  const isAdmin = profile?.role === 'admin';
+
+  if (!isAdmin && authUser.id !== targetUserId) {
+    return Response.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  let body: { content: string };
+  try { body = await req.json(); } catch { return Response.json({ error: 'Invalid body' }, { status: 400 }); }
+
+  const { content } = body;
+  if (!content?.trim()) return Response.json({ error: 'Message cannot be empty' }, { status: 400 });
+
+  const authorName = profile?.name || (isAdmin ? 'Admin' : 'You');
+
+  const { data, error } = await db().from('task_comments').insert({
+    user_id: targetUserId,
+    task_key: '__chat__',
+    content: content.trim(),
+    author_id: authUser.id,
+    author_name: authorName,
+    author_role: isAdmin ? 'admin' : 'user',
+  }).select().maybeSingle();
+
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ success: true, message: data });
+}
+
 // ── Router ────────────────────────────────────────────────────────────────────
 
 export async function GET(req: Request, { params }: { params: { slug: string[] } }) {
-  const [userId] = params.slug;
-  if (userId) return handleGet(req, userId);
+  const [userId, action] = params.slug;
+  if (!userId) return Response.json({ error: 'Not found' }, { status: 404 });
+  if (action === 'chat') return handleGetChat(req, userId);
+  if (!action) return handleGet(req, userId);
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
 
@@ -161,6 +219,7 @@ export async function POST(req: Request, { params }: { params: { slug: string[] 
   if (!userId) return Response.json({ error: 'Not found' }, { status: 404 });
   if (action === 'complete') return handleComplete(req, userId);
   if (action === 'comment') return handleComment(req, userId);
+  if (action === 'chat') return handleSendChat(req, userId);
   return Response.json({ error: 'Not found' }, { status: 404 });
 }
 
