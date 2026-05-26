@@ -50,16 +50,31 @@ export default function SEOInternsHiringPage() {
         fd.append('file', file);
         const res = await fetch('/api/upload-cv', { method: 'POST', body: fd });
         const data = await res.json();
-        if (data.url) cvUrl = data.url;
-        else setUploadError(data.error || 'Upload failed — continuing without file.');
+        if (data.url) {
+          cvUrl = data.url;
+        } else {
+          setUploadError(data.error || 'Upload failed. Please try again.');
+          setUploading(false);
+          return;
+        }
       } catch {
-        setUploadError('Upload failed — continuing without file.');
+        setUploadError('Upload failed. Please check your connection and try again.');
+        setUploading(false);
+        return;
       }
     }
 
-    const text = encodeURIComponent(
-      `Hi Scalify! I'm applying for the SEO Intern position.\n\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}${form.message ? `\n\nAbout me: ${form.message}` : ''}${cvUrl ? `\n\nCV / Portfolio: ${cvUrl}` : ''}`
-    );
+    const lines = [
+      `🙋 *SEO Intern Application — Scalify*`,
+      ``,
+      `*Name:* ${form.name}`,
+      `*Email:* ${form.email}`,
+      `*Phone:* ${form.phone}`,
+      ...(form.message ? [``, `*About me / Portfolio:*`, form.message] : []),
+      ...(cvUrl ? [``, `*CV / Portfolio file:*`, cvUrl] : []),
+    ];
+
+    const text = encodeURIComponent(lines.join('\n'));
 
     setUploading(false);
     setSubmitted(true);
