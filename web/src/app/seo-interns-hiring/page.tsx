@@ -43,42 +43,42 @@ export default function SEOInternsHiringPage() {
     e.preventDefault();
     setUploading(true);
 
-    let cvUrl = '';
-    if (file) {
-      try {
-        const fd = new FormData();
-        fd.append('file', file);
-        const res = await fetch('/api/upload-cv', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.url) {
-          cvUrl = data.url;
-        } else {
-          setUploadError(data.error || 'Upload failed. Please try again.');
-          setUploading(false);
-          return;
-        }
-      } catch {
-        setUploadError('Upload failed. Please check your connection and try again.');
+    // Send everything in one request — upload, shorten URL, save to DB
+    try {
+      const fd = new FormData();
+      fd.append('name',    form.name);
+      fd.append('email',   form.email);
+      fd.append('phone',   form.phone);
+      fd.append('message', form.message);
+      if (file) fd.append('file', file);
+
+      const res  = await fetch('/api/seo-apply', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (!data.success) {
+        setUploadError(data.error || 'Submission failed. Please try again.');
         setUploading(false);
         return;
       }
+
+      const cvUrl = data.cv_url || '';
+      const lines = [
+        `🙋 *SEO Intern Application — Scalify*`,
+        ``,
+        `*Name:* ${form.name}`,
+        `*Email:* ${form.email}`,
+        `*Phone:* ${form.phone}`,
+        ...(form.message ? [``, `*About me / Portfolio:*`, form.message] : []),
+        ...(cvUrl ? [``, `*CV / Portfolio file:*`, cvUrl] : []),
+      ];
+
+      setUploading(false);
+      setSubmitted(true);
+      window.open(`https://wa.me/916353583148?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
+    } catch {
+      setUploadError('Something went wrong. Please check your connection and try again.');
+      setUploading(false);
     }
-
-    const lines = [
-      `🙋 *SEO Intern Application — Scalify*`,
-      ``,
-      `*Name:* ${form.name}`,
-      `*Email:* ${form.email}`,
-      `*Phone:* ${form.phone}`,
-      ...(form.message ? [``, `*About me / Portfolio:*`, form.message] : []),
-      ...(cvUrl ? [``, `*CV / Portfolio file:*`, cvUrl] : []),
-    ];
-
-    const text = encodeURIComponent(lines.join('\n'));
-
-    setUploading(false);
-    setSubmitted(true);
-    window.open(`https://wa.me/916353583148?text=${text}`, '_blank');
   }
 
   const responsibilities = [
