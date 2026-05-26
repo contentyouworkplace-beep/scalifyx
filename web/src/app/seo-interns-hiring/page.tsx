@@ -152,7 +152,7 @@ export default function SEOInternsHiringPage() {
               </ul>
             </div>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 mb-5">
               {perks.map((p) => (
                 <div
                   key={p.label}
@@ -162,6 +162,14 @@ export default function SEOInternsHiringPage() {
                   <span>{p.label}</span>
                 </div>
               ))}
+            </div>
+
+            {/* Stipend note */}
+            <div className="flex items-start gap-3 bg-gradient-to-r from-[#F97316]/10 to-[#A855F7]/10 border border-[#F97316]/30 rounded-xl px-4 py-3">
+              <span className="text-lg">💰</span>
+              <p className="text-[#D4D4D8] text-sm leading-relaxed">
+                <span className="text-white font-semibold">Stipend provided</span> — performance-based stipend will be given according to your work quality and results.
+              </p>
             </div>
           </div>
 
