@@ -38,5 +38,21 @@ export async function POST(req: Request) {
   }
 
   const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(fileName);
-  return Response.json({ url: publicUrl });
+
+  // Shorten the URL so it fits cleanly in WhatsApp
+  let shortUrl = publicUrl;
+  try {
+    const res = await fetch(
+      `https://tinyurl.com/api-create.php?url=${encodeURIComponent(publicUrl)}`,
+      { signal: AbortSignal.timeout(4000) }
+    );
+    if (res.ok) {
+      const text = (await res.text()).trim();
+      if (text.startsWith('https://')) shortUrl = text;
+    }
+  } catch {
+    // fall back to full URL if shortener is unavailable
+  }
+
+  return Response.json({ url: shortUrl });
 }
