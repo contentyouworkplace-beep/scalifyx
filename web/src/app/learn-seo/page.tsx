@@ -434,7 +434,7 @@ export default function LearnSEOPage() {
           href="#enrol"
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-sm font-semibold hover:opacity-90 transition shadow-md shadow-green-100"
         >
-          Book Your Seat
+          Pay Rs. 99 Now · Rs. 4,900 After Session
         </a>
       </nav>
 
@@ -486,7 +486,7 @@ export default function LearnSEOPage() {
             <div className="inline-flex items-center gap-4 bg-white border border-[#E5E7EB] rounded-2xl px-6 py-4 shadow-sm">
               <div>
                 <div className="text-3xl font-extrabold text-[#16A34A]">Rs. 4,999</div>
-                <div className="text-xs text-[#9CA3AF] mt-0.5">One-time · No hidden fees</div>
+                <div className="text-xs text-[#9CA3AF] mt-0.5">Rs. 99 now · Rs. 4,900 after session</div>
               </div>
               <div className="w-px h-10 bg-[#E5E7EB]" />
               <div>
@@ -634,7 +634,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="inline-block px-10 py-4 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-base font-bold hover:opacity-90 transition shadow-lg shadow-green-100"
             >
-              Book Your Seat — Rs. 4,999
+              Pay Rs. 99 Now · Rs. 4,900 After Session
             </a>
           </div>
         </div>
@@ -691,7 +691,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="mt-8 w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition flex items-center justify-center text-sm shadow-lg shadow-green-100"
             >
-              Book Your Seat — Rs. 4,999
+              Pay Rs. 99 Now · Rs. 4,900 After Session
             </a>
           </div>
         </div>
@@ -808,9 +808,9 @@ export default function LearnSEOPage() {
             href="#enrol"
             className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-lg font-extrabold hover:opacity-90 transition shadow-2xl shadow-green-100"
           >
-            Book Your Seat — Rs. 4,999
+            Pay Rs. 99 Now · Rs. 4,900 After Session
           </a>
-          <p className="mt-4 text-sm text-[#9CA3AF]">Limited slots. We confirm within a few hours on WhatsApp.</p>
+          <p className="mt-4 text-sm text-[#9CA3AF]">Pay just Rs. 99 now — Rs. 4,900 remaining at the start of your session.</p>
         </div>
       </section>
 
