@@ -20,8 +20,6 @@ const SEARCH_CONSOLE_IMAGES = [
   '/search-console/7.png', '/search-console/8.png',
 ];
 
-const WEBSITE_BUDGETS = ['₹20,000+', '₹40,000+', '₹70,000+'];
-const SEO_BUDGETS = ['₹70,000+ / year', '₹1,00,000+ / year', '₹1,50,000+ / year'];
 
 const FAQS = [
   {
@@ -90,14 +88,12 @@ function FAQSection() {
 }
 
 function ContactForm() {
-  const [form, setForm] = useState({ name: '', phone: '', service: '', budget: '', website: '' });
+  const [form, setForm] = useState({ name: '', phone: '', service: '', message: '', website: '' });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-  const budgetOptions = form.service === 'WEBSITE' ? WEBSITE_BUDGETS : SEO_BUDGETS;
-
   function handleServiceChange(s: string) {
-    setForm(f => ({ ...f, service: s, budget: '' }));
+    setForm(f => ({ ...f, service: s }));
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -105,7 +101,7 @@ function ContactForm() {
     if (!form.name.trim()) { setError('Please enter your name.'); return; }
     if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 10) { setError('Please enter a valid phone number.'); return; }
     if (!form.service) { setError('Please select a service.'); return; }
-    if (!form.budget) { setError('Please select a budget range.'); return; }
+    if (!form.message.trim()) { setError('Please describe your requirements.'); return; }
     setError('');
 
     const lines = [
@@ -114,10 +110,13 @@ function ContactForm() {
       `*Name* — ${form.name}`,
       `*Phone* — +91 ${form.phone}`,
       `*Service* — ${form.service}`,
-      `*Budget* — ${form.budget}`,
+      `*Requirements* — ${form.message}`,
       ...(form.website ? [`*Website* — ${form.website}`] : []),
     ];
 
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Lead', { content_name: 'Vadodara Enquiry', content_category: form.service });
+    }
     setSubmitted(true);
     window.open(`https://wa.me/916353583148?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
   }
@@ -186,26 +185,17 @@ function ContactForm() {
         </div>
       </div>
 
-      {form.service && (
-        <div>
-          <label className="block text-[#A1A1AA] text-sm mb-2">Budget Range *</label>
-          <div className="grid grid-cols-3 gap-2">
-            {budgetOptions.map(b => (
-              <button
-                key={b}
-                type="button"
-                onClick={() => setForm(f => ({ ...f, budget: b }))}
-                className={`py-3 px-2 rounded-xl text-xs font-bold border transition-all text-center leading-tight ${form.budget === b
-                  ? 'bg-gradient-to-r from-[#7C3AED] to-[#A855F7] border-[#A855F7] text-white'
-                  : 'bg-[#0A0A0F] border-[#27272A] text-[#71717A] hover:border-[#A855F7]/50 hover:text-white'
-                }`}
-              >
-                {b}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <div>
+        <label className="block text-[#A1A1AA] text-sm mb-1.5">Your Requirements *</label>
+        <textarea
+          required
+          rows={4}
+          value={form.message}
+          onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+          placeholder="Tell us about your business and what you're looking for — e.g. new website for my salon, SEO for my construction business..."
+          className="w-full bg-[#0A0A0F] border border-[#27272A] rounded-xl px-4 py-3 text-white placeholder-[#3F3F46] focus:outline-none focus:border-[#A855F7] transition-colors text-sm resize-none"
+        />
+      </div>
 
       <div>
         <label className="block text-[#A1A1AA] text-sm mb-1.5">
