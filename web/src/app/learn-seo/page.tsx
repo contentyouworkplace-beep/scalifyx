@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const WHY_LEARN_SEO = [
   {
@@ -137,8 +138,8 @@ const FAQS = [
     a: 'After the session, you can WhatsApp us anytime you\'re stuck — whether it\'s a Google Search Console question, a keyword doubt, or something you forgot from the session. We\'ll reply.',
   },
   {
-    q: 'Is Rs. 5,000 a one-time payment?',
-    a: 'Yes. One payment of Rs. 5,000 covers the full 4-hour session + 1 year of WhatsApp support. No monthly fees, no hidden costs.',
+    q: 'Is Rs. 4,999 a one-time payment?',
+    a: 'Yes. One payment of Rs. 4,999 covers the full 4-hour session + 1 year of WhatsApp support. No monthly fees, no hidden costs.',
   },
   {
     q: 'Can I do this for my client\'s business?',
@@ -190,136 +191,239 @@ function FAQSection() {
   );
 }
 
-function EnrolForm() {
-  const [form, setForm] = useState({ name: '', company: '', phone: '', bizType: '', website: '' });
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
+const SLOTS = [
+  { key: 'morning', label: '10 AM – 2 PM' },
+  { key: 'afternoon', label: '3 PM – 7 PM' },
+  { key: 'evening', label: '7 PM – 11 PM' },
+];
 
-  function handleSubmit(e: React.FormEvent) {
+function getNext14Days() {
+  const days = [];
+  const today = new Date();
+  for (let i = 1; i <= 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function dateStr(d: Date) {
+  return d.toISOString().split('T')[0];
+}
+
+function BookingFlow() {
+  const router = useRouter();
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [form, setForm] = useState({ name: '', company: '', phone: '', bizType: '', website: '' });
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedSlot, setSelectedSlot] = useState('');
+  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [error, setError] = useState('');
+  const [paying, setPaying] = useState(false);
+
+  const days = getNext14Days();
+
+  const fetchBookedSlots = useCallback(async (date: string) => {
+    setLoadingSlots(true);
+    try {
+      const res = await fetch(`/api/seo-course/bookings?date=${date}`);
+      const data = await res.json();
+      setBookedSlots(data.bookedSlots || []);
+    } catch { setBookedSlots([]); }
+    setLoadingSlots(false);
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate) fetchBookedSlots(selectedDate);
+  }, [selectedDate, fetchBookedSlots]);
+
+  function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim()) { setError('Please enter your name.'); return; }
-    if (!form.company.trim()) { setError('Please enter your company / business name.'); return; }
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length < 10) { setError('Please enter a valid WhatsApp number.'); return; }
+    if (!form.company.trim()) { setError('Please enter your business name.'); return; }
+    if (form.phone.replace(/\D/g, '').length < 10) { setError('Please enter a valid WhatsApp number.'); return; }
     if (!form.bizType) { setError('Please select your business type.'); return; }
     setError('');
+    setStep(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-    const lines = [
-      `*SEO Masterclass — New Enrolment Enquiry*`,
-      ``,
-      `*Name* — ${form.name}`,
-      `*Business* — ${form.company}`,
-      `*Phone* — +91 ${form.phone}`,
-      `*Business Type* — ${form.bizType}`,
-      form.website ? `*Website* — ${form.website}` : `*Website* — Not yet`,
-    ];
+  function handleSlotSelect(date: string, slot: string) {
+    setSelectedDate(date);
+    setSelectedSlot(slot);
+  }
 
-    if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'Lead', { content_name: 'SEO Course Enrolment', content_category: form.bizType });
+  async function handleProceedToPayment() {
+    if (!selectedDate || !selectedSlot) { setError('Please select a date and time slot.'); return; }
+    setError('');
+    setPaying(true);
+
+    try {
+      const res = await fetch('/api/seo-course/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, date: selectedDate, slot: selectedSlot }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Something went wrong. Please try again.'); setPaying(false); return; }
+
+      const { orderId, bookingId, keyId, amount } = data;
+
+      const rzp = new (window as any).Razorpay({
+        key: keyId,
+        amount,
+        currency: 'INR',
+        name: 'Scalify SEO Masterclass',
+        description: 'Seat Booking — Rs. 99',
+        order_id: orderId,
+        prefill: { name: form.name, contact: `+91${form.phone}` },
+        theme: { color: '#16A34A' },
+        handler: async (response: any) => {
+          const verifyRes = await fetch('/api/seo-course/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              bookingId,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            router.push(`/learn-seo/success?name=${encodeURIComponent(form.name)}&date=${selectedDate}&slot=${selectedSlot}`);
+          } else {
+            setError('Payment verified but booking failed. Please WhatsApp us at +91 6353583148.');
+            setPaying(false);
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) },
+      });
+      rzp.open();
+    } catch {
+      setError('Something went wrong. Please try again.');
+      setPaying(false);
     }
-
-    setSubmitted(true);
-    window.open(`https://wa.me/916353583148?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
   }
 
-  if (submitted) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-5xl mb-4">✅</div>
-        <h3 className="text-[#0F172A] text-xl font-bold mb-2">Opening WhatsApp…</h3>
-        <p className="text-[#6B7280] text-sm mb-6">Your details are pre-filled. Just hit send and we'll confirm your slot.</p>
-        <button
-          onClick={() => { setSubmitted(false); setForm({ name: '', company: '', phone: '', bizType: '', website: '' }); }}
-          className="text-sm text-[#16A34A] hover:underline"
-        >
-          Submit another enquiry
-        </button>
-      </div>
-    );
-  }
+  // Step indicator
+  const steps = ['Your Details', 'Pick a Slot', 'Pay Rs. 99'];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <input
-        type="text"
-        required
-        value={form.name}
-        onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-        placeholder="Your name *"
-        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm"
-      />
-
-      <input
-        type="text"
-        required
-        value={form.company}
-        onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
-        placeholder="Company / Business name *"
-        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm"
-      />
-
-      <div className="flex rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] overflow-hidden focus-within:border-[#16A34A] transition-colors">
-        <span className="flex items-center px-3 text-[#9CA3AF] text-xs border-r border-[#E5E7EB] select-none">+91</span>
-        <input
-          type="tel"
-          required
-          value={form.phone}
-          onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-          placeholder="WhatsApp number *"
-          className="flex-1 py-3 px-3 bg-transparent text-sm text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none"
-        />
+    <div>
+      {/* Step indicator */}
+      <div className="flex items-center gap-2 mb-5">
+        {steps.map((s, i) => (
+          <div key={s} className="flex items-center gap-2 flex-1">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${step > i + 1 ? 'bg-[#16A34A] text-white' : step === i + 1 ? 'bg-[#16A34A] text-white' : 'bg-[#E5E7EB] text-[#9CA3AF]'}`}>
+              {step > i + 1 ? '✓' : i + 1}
+            </div>
+            <span className={`text-xs font-semibold ${step === i + 1 ? 'text-[#16A34A]' : 'text-[#9CA3AF]'}`}>{s}</span>
+            {i < steps.length - 1 && <div className="flex-1 h-px bg-[#E5E7EB]" />}
+          </div>
+        ))}
       </div>
 
-      <select
-        required
-        value={form.bizType}
-        onChange={e => setForm(f => ({ ...f, bizType: e.target.value }))}
-        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#16A34A] transition-colors appearance-none"
-        style={{ color: form.bizType ? '#0F172A' : '#9CA3AF' }}
-      >
-        <option value="" disabled>I am a... *</option>
-        <option value="Small Business Owner">Small Business Owner</option>
-        <option value="Freelancer">Freelancer</option>
-        <option value="Agency">Agency / Marketing Team</option>
-        <option value="Other">Other</option>
-      </select>
-
-      <input
-        type="url"
-        value={form.website}
-        onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
-        placeholder="Your website URL (optional)"
-        className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm"
-      />
-
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">
-          {error}
-        </div>
+      {/* Step 1 — Form */}
+      {step === 1 && (
+        <form onSubmit={handleFormSubmit} className="space-y-3">
+          <input type="text" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Your name *" className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm" />
+          <input type="text" required value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} placeholder="Company / Business name *" className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm" />
+          <div className="flex rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] overflow-hidden focus-within:border-[#16A34A] transition-colors">
+            <span className="flex items-center px-3 text-[#9CA3AF] text-xs border-r border-[#E5E7EB] select-none">+91</span>
+            <input type="tel" required value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))} placeholder="WhatsApp number *" className="flex-1 py-3 px-3 bg-transparent text-sm text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none" />
+          </div>
+          <select required value={form.bizType} onChange={e => setForm(f => ({ ...f, bizType: e.target.value }))} className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#16A34A] transition-colors appearance-none" style={{ color: form.bizType ? '#0F172A' : '#9CA3AF' }}>
+            <option value="" disabled>I am a... *</option>
+            <option value="Small Business Owner">Small Business Owner</option>
+            <option value="Freelancer">Freelancer</option>
+            <option value="Agency">Agency / Marketing Team</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} placeholder="Your website URL (optional)" className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm" />
+          {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">{error}</div>}
+          <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm shadow-lg shadow-green-100">
+            Next — Pick Your Slot →
+          </button>
+          <p className="text-center text-xs text-[#9CA3AF]">Pay only Rs. 99 now · Rs. 4,900 at start of session</p>
+        </form>
       )}
 
-      <button
-        type="submit"
-        className="w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm shadow-lg shadow-green-200"
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-        </svg>
-        Book Your Seat on WhatsApp
-      </button>
+      {/* Step 2 — Calendar */}
+      {step === 2 && (
+        <div>
+          <p className="text-xs text-[#9CA3AF] mb-4">Select a date and time slot for your session.</p>
 
-      <p className="text-center text-xs text-[#9CA3AF]">Rs. 5,000 · One-time · 1 year support included</p>
-    </form>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+            {days.map(day => {
+              const ds = dateStr(day);
+              const isSelected = selectedDate === ds;
+              const dayLabel = day.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+              return (
+                <div key={ds} className={`rounded-xl border transition-all ${isSelected ? 'border-[#16A34A] bg-[#F0FDF4]' : 'border-[#E5E7EB] bg-white'}`}>
+                  <button
+                    type="button"
+                    className="w-full text-left px-4 py-3 flex items-center justify-between"
+                    onClick={() => { setSelectedDate(ds); setSelectedSlot(''); }}
+                  >
+                    <span className={`text-sm font-bold ${isSelected ? 'text-[#16A34A]' : 'text-[#0F172A]'}`}>{dayLabel}</span>
+                    <span className={`text-xs transition-transform ${isSelected ? 'rotate-180 text-[#16A34A]' : 'text-[#9CA3AF]'}`}>▾</span>
+                  </button>
+
+                  {isSelected && (
+                    <div className="px-4 pb-4 grid grid-cols-1 gap-2">
+                      {loadingSlots ? (
+                        <p className="text-xs text-[#9CA3AF]">Checking availability...</p>
+                      ) : SLOTS.map(slot => {
+                        const booked = bookedSlots.includes(slot.key);
+                        const picked = selectedSlot === slot.key;
+                        return (
+                          <button
+                            key={slot.key}
+                            type="button"
+                            disabled={booked}
+                            onClick={() => setSelectedSlot(slot.key)}
+                            className={`w-full py-2.5 px-4 rounded-lg text-sm font-semibold border transition-all text-left ${booked ? 'bg-[#F3F4F6] border-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed line-through' : picked ? 'bg-[#16A34A] border-[#16A34A] text-white' : 'bg-white border-[#E5E7EB] text-[#374151] hover:border-[#16A34A]'}`}
+                          >
+                            {slot.label} {booked ? '— Fully Booked' : ''}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">{error}</div>}
+
+          <div className="flex gap-2 mt-4">
+            <button type="button" onClick={() => { setStep(1); setError(''); }} className="flex-1 py-3 rounded-xl border border-[#E5E7EB] text-[#6B7280] font-semibold text-sm hover:bg-[#F9FAFB] transition">
+              ← Back
+            </button>
+            <button
+              type="button"
+              disabled={!selectedDate || !selectedSlot || paying}
+              onClick={handleProceedToPayment}
+              className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {paying ? 'Opening Payment...' : 'Pay Rs. 99 & Confirm →'}
+            </button>
+          </div>
+          <p className="text-center text-xs text-[#9CA3AF] mt-2">Secure payment via Razorpay</p>
+        </div>
+      )}
+    </div>
   );
 }
 
 export default function LearnSEOPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-[#0F172A] font-['Poppins',sans-serif]">
-
-      {/* Top Bar */}
-      <div className="w-full bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-center py-2.5 px-4 text-xs sm:text-sm font-semibold">
-        🛡️ Not happy after 4 hours? We refund you instantly — right in the session. No questions asked.
-      </div>
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB] sticky top-0 z-50 bg-[#FAFAF7]/95 backdrop-blur-xl">
@@ -381,7 +485,7 @@ export default function LearnSEOPage() {
             {/* Price pill */}
             <div className="inline-flex items-center gap-4 bg-white border border-[#E5E7EB] rounded-2xl px-6 py-4 shadow-sm">
               <div>
-                <div className="text-3xl font-extrabold text-[#16A34A]">Rs. 5,000</div>
+                <div className="text-3xl font-extrabold text-[#16A34A]">Rs. 4,999</div>
                 <div className="text-xs text-[#9CA3AF] mt-0.5">One-time · No hidden fees</div>
               </div>
               <div className="w-px h-10 bg-[#E5E7EB]" />
@@ -397,11 +501,11 @@ export default function LearnSEOPage() {
             </div>
           </div>
 
-          {/* Right — Form */}
+          {/* Right — Booking Flow */}
           <div id="enrol" className="bg-white border border-[#E5E7EB] rounded-2xl p-6 lg:sticky lg:top-24 shadow-xl shadow-gray-100">
             <h3 className="text-[#0F172A] text-lg font-bold mb-0.5">Book Your Seat</h3>
-            <p className="text-[#9CA3AF] text-xs mb-5">We'll confirm your slot on WhatsApp within a few hours.</p>
-            <EnrolForm />
+            <p className="text-[#9CA3AF] text-xs mb-5">Pay Rs. 99 now to confirm · Rs. 4,900 at start of session</p>
+            <BookingFlow />
           </div>
 
         </div>
@@ -481,7 +585,7 @@ export default function LearnSEOPage() {
               Everything Included.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Nothing Hidden.</span>
             </h2>
-            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">Rs. 5,000 — one time. Here's exactly what you walk away with.</p>
+            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">Rs. 4,999 — one time. Here's exactly what you walk away with.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -516,11 +620,6 @@ export default function LearnSEOPage() {
                 title: 'Taught with Your Business in Mind',
                 desc: 'Before the session, we learn about your industry and city. Every example and strategy is relevant to what you actually do.',
               },
-              {
-                icon: '🛡️',
-                title: '100% Refund Guarantee',
-                desc: 'Not happy after 4 hours? We refund you instantly — right in the session. No questions asked.',
-              },
             ].map((item, i) => (
               <div key={i} className="rounded-2xl border border-[#E5E7EB] bg-white p-7 shadow-sm hover:shadow-md hover:border-[#16A34A]/30 transition-all">
                 <div className="text-4xl mb-5">{item.icon}</div>
@@ -535,7 +634,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="inline-block px-10 py-4 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-base font-bold hover:opacity-90 transition shadow-lg shadow-green-100"
             >
-              Book Your Seat — Rs. 5,000
+              Book Your Seat — Rs. 4,999
             </a>
           </div>
         </div>
@@ -568,7 +667,7 @@ export default function LearnSEOPage() {
           </div>
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">What You Walk Away With</p>
-            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">Rs. 5,000 covers everything</h3>
+            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">Rs. 4,999 — everything included</h3>
             <div className="space-y-4">
               {[
                 '4-hour live one-on-one session',
@@ -592,7 +691,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="mt-8 w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition flex items-center justify-center text-sm shadow-lg shadow-green-100"
             >
-              Book Your Seat — Rs. 5,000
+              Book Your Seat — Rs. 4,999
             </a>
           </div>
         </div>
@@ -703,13 +802,13 @@ export default function LearnSEOPage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Are you?</span>
           </h2>
           <p className="text-[#6B7280] text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-            4 hours. Rs. 5,000. 1 year of support. Everything you need to start ranking your business on Google — taught with your business in mind.
+            4 hours. Rs. 4,999. 1 year of support. Everything you need to start ranking your business on Google — taught with your business in mind.
           </p>
           <a
             href="#enrol"
             className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-lg font-extrabold hover:opacity-90 transition shadow-2xl shadow-green-100"
           >
-            Book Your Seat — Rs. 5,000
+            Book Your Seat — Rs. 4,999
           </a>
           <p className="mt-4 text-sm text-[#9CA3AF]">Limited slots. We confirm within a few hours on WhatsApp.</p>
         </div>
