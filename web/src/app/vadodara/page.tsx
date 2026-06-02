@@ -88,7 +88,7 @@ function FAQSection() {
 }
 
 function ContactForm() {
-  const [form, setForm] = useState({ name: '', phone: '', service: '', message: '', website: '' });
+  const [form, setForm] = useState({ name: '', phone: '', service: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
@@ -111,7 +111,6 @@ function ContactForm() {
       `*Phone* — +91 ${form.phone}`,
       `*Service* — ${form.service}`,
       `*Requirements* — ${form.message}`,
-      ...(form.website ? [`*Website* — ${form.website}`] : []),
     ];
 
     if (typeof window !== 'undefined' && (window as any).fbq) {
@@ -128,7 +127,7 @@ function ContactForm() {
         <h3 className="text-white text-xl font-bold mb-2">Opening WhatsApp…</h3>
         <p className="text-[#71717A] text-sm mb-6">Your details are pre-filled. Just hit send.</p>
         <button
-          onClick={() => { setSubmitted(false); setForm({ name: '', phone: '', service: '', message: '', website: '' }); }}
+          onClick={() => { setSubmitted(false); setForm({ name: '', phone: '', service: '', message: '' }); }}
           className="text-sm text-[#A855F7] hover:underline"
         >
           Submit another enquiry
@@ -138,89 +137,68 @@ function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label className="block text-[#A1A1AA] text-sm mb-1.5">Your Name *</label>
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Name + Phone in one row */}
+      <div className="grid grid-cols-2 gap-2">
         <input
           type="text"
           required
           value={form.name}
           onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-          placeholder="e.g. Rajesh Patel"
-          className="w-full bg-[#0A0A0F] border border-[#27272A] rounded-xl px-4 py-3 text-white placeholder-[#3F3F46] focus:outline-none focus:border-[#A855F7] transition-colors text-sm"
+          placeholder="Your name *"
+          className="w-full bg-[#0A0A0F] border border-[#27272A] rounded-lg px-3 py-2.5 text-white placeholder-[#3F3F46] focus:outline-none focus:border-[#A855F7] transition-colors text-sm"
         />
-      </div>
-
-      <div>
-        <label className="block text-[#A1A1AA] text-sm mb-1.5">Phone Number *</label>
-        <div className="flex rounded-xl border border-[#27272A] bg-[#0A0A0F] overflow-hidden focus-within:border-[#A855F7] transition-colors">
-          <span className="flex items-center px-4 text-[#71717A] text-sm border-r border-[#27272A] select-none">+91</span>
+        <div className="flex rounded-lg border border-[#27272A] bg-[#0A0A0F] overflow-hidden focus-within:border-[#A855F7] transition-colors">
+          <span className="flex items-center px-2.5 text-[#71717A] text-xs border-r border-[#27272A] select-none">+91</span>
           <input
             type="tel"
             required
             value={form.phone}
             onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-            placeholder="WhatsApp number"
-            className="flex-1 py-3 px-4 bg-transparent text-sm text-white placeholder-[#3F3F46] focus:outline-none"
+            placeholder="WhatsApp no. *"
+            className="flex-1 py-2.5 px-2 bg-transparent text-sm text-white placeholder-[#3F3F46] focus:outline-none"
           />
         </div>
       </div>
 
-      <div>
-        <label className="block text-[#A1A1AA] text-sm mb-2">What do you need? *</label>
-        <div className="grid grid-cols-3 gap-2">
-          {(['WEBSITE', 'SEO', 'WEBSITE + SEO'] as const).map(s => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => handleServiceChange(s)}
-              className={`py-3 px-2 rounded-xl text-xs font-bold border transition-all ${form.service === s
-                ? 'bg-gradient-to-r from-[#7C3AED] to-[#A855F7] border-[#A855F7] text-white'
-                : 'bg-[#0A0A0F] border-[#27272A] text-[#71717A] hover:border-[#A855F7]/50 hover:text-white'
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+      {/* Service toggle */}
+      <div className="grid grid-cols-3 gap-1.5">
+        {(['WEBSITE', 'SEO', 'WEBSITE + SEO'] as const).map(s => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => handleServiceChange(s)}
+            className={`py-2 px-1 rounded-lg text-[11px] font-bold border transition-all ${form.service === s
+              ? 'bg-gradient-to-r from-[#7C3AED] to-[#A855F7] border-[#A855F7] text-white'
+              : 'bg-[#0A0A0F] border-[#27272A] text-[#71717A] hover:border-[#A855F7]/50 hover:text-white'
+            }`}
+          >
+            {s}
+          </button>
+        ))}
       </div>
 
-      <div>
-        <label className="block text-[#A1A1AA] text-sm mb-1.5">Your Requirements *</label>
-        <textarea
-          required
-          rows={4}
-          value={form.message}
-          onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-          placeholder="Tell us about your business and what you're looking for — e.g. new website for my salon, SEO for my construction business..."
-          className="w-full bg-[#0A0A0F] border border-[#27272A] rounded-xl px-4 py-3 text-white placeholder-[#3F3F46] focus:outline-none focus:border-[#A855F7] transition-colors text-sm resize-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-[#A1A1AA] text-sm mb-1.5">
-          Existing Website <span className="text-[#3F3F46]">(optional)</span>
-        </label>
-        <input
-          type="url"
-          value={form.website}
-          onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
-          placeholder="https://yourbusiness.com"
-          className="w-full bg-[#0A0A0F] border border-[#27272A] rounded-xl px-4 py-3 text-white placeholder-[#3F3F46] focus:outline-none focus:border-[#A855F7] transition-colors text-sm"
-        />
-      </div>
+      {/* Requirements */}
+      <textarea
+        required
+        rows={3}
+        value={form.message}
+        onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+        placeholder="Your requirements — e.g. new website for my salon, SEO for my clinic... *"
+        className="w-full bg-[#0A0A0F] border border-[#27272A] rounded-lg px-3 py-2.5 text-white placeholder-[#3F3F46] focus:outline-none focus:border-[#A855F7] transition-colors text-sm resize-none"
+      />
 
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-xs text-red-400">
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
           {error}
         </div>
       )}
 
       <button
         type="submit"
-        className="w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
+        className="w-full py-3 rounded-lg font-bold text-white bg-gradient-to-r from-[#7C3AED] to-[#A855F7] hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
       >
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
         </svg>
         Talk to Us on WhatsApp
@@ -251,16 +229,16 @@ export default function VadodaraPage() {
         {/* bg glow */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[400px] bg-[#7C3AED]/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
+        <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 items-start">
 
-          {/* Left */}
-          <div className="pt-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] text-xs font-bold uppercase tracking-widest">
+          {/* Left — on mobile shows AFTER form (order-2), on desktop shows first (order-1) */}
+          <div className="pt-2 order-2 lg:order-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-5 rounded-full border border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] text-[11px] font-bold uppercase tracking-widest">
               <span className="w-1.5 h-1.5 rounded-full bg-[#A855F7] animate-pulse" />
               Vadodara · Website & SEO Services
             </div>
 
-            <h1 className="text-5xl sm:text-6xl font-extrabold leading-[0.95] tracking-tight mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight mb-4">
               Your Customers<br />
               Are Searching.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">
@@ -268,15 +246,15 @@ export default function VadodaraPage() {
               </span>
             </h1>
 
-            <p className="text-lg text-[#A1A1AA] leading-relaxed mb-8">
+            <p className="text-sm text-[#71717A] leading-relaxed mb-6 max-w-md">
               We build professional websites and do SEO for local businesses in Vadodara.
               No templates. No shortcuts. Real results on Google.
             </p>
 
             {/* Trust strip */}
-            <div className="flex flex-col gap-3 text-sm text-[#71717A]">
+            <div className="flex flex-col gap-2.5">
               {['100+ businesses served across Vadodara', 'Real Google rankings — not promises', 'Every lead goes directly to your WhatsApp'].map(t => (
-                <span key={t} className="flex items-center gap-2.5">
+                <span key={t} className="flex items-center gap-2.5 text-sm text-[#71717A]">
                   <span className="w-4 h-4 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#A855F7] flex items-center justify-center flex-shrink-0">
                     <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
                       <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -288,10 +266,10 @@ export default function VadodaraPage() {
             </div>
           </div>
 
-          {/* Right — Form */}
-          <div className="bg-[#141419] border border-[#27272A] rounded-2xl p-7 lg:sticky lg:top-24">
-            <h3 className="text-white text-xl font-bold mb-1">Get a Free Quote</h3>
-            <p className="text-[#71717A] text-sm mb-6">Tell us what you need. We'll respond on WhatsApp.</p>
+          {/* Right — Form: shows FIRST on mobile (order-1), second on desktop (order-2) */}
+          <div className="bg-[#141419] border border-[#27272A] rounded-2xl p-5 lg:sticky lg:top-24 order-1 lg:order-2">
+            <h3 className="text-white text-base font-bold mb-0.5">Get a Free Quote</h3>
+            <p className="text-[#71717A] text-xs mb-4">We'll respond on WhatsApp within a few hours.</p>
             <ContactForm />
           </div>
 
