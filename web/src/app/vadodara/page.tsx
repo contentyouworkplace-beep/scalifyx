@@ -229,16 +229,16 @@ export default function VadodaraPage() {
         {/* bg glow */}
         <div className="absolute top-0 left-1/4 w-[600px] h-[400px] bg-[#7C3AED]/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 items-start">
+        <div className="relative max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
 
-          {/* Left — on mobile shows AFTER form (order-2), on desktop shows first (order-1) */}
-          <div className="pt-2 order-2 lg:order-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-5 rounded-full border border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] text-[11px] font-bold uppercase tracking-widest">
+          {/* Left */}
+          <div className="pt-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] text-xs font-bold uppercase tracking-widest">
               <span className="w-1.5 h-1.5 rounded-full bg-[#A855F7] animate-pulse" />
               Vadodara · Website & SEO Services
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight mb-4">
+            <h1 className="text-5xl sm:text-6xl font-extrabold leading-[0.95] tracking-tight mb-6">
               Your Customers<br />
               Are Searching.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">
@@ -246,13 +246,13 @@ export default function VadodaraPage() {
               </span>
             </h1>
 
-            <p className="text-sm text-[#71717A] leading-relaxed mb-6 max-w-md">
+            <p className="text-sm text-[#71717A] leading-relaxed mb-8 max-w-md">
               We build professional websites and do SEO for local businesses in Vadodara.
               No templates. No shortcuts. Real results on Google.
             </p>
 
             {/* Trust strip */}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-3">
               {['100+ businesses served across Vadodara', 'Real Google rankings — not promises', 'Every lead goes directly to your WhatsApp'].map(t => (
                 <span key={t} className="flex items-center gap-2.5 text-sm text-[#71717A]">
                   <span className="w-4 h-4 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#A855F7] flex items-center justify-center flex-shrink-0">
@@ -266,8 +266,8 @@ export default function VadodaraPage() {
             </div>
           </div>
 
-          {/* Right — Form: shows FIRST on mobile (order-1), second on desktop (order-2) */}
-          <div className="bg-[#141419] border border-[#27272A] rounded-2xl p-5 lg:sticky lg:top-24 order-1 lg:order-2">
+          {/* Right — Form */}
+          <div className="bg-[#141419] border border-[#27272A] rounded-2xl p-5 lg:sticky lg:top-24">
             <h3 className="text-white text-base font-bold mb-0.5">Get a Free Quote</h3>
             <p className="text-[#71717A] text-xs mb-4">We'll respond on WhatsApp within a few hours.</p>
             <ContactForm />
