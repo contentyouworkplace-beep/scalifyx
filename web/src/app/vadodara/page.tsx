@@ -128,7 +128,7 @@ function ContactForm() {
         <h3 className="text-white text-xl font-bold mb-2">Opening WhatsApp…</h3>
         <p className="text-[#71717A] text-sm mb-6">Your details are pre-filled. Just hit send.</p>
         <button
-          onClick={() => { setSubmitted(false); setForm({ name: '', phone: '', service: '', budget: '', website: '' }); }}
+          onClick={() => { setSubmitted(false); setForm({ name: '', phone: '', service: '', message: '', website: '' }); }}
           className="text-sm text-[#A855F7] hover:underline"
         >
           Submit another enquiry
