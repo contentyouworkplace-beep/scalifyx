@@ -5,6 +5,68 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+function fbq(...args: any[]) {
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq(...args);
+  }
+}
+
+function OfferCountdown() {
+  const [secondsLeft, setSecondsLeft] = useState<number>(3600);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem('seo_offer_expiry');
+    let expiry: number;
+    if (stored) {
+      expiry = parseInt(stored);
+    } else {
+      expiry = Date.now() + 3600 * 1000;
+      sessionStorage.setItem('seo_offer_expiry', String(expiry));
+    }
+    const left = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
+    setSecondsLeft(left);
+    setMounted(true);
+
+    if (left <= 0) return;
+    const t = setInterval(() => {
+      const remaining = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
+      setSecondsLeft(remaining);
+      if (remaining <= 0) clearInterval(t);
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (!mounted) return null;
+
+  const mins = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+  const secs = String(secondsLeft % 60).padStart(2, '0');
+  const urgent = secondsLeft < 300;
+
+  if (secondsLeft <= 0) {
+    return (
+      <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 mb-4 text-center">
+        <p className="text-xs font-bold text-red-600">⏰ Rs. 9 offer has expired</p>
+        <p className="text-[11px] text-red-500 mt-0.5">Seats still available — WhatsApp us for current price</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`rounded-xl border px-4 py-2.5 mb-4 flex items-center justify-between ${urgent ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+      <div>
+        <p className={`text-xs font-bold ${urgent ? 'text-red-700' : 'text-amber-800'}`}>
+          🔥 Rs. 9 offer expires in
+        </p>
+        <p className={`text-[10px] mt-0.5 ${urgent ? 'text-red-500' : 'text-amber-600'}`}>Price goes up after timer ends</p>
+      </div>
+      <div className={`font-mono text-2xl font-black tabular-nums ${urgent ? 'text-red-600' : 'text-amber-700'}`}>
+        {mins}:{secs}
+      </div>
+    </div>
+  );
+}
+
 const WHY_LEARN_SEO = [
   {
     icon: '💸',
@@ -273,6 +335,14 @@ function BookingFlow() {
     if (form.phone.replace(/\D/g, '').length < 10) { setError('Please enter a valid WhatsApp number.'); return; }
     if (!form.bizType) { setError('Please select your business type.'); return; }
     setError('');
+    // Fire Meta Pixel Lead event
+    fbq('track', 'Lead');
+    // Capture lead in DB (fire-and-forget)
+    fetch('/api/seo-course/lead-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: form.name, company: form.company, phone: form.phone, bizType: form.bizType, website: form.website }),
+    }).catch(() => {});
     setStep(2);
   }
 
@@ -297,6 +367,9 @@ function BookingFlow() {
 
       const { orderId, bookingId, keyId, amount } = data;
 
+      // Fire Meta Pixel InitiateCheckout event
+      fbq('track', 'InitiateCheckout', { value: 9, currency: 'INR' });
+
       const rzp = new (window as any).Razorpay({
         key: keyId,
         amount,
@@ -319,6 +392,7 @@ function BookingFlow() {
           });
           const verifyData = await verifyRes.json();
           if (verifyData.success) {
+            fbq('track', 'Purchase', { value: 9, currency: 'INR' });
             router.push(`/learn-seo/success?name=${encodeURIComponent(form.name)}&date=${selectedDate}&slot=${selectedSlot}`);
           } else {
             setError('Payment verified but booking failed. Please WhatsApp us at +91 6353583148.');
@@ -335,7 +409,7 @@ function BookingFlow() {
   }
 
   // Step indicator
-  const steps = ['Your Details', 'Pick a Slot', 'Pay Rs. 99'];
+  const steps = ['Your Details', 'Pick a Slot', 'Pay Rs. 9'];
 
   return (
     <div>
@@ -615,7 +689,8 @@ export default function LearnSEOPage() {
           {/* Right — Booking Flow */}
           <div id="enrol" className="bg-white border border-[#E5E7EB] rounded-2xl p-6 lg:sticky lg:top-24 shadow-xl shadow-gray-100">
             <h3 className="text-[#0F172A] text-lg font-bold mb-0.5">Book Your Seat</h3>
-            <p className="text-[#9CA3AF] text-xs mb-5">Pay Rs. 9 now to confirm · Rs. 4,990 at start of session</p>
+            <p className="text-[#9CA3AF] text-xs mb-4">Pay Rs. 9 now to confirm · Rs. 4,990 at start of session</p>
+            <OfferCountdown />
             <BookingFlow />
           </div>
 
