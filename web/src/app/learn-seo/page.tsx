@@ -274,7 +274,6 @@ function BookingFlow() {
     if (!form.bizType) { setError('Please select your business type.'); return; }
     setError('');
     setStep(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function handleSlotSelect(date: string, slot: string) {
@@ -423,10 +422,11 @@ function BookingFlow() {
 
             const weeks: (Date | null)[][] = [];
             for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+            const twoWeeks = weeks.filter(week => week.some(d => d && d >= today && d <= calendarDays[calendarDays.length - 1]));
 
             return (
               <div className="space-y-1 mb-4">
-                {weeks.map((week, wi) => (
+                {twoWeeks.map((week, wi) => (
                   <div key={wi} className="grid grid-cols-7 gap-1">
                     {week.map((day, di) => {
                       if (!day) return <div key={di} />;
