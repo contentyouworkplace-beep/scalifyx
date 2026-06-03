@@ -449,15 +449,17 @@ function BookingFlow() {
                           onClick={() => { setSelectedDate(ds); setSelectedSlot(''); }}
                           className={`relative flex flex-col items-center py-2 rounded-xl border text-xs font-bold transition-all
                             ${isSelected ? 'border-[#16A34A] bg-[#16A34A] text-white shadow-md' :
-                              isDisabled ? 'border-[#F3F4F6] bg-[#F9FAFB] text-[#D1D5DB] cursor-not-allowed' :
+                              isPast ? 'border-[#F3F4F6] bg-[#F9FAFB] text-[#D1D5DB] cursor-not-allowed' :
+                              isToday ? 'border-red-200 bg-red-50 text-red-400 cursor-not-allowed' :
+                              totalBooked >= 3 ? 'border-red-200 bg-red-50 text-red-400 cursor-not-allowed' :
                               `border-[#E5E7EB] bg-white hover:border-[#16A34A] text-[#0F172A] ${style.bg}`}
                           `}
                         >
                           <span>{day.getDate()}</span>
-                          {isFuture && !isSelected && (
-                            <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isDisabled ? 'bg-red-400' : style.dot}`} />
+                          {(isToday || isFuture) && !isSelected && (
+                            <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isPast ? 'bg-transparent' : style.dot}`} />
                           )}
-                          {isToday && <span className="text-[8px] text-[#9CA3AF] leading-none">Today</span>}
+                          {isToday && <span className="text-[8px] text-red-400 leading-none font-bold">Full</span>}
                         </button>
                       );
                     })}
