@@ -7,11 +7,11 @@ export default function LearnSEOThankYou() {
   useEffect(() => {
     // Fire Meta Pixel Lead event
     if (typeof window !== 'undefined' && (window as any).fbq) {
-      (window as any).fbq('track', 'Lead', {
-        content_name: 'SEO Masterclass Enquiry',
-        content_category: 'SEO Course',
+      (window as any).fbq('track', 'Purchase', {
+        value: 9,
         currency: 'INR',
-        value: 4999,
+        content_name: 'SEO Masterclass Seat Booking',
+        content_category: 'SEO Course',
       });
     }
   }, []);

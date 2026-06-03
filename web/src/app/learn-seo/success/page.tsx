@@ -2,13 +2,24 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 
 function SuccessContent() {
   const params = useSearchParams();
   const name = params.get('name') || 'there';
   const date = params.get('date') || '';
   const slot = params.get('slot') || '';
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Purchase', {
+        value: 9,
+        currency: 'INR',
+        content_name: 'SEO Masterclass Seat Booking',
+        content_category: 'SEO Course',
+      });
+    }
+  }, []);
 
   const slotLabel: Record<string, string> = {
     'morning': '10:00 AM – 2:00 PM',
