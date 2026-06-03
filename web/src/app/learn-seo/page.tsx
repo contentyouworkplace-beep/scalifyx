@@ -226,8 +226,8 @@ function getCalendarDays() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const days: Date[] = [];
-  // today + next 20 days
-  for (let i = 0; i <= 20; i++) {
+  // today + next 14 days (2 weeks)
+  for (let i = 0; i <= 14; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     days.push(d);
