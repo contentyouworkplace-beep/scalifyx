@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Ad 3 — The Shift</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1350px;
+    background: #060D09;
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden; position: relative;
+  }
+
+  /* Split background */
+  .split-left {
+    position: absolute; top: 0; left: 0;
+    width: 520px; height: 1350px;
+    background: #060D09;
+  }
+  .split-right {
+    position: absolute; top: 0; right: 0;
+    width: 520px; height: 1350px;
+    background: #061209;
+  }
+  .split-line {
+    position: absolute; top: 0; left: 50%;
+    width: 1px; height: 1350px;
+    background: linear-gradient(180deg, transparent, rgba(57,255,20,0.3) 30%, rgba(57,255,20,0.3) 70%, transparent);
+  }
+
+  /* Glow right side */
+  .glow-right {
+    position: absolute; top: 50%; right: 0;
+    transform: translateY(-50%);
+    width: 400px; height: 600px;
+    background: radial-gradient(ellipse at right, rgba(57,255,20,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .wrap {
+    position: relative; z-index: 2;
+    width: 1080px; height: 1350px;
+    display: grid; grid-template-columns: 1fr 1fr;
+  }
+
+  /* LEFT — BEFORE */
+  .before {
+    padding: 72px 52px 72px 72px;
+    display: flex; flex-direction: column;
+    border-right: none;
+  }
+  .state-tag {
+    font-size: 18px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; margin-bottom: 36px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .state-tag.before-tag { color: rgba(255,255,255,0.2); }
+  .state-tag.after-tag { color: #39FF14; }
+  .state-tag::before {
+    content: ''; display: block;
+    width: 20px; height: 2px;
+  }
+  .state-tag.before-tag::before { background: rgba(255,255,255,0.2); }
+  .state-tag.after-tag::before { background: #39FF14; }
+
+  /* Phone mockup SVG container */
+  .phone-area { margin-bottom: 36px; }
+
+  .state-headline {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px; font-weight: 800;
+    line-height: 1.1; letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  .state-headline.dim { color: rgba(255,255,255,0.25); }
+  .state-headline.bright { color: #fff; }
+
+  .state-items { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+  .state-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 22px; line-height: 1.5;
+  }
+  .state-item.dim-item { color: rgba(255,255,255,0.25); }
+  .state-item.bright-item { color: rgba(255,255,255,0.8); }
+  .dot-dim {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0; margin-top: 7px;
+  }
+  .dot-bright {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(57,255,20,0.15);
+    border: 1px solid rgba(57,255,20,0.4);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* RIGHT — AFTER */
+  .after {
+    padding: 72px 72px 72px 52px;
+    display: flex; flex-direction: column;
+  }
+
+  /* Center arrow overlay */
+  .center-arrow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: #39FF14;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(57,255,20,0.5), 0 0 80px rgba(57,255,20,0.2);
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 90px;
+    background: rgba(57,255,20,0.04);
+    border-top: 1px solid rgba(57,255,20,0.1);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 72px;
+    z-index: 3;
+  }
+  .brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px; font-weight: 800;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.05em;
+  }
+  .brand span { color: #39FF14; }
+  .url {
+    font-size: 21px; font-weight: 600;
+    color: rgba(255,255,255,0.3);
+    background: rgba(57,255,20,0.07);
+    border: 1px solid rgba(57,255,20,0.15);
+    padding: 10px 24px; border-radius: 100px;
+  }
+  .month2 {
+    font-size: 20px; font-weight: 700;
+    color: #39FF14; letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+<div class="split-left"></div>
+<div class="split-right"></div>
+<div class="split-line"></div>
+<div class="glow-right"></div>
+
+<!-- Center arrow -->
+<div class="center-arrow">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+    <path d="M5 12h14M13 6l6 6-6 6" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</div>
+
+<div class="wrap">
+  <!-- LEFT — BEFORE -->
+  <div class="before">
+    <div class="state-tag before-tag">Before</div>
+
+    <!-- Silent phone SVG -->
+    <div class="phone-area">
+      <svg width="180" height="200" viewBox="0 0 180 200" fill="none">
+        <rect x="40" y="10" width="100" height="180" rx="16" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+        <rect x="55" y="30" width="70" height="110" rx="8" fill="rgba(255,255,255,0.03)"/>
+        <!-- Empty screen lines -->
+        <rect x="65" y="45" width="50" height="7" rx="3" fill="rgba(255,255,255,0.06)"/>
+        <rect x="65" y="60" width="35" height="7" rx="3" fill="rgba(255,255,255,0.04)"/>
+        <rect x="65" y="75" width="42" height="7" rx="3" fill="rgba(255,255,255,0.04)"/>
+        <rect x="65" y="100" width="50" height="22" rx="5" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <text x="90" y="116" font-family="DM Sans" font-size="9" fill="rgba(255,255,255,0.15)" text-anchor="middle">No enquiries</text>
+        <!-- Home bar -->
+        <rect x="72" y="175" width="36" height="4" rx="2" fill="rgba(255,255,255,0.1)"/>
+        <!-- Zzz -->
+        <text x="148" y="60" font-family="DM Sans" font-size="22" fill="rgba(255,255,255,0.08)" font-weight="700">z</text>
+        <text x="156" y="42" font-family="DM Sans" font-size="16" fill="rgba(255,255,255,0.05)" font-weight="700">z</text>
+      </svg>
+    </div>
+
+    <h2 class="state-headline dim">Waiting.<br/>Hoping.<br/>Guessing.</h2>
+
+    <div class="state-items">
+      {['Word of mouth only', 'Slow, unpredictable months', 'No Google presence', 'Missing leads every day'].map(t => `
+      <div class="state-item dim-item">
+        <div class="dot-dim"></div>
+        <span>${t}</span>
+      </div>`).join('')}
+      <div class="state-item dim-item"><div class="dot-dim"></div><span>Word of mouth only</span></div>
+      <div class="state-item dim-item"><div class="dot-dim"></div><span>Slow, unpredictable months</span></div>
+      <div class="state-item dim-item"><div class="dot-dim"></div><span>No Google presence</span></div>
+      <div class="state-item dim-item"><div class="dot-dim"></div><span>Missing leads every single day</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT — AFTER -->
+  <div class="after">
+    <div class="state-tag after-tag">After</div>
+
+    <!-- Active phone SVG -->
+    <div class="phone-area">
+      <svg width="180" height="200" viewBox="0 0 180 200" fill="none">
+        <rect x="40" y="10" width="100" height="180" rx="16" fill="rgba(57,255,20,0.04)" stroke="rgba(57,255,20,0.2)" stroke-width="1.5"/>
+        <rect x="55" y="30" width="70" height="110" rx="8" fill="rgba(57,255,20,0.04)"/>
+        <!-- WhatsApp notifications -->
+        <rect x="60" y="35" width="60" height="28" rx="6" fill="rgba(57,255,20,0.1)" stroke="rgba(57,255,20,0.2)" stroke-width="1"/>
+        <circle cx="70" cy="49" r="7" fill="rgba(57,255,20,0.3)"/>
+        <rect x="81" y="42" width="30" height="5" rx="2.5" fill="rgba(57,255,20,0.5)"/>
+        <rect x="81" y="51" width="22" height="4" rx="2" fill="rgba(57,255,20,0.25)"/>
+
+        <rect x="60" y="70" width="60" height="28" rx="6" fill="rgba(57,255,20,0.08)" stroke="rgba(57,255,20,0.15)" stroke-width="1"/>
+        <circle cx="70" cy="84" r="7" fill="rgba(57,255,20,0.25)"/>
+        <rect x="81" y="77" width="26" height="5" rx="2.5" fill="rgba(57,255,20,0.4)"/>
+        <rect x="81" y="86" width="32" height="4" rx="2" fill="rgba(57,255,20,0.2)"/>
+
+        <rect x="60" y="105" width="60" height="28" rx="6" fill="rgba(57,255,20,0.06)" stroke="rgba(57,255,20,0.1)" stroke-width="1"/>
+        <circle cx="70" cy="119" r="7" fill="rgba(57,255,20,0.2)"/>
+        <rect x="81" y="112" width="34" height="5" rx="2.5" fill="rgba(57,255,20,0.35)"/>
+        <rect x="81" y="121" width="20" height="4" rx="2" fill="rgba(57,255,20,0.15)"/>
+
+        <!-- Badge counts -->
+        <circle cx="132" cy="38" r="9" fill="#39FF14"/>
+        <text x="132" y="43" font-family="DM Sans" font-size="10" fill="#000" text-anchor="middle" font-weight="800">3</text>
+
+        <!-- Home bar -->
+        <rect x="72" y="175" width="36" height="4" rx="2" fill="rgba(57,255,20,0.2)"/>
+      </svg>
+    </div>
+
+    <h2 class="state-headline bright">Phone rings.<br/>WhatsApp pings.<br/>You close.</h2>
+
+    <div class="state-items">
+      <div class="state-item bright-item">
+        <div class="dot-bright">
+          <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#39FF14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span>Customers find you on Google</span>
+      </div>
+      <div class="state-item bright-item">
+        <div class="dot-bright">
+          <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#39FF14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span>Leads on WhatsApp, daily</span>
+      </div>
+      <div class="state-item bright-item">
+        <div class="dot-bright">
+          <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#39FF14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span>Consistent, predictable enquiries</span>
+      </div>
+      <div class="state-item bright-item">
+        <div class="dot-bright">
+          <svg width="8" height="6" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#39FF14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span>Results from Month 2</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="brand"><span>Scalify</span> Vadodara</div>
+  <div class="month2">Website & SEO for Local Businesses</div>
+  <div class="url">scalifyapp.com/vadodara</div>
+</div>
+</body>
+</html>

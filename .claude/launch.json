@@ -10,8 +10,15 @@
     {
       "name": "web",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /Users/rahulmedhe/ScalifyX/web && npm run dev"],
-      "port": 3000
+      "runtimeArgs": ["-c", "cd /Users/rahulmedhe/ScalifyX/web && npm run dev -- -p 3002"],
+      "port": 3002
+    }
+  ],
+  "staticFiles": [
+    {
+      "name": "colors-preview",
+      "file": "/tmp/colors.html",
+      "port": 3099
     }
   ]
 }

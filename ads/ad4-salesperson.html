@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Ad 4 — The Salesperson</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1350px;
+    background: #0C0900;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden; position: relative;
+  }
+
+  /* Gold radial glow center */
+  .glow-center {
+    position: absolute; top: 35%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px; height: 500px;
+    background: radial-gradient(ellipse, rgba(245,158,11,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  /* Concentric circles decoration */
+  .circles {
+    position: absolute; top: 28%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  /* Corner accents */
+  .corner {
+    position: absolute;
+    width: 48px; height: 48px;
+  }
+  .corner.tl { top: 40px; left: 40px; border-top: 2px solid rgba(245,158,11,0.3); border-left: 2px solid rgba(245,158,11,0.3); }
+  .corner.tr { top: 40px; right: 40px; border-top: 2px solid rgba(245,158,11,0.3); border-right: 2px solid rgba(245,158,11,0.3); }
+  .corner.bl { bottom: 40px; left: 40px; border-bottom: 2px solid rgba(245,158,11,0.3); border-left: 2px solid rgba(245,158,11,0.3); }
+  .corner.br { bottom: 40px; right: 40px; border-bottom: 2px solid rgba(245,158,11,0.3); border-right: 2px solid rgba(245,158,11,0.3); }
+
+  .wrap {
+    position: relative; z-index: 2;
+    width: 1080px; height: 1350px;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 72px 100px 60px;
+  }
+
+  .tag {
+    font-size: 26px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: rgba(245,158,11,0.6);
+    margin-bottom: 52px;
+  }
+
+  /* Central SVG visual */
+  .visual { margin-bottom: 48px; }
+
+  .eyebrow {
+    font-size: 22px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(245,158,11,0.5);
+    text-align: center; margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 82px; line-height: 1.0;
+    letter-spacing: -0.02em; color: #fff;
+    text-align: center; margin-bottom: 32px;
+  }
+  h1 em {
+    font-style: italic;
+    color: #F59E0B;
+  }
+
+  .divider {
+    width: 1px; height: 40px;
+    background: linear-gradient(180deg, rgba(245,158,11,0.4), transparent);
+    margin: 0 auto 32px;
+  }
+
+  .sub {
+    font-size: 28px; font-weight: 400;
+    color: rgba(255,255,255,0.4);
+    text-align: center; line-height: 1.7;
+    max-width: 620px; margin-bottom: 48px;
+  }
+  .sub strong { color: rgba(255,255,255,0.75); font-weight: 600; }
+
+  /* Stats row */
+  .stats {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 52px;
+    border: 1px solid rgba(245,158,11,0.12);
+    border-radius: 16px; overflow: hidden;
+  }
+  .stat {
+    padding: 20px 40px; text-align: center;
+    border-right: 1px solid rgba(245,158,11,0.1);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px; font-weight: 700;
+    color: #F59E0B; line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-size: 26px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: rgba(255,255,255,0.2);
+  }
+
+  .cta {
+    display: flex; align-items: center; gap: 16px;
+    padding: 22px 52px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    border-radius: 100px;
+    color: #0C0900; font-weight: 800; font-size: 26px;
+    box-shadow: 0 0 50px rgba(245,158,11,0.25), 0 8px 32px rgba(245,158,11,0.2);
+    margin-bottom: auto;
+  }
+
+  .brand {
+    position: absolute; bottom: 52px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 21px; font-weight: 600;
+    color: rgba(255,255,255,0.15); letter-spacing: 0.1em;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .brand span { color: rgba(245,158,11,0.5); }
+</style>
+</head>
+<body>
+<div class="glow-center"></div>
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<div class="wrap">
+  <div class="tag">Vadodara · Website & SEO</div>
+
+  <!-- Central SVG: Clock + Person + 24/7 -->
+  <div class="visual">
+    <svg width="520" height="180" viewBox="0 0 520 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left: Clock -->
+      <g transform="translate(60, 10)">
+        <circle cx="60" cy="80" r="62" stroke="rgba(245,158,11,0.15)" stroke-width="1.5" fill="none"/>
+        <circle cx="60" cy="80" r="50" stroke="rgba(245,158,11,0.25)" stroke-width="1" fill="rgba(245,158,11,0.03)"/>
+        <!-- Hour marks -->
+        <line x1="60" y1="34" x2="60" y2="42" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="60" y1="118" x2="60" y2="126" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="14" y1="80" x2="22" y2="80" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="98" y1="80" x2="106" y2="80" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-linecap="round"/>
+        <!-- Hour hand -->
+        <line x1="60" y1="80" x2="60" y2="52" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Minute hand -->
+        <line x1="60" y1="80" x2="84" y2="80" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="60" cy="80" r="4" fill="#F59E0B"/>
+        <text x="60" y="170" font-family="Inter" font-size="11" fill="rgba(245,158,11,0.5)" text-anchor="middle" font-weight="700" letter-spacing="2">ALWAYS ON</text>
+      </g>
+
+      <!-- Center arrow -->
+      <g transform="translate(188, 72)">
+        <rect x="0" y="0" width="60" height="36" rx="8" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
+        <path d="M18 18h24M32 10l10 8-10 8" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+
+      <!-- Right: Person + WhatsApp notifications -->
+      <g transform="translate(280, 0)">
+        <!-- Person silhouette -->
+        <circle cx="100" cy="45" r="28" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.2)" stroke-width="1.5"/>
+        <circle cx="100" cy="38" r="14" fill="rgba(245,158,11,0.15)"/>
+        <path d="M68 90 Q68 68 100 68 Q132 68 132 90" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.2)" stroke-width="1.5"/>
+
+        <!-- Phone in hand -->
+        <rect x="88" y="58" width="24" height="38" rx="4" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.4)" stroke-width="1"/>
+        <rect x="91" y="63" width="18" height="26" rx="2" fill="rgba(245,158,11,0.08)"/>
+
+        <!-- Notification bubbles floating -->
+        <g transform="translate(120, 20)">
+          <rect x="0" y="0" width="76" height="28" rx="8" fill="rgba(245,158,11,0.12)" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+          <circle cx="14" cy="14" r="7" fill="rgba(245,158,11,0.3)"/>
+          <rect x="25" y="8" width="36" height="5" rx="2.5" fill="rgba(245,158,11,0.4)"/>
+          <rect x="25" y="17" width="26" height="4" rx="2" fill="rgba(245,158,11,0.2)"/>
+        </g>
+        <g transform="translate(115, 54)">
+          <rect x="0" y="0" width="70" height="26" rx="7" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.18)" stroke-width="1"/>
+          <circle cx="13" cy="13" r="6" fill="rgba(245,158,11,0.2)"/>
+          <rect x="23" y="7" width="30" height="4" rx="2" fill="rgba(245,158,11,0.3)"/>
+          <rect x="23" y="15" width="22" height="3" rx="1.5" fill="rgba(245,158,11,0.15)"/>
+        </g>
+
+        <text x="100" y="170" font-family="Inter" font-size="11" fill="rgba(245,158,11,0.5)" text-anchor="middle" font-weight="700" letter-spacing="2">YOUR CUSTOMER</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="eyebrow">What if you had</div>
+
+  <h1>A salesperson working<br/><em>24 hours a day.</em></h1>
+
+  <div class="divider"></div>
+
+  <p class="sub">
+    That's a website with proper SEO.<br/>
+    <strong>We build it. We optimize it. You get the customers.</strong><br/>
+    Results from Month 2. For businesses in Vadodara.
+  </p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Always Working</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">Month 2</div>
+      <div class="stat-label">First Results</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">₹0</div>
+      <div class="stat-label">Per Lead</div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+    Talk to Us — scalifyapp.com/vadodara
+  </div>
+
+  <div class="brand"><span>Scalify</span> — Website & SEO · Vadodara</div>
+</div>
+</body>
+</html>
