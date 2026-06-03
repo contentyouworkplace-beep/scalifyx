@@ -699,7 +699,7 @@ export default function LearnSEOPage() {
               {
                 icon: '🎙️',
                 title: '4 Hour Live One-on-One Masterclass',
-                desc: 'Just you and the trainer. No batch, no crowd. Full attention on your questions and your business.',
+                desc: 'Just you and the trainer. No batch, no crowd. Full attention on your questions and your business. 🗣️ Language: Hindi + Hinglish — easy to follow, no jargon.',
               },
               {
                 icon: '🎬',
