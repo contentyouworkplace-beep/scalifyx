@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Basic ${auth}` },
       body: JSON.stringify({
-        amount: 9900, // Rs. 99 in paise
+        amount: 900, // Rs. 9 in paise
         currency: 'INR',
         notes: { name, company, phone, bizType, date, slot },
       }),
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       orderId: order.id,
       bookingId: booking.id,
       keyId: RAZORPAY_KEY_ID,
-      amount: 9900,
+      amount: 900,
     });
   } catch (err) {
     console.error('Create order error:', err);

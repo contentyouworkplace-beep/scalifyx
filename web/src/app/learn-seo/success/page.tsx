@@ -96,7 +96,7 @@ function SuccessContent() {
         </div>
 
         <p className="mt-8 text-xs text-[#9CA3AF]">
-          Remaining Rs. 4,900 to be paid at the start of the session.
+          Remaining Rs. 4,990 to be paid at the start of the session.
         </p>
 
         <div className="mt-6">
