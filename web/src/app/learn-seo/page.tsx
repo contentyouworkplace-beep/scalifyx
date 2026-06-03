@@ -197,10 +197,34 @@ const SLOTS = [
   { key: 'evening', label: '7 PM – 11 PM' },
 ];
 
-function getNext14Days() {
-  const days = [];
+function dateStr(d: Date) {
+  return d.toISOString().split('T')[0];
+}
+
+// Returns fake booked slot keys for a date (frontend only, for trust/social proof)
+function getFakeBookedSlots(date: Date): string[] {
   const today = new Date();
-  for (let i = 1; i <= 14; i++) {
+  today.setHours(0, 0, 0, 0);
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((d.getTime() - today.getTime()) / 86400000);
+  const dow = d.getDay(); // 0=Sun, 6=Sat
+
+  if (diffDays === 0) return ['morning', 'afternoon', 'evening']; // today = full
+  if (dow === 0) return ['morning', 'afternoon', 'evening'];      // every Sunday = full
+  if (dow === 6) return ['evening'];                               // every Saturday = evening booked
+  if (diffDays === 2) return ['morning'];
+  if (diffDays === 3) return ['morning', 'evening'];
+  if (diffDays === 5) return ['morning'];
+  return [];
+}
+
+function getCalendarDays() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days: Date[] = [];
+  // today + next 20 days
+  for (let i = 0; i <= 20; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     days.push(d);
@@ -208,8 +232,11 @@ function getNext14Days() {
   return days;
 }
 
-function dateStr(d: Date) {
-  return d.toISOString().split('T')[0];
+function getAvailabilityStyle(totalBooked: number) {
+  if (totalBooked >= 3) return { dot: 'bg-red-500', text: 'text-red-500', label: 'Full', bg: 'bg-red-50 border-red-200' };
+  if (totalBooked === 2) return { dot: 'bg-orange-500', text: 'text-orange-500', label: '2 Booked', bg: 'bg-orange-50 border-orange-200' };
+  if (totalBooked === 1) return { dot: 'bg-amber-400', text: 'text-amber-600', label: '1 Booked', bg: 'bg-amber-50 border-amber-200' };
+  return { dot: 'bg-green-500', text: 'text-green-600', label: 'Available', bg: 'bg-green-50 border-green-200' };
 }
 
 function BookingFlow() {
@@ -218,26 +245,23 @@ function BookingFlow() {
   const [form, setForm] = useState({ name: '', company: '', phone: '', bizType: '', website: '' });
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlot, setSelectedSlot] = useState('');
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [realBookedSlots, setRealBookedSlots] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [paying, setPaying] = useState(false);
 
-  const days = getNext14Days();
+  const calendarDays = getCalendarDays();
 
-  const fetchBookedSlots = useCallback(async (date: string) => {
-    setLoadingSlots(true);
+  const fetchRealBookedSlots = useCallback(async (date: string) => {
     try {
       const res = await fetch(`/api/seo-course/bookings?date=${date}`);
       const data = await res.json();
-      setBookedSlots(data.bookedSlots || []);
-    } catch { setBookedSlots([]); }
-    setLoadingSlots(false);
+      setRealBookedSlots(data.bookedSlots || []);
+    } catch { setRealBookedSlots([]); }
   }, []);
 
   useEffect(() => {
-    if (selectedDate) fetchBookedSlots(selectedDate);
-  }, [selectedDate, fetchBookedSlots]);
+    if (selectedDate) fetchRealBookedSlots(selectedDate);
+  }, [selectedDate, fetchRealBookedSlots]);
 
   function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -351,57 +375,139 @@ function BookingFlow() {
         </form>
       )}
 
-      {/* Step 2 — Calendar */}
+      {/* Step 2 — Calendar Grid */}
       {step === 2 && (
         <div>
-          <p className="text-xs text-[#9CA3AF] mb-4">Select a date and time slot for your session.</p>
+          <p className="text-xs text-[#9CA3AF] mb-3">Pick a date — then choose your time slot.</p>
 
-          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-            {days.map(day => {
-              const ds = dateStr(day);
-              const isSelected = selectedDate === ds;
-              const dayLabel = day.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-
-              return (
-                <div key={ds} className={`rounded-xl border transition-all ${isSelected ? 'border-[#16A34A] bg-[#F0FDF4]' : 'border-[#E5E7EB] bg-white'}`}>
-                  <button
-                    type="button"
-                    className="w-full text-left px-4 py-3 flex items-center justify-between"
-                    onClick={() => { setSelectedDate(ds); setSelectedSlot(''); }}
-                  >
-                    <span className={`text-sm font-bold ${isSelected ? 'text-[#16A34A]' : 'text-[#0F172A]'}`}>{dayLabel}</span>
-                    <span className={`text-xs transition-transform ${isSelected ? 'rotate-180 text-[#16A34A]' : 'text-[#9CA3AF]'}`}>▾</span>
-                  </button>
-
-                  {isSelected && (
-                    <div className="px-4 pb-4 grid grid-cols-1 gap-2">
-                      {loadingSlots ? (
-                        <p className="text-xs text-[#9CA3AF]">Checking availability...</p>
-                      ) : SLOTS.map(slot => {
-                        const booked = bookedSlots.includes(slot.key);
-                        const picked = selectedSlot === slot.key;
-                        return (
-                          <button
-                            key={slot.key}
-                            type="button"
-                            disabled={booked}
-                            onClick={() => setSelectedSlot(slot.key)}
-                            className={`w-full py-2.5 px-4 rounded-lg text-sm font-semibold border transition-all text-left ${booked ? 'bg-[#F3F4F6] border-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed line-through' : picked ? 'bg-[#16A34A] border-[#16A34A] text-white' : 'bg-white border-[#E5E7EB] text-[#374151] hover:border-[#16A34A]'}`}
-                          >
-                            {slot.label} {booked ? '— Fully Booked' : ''}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          {/* Legend */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            {[
+              { dot: 'bg-green-500', label: 'Available' },
+              { dot: 'bg-amber-400', label: '1 Booked' },
+              { dot: 'bg-orange-500', label: '2 Booked' },
+              { dot: 'bg-red-500', label: 'Full' },
+            ].map(l => (
+              <div key={l.label} className="flex items-center gap-1.5">
+                <span className={`w-2.5 h-2.5 rounded-full ${l.dot}`} />
+                <span className="text-[10px] text-[#6B7280] font-medium">{l.label}</span>
+              </div>
+            ))}
           </div>
 
-          {error && <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">{error}</div>}
+          {/* Day headers */}
+          <div className="grid grid-cols-7 mb-1">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+              <div key={d} className="text-center text-[10px] font-bold text-[#9CA3AF] py-1">{d}</div>
+            ))}
+          </div>
 
-          <div className="flex gap-2 mt-4">
+          {/* Calendar grid */}
+          {(() => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Build weeks — start from this week's Sunday
+            const startDay = new Date(today);
+            startDay.setDate(today.getDate() - today.getDay());
+
+            const cells: (Date | null)[] = [];
+            for (let i = 0; i < 28; i++) {
+              const d = new Date(startDay);
+              d.setDate(startDay.getDate() + i);
+              cells.push(d);
+            }
+
+            const weeks: (Date | null)[][] = [];
+            for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+
+            return (
+              <div className="space-y-1 mb-4">
+                {weeks.map((week, wi) => (
+                  <div key={wi} className="grid grid-cols-7 gap-1">
+                    {week.map((day, di) => {
+                      if (!day) return <div key={di} />;
+                      const ds = dateStr(day);
+                      const isPast = day < today;
+                      const isToday = ds === dateStr(today);
+                      const isFuture = day > today;
+                      const fakeBooked = getFakeBookedSlots(day);
+                      const allBooked = Array.from(new Set([...fakeBooked, ...(ds === selectedDate ? realBookedSlots : [])]));
+                      const totalBooked = allBooked.length;
+                      const style = getAvailabilityStyle(totalBooked);
+                      const isSelected = selectedDate === ds;
+                      const isDisabled = isPast || isToday || totalBooked >= 3;
+
+                      return (
+                        <button
+                          key={ds}
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={() => { setSelectedDate(ds); setSelectedSlot(''); }}
+                          className={`relative flex flex-col items-center py-2 rounded-xl border text-xs font-bold transition-all
+                            ${isSelected ? 'border-[#16A34A] bg-[#16A34A] text-white shadow-md' :
+                              isDisabled ? 'border-[#F3F4F6] bg-[#F9FAFB] text-[#D1D5DB] cursor-not-allowed' :
+                              `border-[#E5E7EB] bg-white hover:border-[#16A34A] text-[#0F172A] ${style.bg}`}
+                          `}
+                        >
+                          <span>{day.getDate()}</span>
+                          {isFuture && !isSelected && (
+                            <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${isDisabled ? 'bg-red-400' : style.dot}`} />
+                          )}
+                          {isToday && <span className="text-[8px] text-[#9CA3AF] leading-none">Today</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+
+          {/* Slots for selected date */}
+          {selectedDate && (() => {
+            const selDay = new Date(selectedDate);
+            const fakeBooked = getFakeBookedSlots(selDay);
+            const allBooked = Array.from(new Set([...fakeBooked, ...realBookedSlots]));
+
+            return (
+              <div className="mb-4">
+                <p className="text-xs font-bold text-[#0F172A] mb-2">
+                  {selDay.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  {SLOTS.map(slot => {
+                    const booked = allBooked.includes(slot.key);
+                    const picked = selectedSlot === slot.key;
+                    return (
+                      <button
+                        key={slot.key}
+                        type="button"
+                        disabled={booked}
+                        onClick={() => setSelectedSlot(slot.key)}
+                        className={`w-full py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all flex items-center justify-between
+                          ${booked ? 'bg-[#FEF2F2] border-red-200 text-red-400 cursor-not-allowed' :
+                            picked ? 'bg-[#16A34A] border-[#16A34A] text-white' :
+                            'bg-white border-[#E5E7EB] text-[#374151] hover:border-[#16A34A]'}`}
+                      >
+                        <span>{slot.label}</span>
+                        {booked && <span className="text-xs font-bold text-red-400">Booked</span>}
+                        {picked && <span className="text-xs font-bold text-white">✓ Selected</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {!selectedDate && (
+            <p className="text-xs text-[#9CA3AF] text-center mb-4">← Select a date above to see available slots</p>
+          )}
+
+          {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600 mb-3">{error}</div>}
+
+          <div className="flex gap-2">
             <button type="button" onClick={() => { setStep(1); setError(''); }} className="flex-1 py-3 rounded-xl border border-[#E5E7EB] text-[#6B7280] font-semibold text-sm hover:bg-[#F9FAFB] transition">
               ← Back
             </button>
