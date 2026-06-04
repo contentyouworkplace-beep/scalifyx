@@ -353,7 +353,7 @@ function BookingFlow() {
       body: JSON.stringify({ ...form, date: selectedDate, slot: selectedSlot }),
     }).catch(() => {});
 
-    fbq('track', 'InitiateCheckout', { value: 2499, currency: 'INR' });
+    fbq('track', 'Contact');
 
     // Build WhatsApp message
     const slotLabel = { morning: '10 AM – 2 PM', afternoon: '3 PM – 7 PM', evening: '7 PM – 11 PM' }[selectedSlot] || selectedSlot;
