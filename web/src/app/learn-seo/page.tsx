@@ -589,7 +589,7 @@ export default function LearnSEOPage() {
           href="#enrol"
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-sm font-semibold hover:opacity-90 transition shadow-md shadow-green-100"
         >
-          Book Your Seat — Rs. 2,499
+          Book your Slot on WhatsApp
         </a>
       </nav>
 
@@ -790,7 +790,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="inline-block px-10 py-4 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-base font-bold hover:opacity-90 transition shadow-lg shadow-green-100"
             >
-              Book Your Seat — Rs. 2,499
+              Book your Slot on WhatsApp
             </a>
           </div>
         </div>
@@ -847,7 +847,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="mt-8 w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition flex items-center justify-center text-sm shadow-lg shadow-green-100"
             >
-              Book Your Seat — Rs. 2,499
+              Book your Slot on WhatsApp
             </a>
           </div>
         </div>
@@ -964,7 +964,7 @@ export default function LearnSEOPage() {
             href="#enrol"
             className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-lg font-extrabold hover:opacity-90 transition shadow-2xl shadow-green-100"
           >
-            Book Your Seat — Rs. 2,499
+            Book your Slot on WhatsApp
           </a>
           <p className="mt-4 text-sm text-[#9CA3AF]">Rs. 2,499 · one-time payment · 4-hour live session + 1 year support.</p>
         </div>
