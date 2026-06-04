@@ -200,8 +200,8 @@ const FAQS = [
     a: 'After the session, you can WhatsApp us anytime you\'re stuck — whether it\'s a Google Search Console question, a keyword doubt, or something you forgot from the session. We\'ll reply.',
   },
   {
-    q: 'Is Rs. 4,999 a one-time payment?',
-    a: 'Yes. One payment of Rs. 4,999 covers the full 4-hour session + 1 year of WhatsApp support. No monthly fees, no hidden costs.',
+    q: 'Is Rs. 2,499 a one-time payment?',
+    a: 'Yes. One payment of Rs. 2,499 covers the full 4-hour session + 1 year of WhatsApp support. No monthly fees, no hidden costs.',
   },
   {
     q: 'Can I do this for my client\'s business?',
@@ -670,7 +670,7 @@ export default function LearnSEOPage() {
             {/* Price pill */}
             <div className="inline-flex items-center gap-4 bg-white border border-[#E5E7EB] rounded-2xl px-6 py-4 shadow-sm">
               <div>
-                <div className="text-3xl font-extrabold text-[#16A34A]">Rs. 4,999</div>
+                <div className="text-3xl font-extrabold text-[#16A34A]">Rs. 2,499</div>
                 <div className="text-xs text-[#9CA3AF] mt-0.5">Rs. 9 now · Rs. 4,990 after session</div>
               </div>
               <div className="w-px h-10 bg-[#E5E7EB]" />
@@ -771,7 +771,7 @@ export default function LearnSEOPage() {
               Everything Included.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Nothing Hidden.</span>
             </h2>
-            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">Rs. 4,999 — one time. Here's exactly what you walk away with.</p>
+            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">Rs. 2,499 — one time. Here's exactly what you walk away with.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -853,7 +853,7 @@ export default function LearnSEOPage() {
           </div>
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">What You Walk Away With</p>
-            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">Rs. 4,999 — everything included</h3>
+            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">Rs. 2,499 — everything included</h3>
             <div className="space-y-4">
               {[
                 '4-hour live one-on-one session',
@@ -988,7 +988,7 @@ export default function LearnSEOPage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Are you?</span>
           </h2>
           <p className="text-[#6B7280] text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-            4 hours. Rs. 4,999. 1 year of support. Everything you need to start ranking your business on Google — taught with your business in mind.
+            4 hours. Rs. 2,499. 1 year of support. Everything you need to start ranking your business on Google — taught with your business in mind.
           </p>
           <a
             href="#enrol"
