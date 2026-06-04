@@ -3,8 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-
 function fbq(...args: any[]) {
   if (typeof window !== 'undefined' && (window as any).fbq) {
     (window as any).fbq(...args);
@@ -305,14 +303,13 @@ function getAvailabilityStyle(totalBooked: number) {
 }
 
 function BookingFlow() {
-  const router = useRouter();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState({ name: '', company: '', phone: '', bizType: '', website: '' });
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlot, setSelectedSlot] = useState('');
   const [realBookedSlots, setRealBookedSlots] = useState<string[]>([]);
   const [error, setError] = useState('');
-  const [paying, setPaying] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const calendarDays = getCalendarDays();
 
@@ -335,9 +332,7 @@ function BookingFlow() {
     if (form.phone.replace(/\D/g, '').length < 10) { setError('Please enter a valid WhatsApp number.'); return; }
     if (!form.bizType) { setError('Please select your business type.'); return; }
     setError('');
-    // Fire Meta Pixel Lead event
     fbq('track', 'Lead');
-    // Capture lead in DB (fire-and-forget)
     fetch('/api/seo-course/lead-capture', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -346,70 +341,45 @@ function BookingFlow() {
     setStep(2);
   }
 
-  function handleSlotSelect(date: string, slot: string) {
-    setSelectedDate(date);
-    setSelectedSlot(slot);
-  }
-
-  async function handleProceedToPayment() {
+  async function handleConfirmBooking() {
     if (!selectedDate || !selectedSlot) { setError('Please select a date and time slot.'); return; }
     setError('');
-    setPaying(true);
+    setSubmitting(true);
 
-    try {
-      const res = await fetch('/api/seo-course/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, date: selectedDate, slot: selectedSlot }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || 'Something went wrong. Please try again.'); setPaying(false); return; }
+    // Save booking to DB (fire-and-forget)
+    fetch('/api/seo-course/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, date: selectedDate, slot: selectedSlot }),
+    }).catch(() => {});
 
-      const { orderId, bookingId, keyId, amount } = data;
+    fbq('track', 'InitiateCheckout', { value: 2499, currency: 'INR' });
 
-      // Fire Meta Pixel InitiateCheckout event
-      fbq('track', 'InitiateCheckout', { value: 9, currency: 'INR' });
+    // Build WhatsApp message
+    const slotLabel = { morning: '10 AM – 2 PM', afternoon: '3 PM – 7 PM', evening: '7 PM – 11 PM' }[selectedSlot] || selectedSlot;
+    const dateFormatted = new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const msg = [
+      `Hi! I'd like to book the SEO Masterclass.`,
+      ``,
+      `Name: ${form.name}`,
+      `Business: ${form.company}`,
+      `Type: ${form.bizType}`,
+      `WhatsApp: +91${form.phone}`,
+      form.website ? `Website: ${form.website}` : null,
+      ``,
+      `Preferred Date: ${dateFormatted}`,
+      `Slot: ${slotLabel}`,
+      ``,
+      `Please confirm my booking.`,
+    ].filter(l => l !== null).join('\n');
 
-      const rzp = new (window as any).Razorpay({
-        key: keyId,
-        amount,
-        currency: 'INR',
-        name: 'Scalify SEO Masterclass',
-        description: 'Seat Booking — Rs. 9',
-        order_id: orderId,
-        prefill: { name: form.name, contact: `+91${form.phone}` },
-        theme: { color: '#16A34A' },
-        handler: async (response: any) => {
-          const verifyRes = await fetch('/api/seo-course/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              bookingId,
-            }),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyData.success) {
-            fbq('track', 'Purchase', { value: 9, currency: 'INR' });
-            router.push(`/learn-seo/success?name=${encodeURIComponent(form.name)}&date=${selectedDate}&slot=${selectedSlot}`);
-          } else {
-            setError('Payment verified but booking failed. Please WhatsApp us at +91 6353583148.');
-            setPaying(false);
-          }
-        },
-        modal: { ondismiss: () => setPaying(false) },
-      });
-      rzp.open();
-    } catch {
-      setError('Something went wrong. Please try again.');
-      setPaying(false);
-    }
+    const waUrl = `https://wa.me/916353583138?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+    setSubmitting(false);
   }
 
   // Step indicator
-  const steps = ['Your Details', 'Pick a Slot', 'Pay Rs. 9'];
+  const steps = ['Your Details', 'Pick a Slot'];
 
   return (
     <div>
@@ -447,7 +417,7 @@ function BookingFlow() {
           <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm shadow-lg shadow-green-100">
             Next — Pick Your Slot →
           </button>
-          <p className="text-center text-xs text-[#9CA3AF]">Pay only Rs. 9 now · Rs. 4,990 at start of session</p>
+          <p className="text-center text-xs text-[#9CA3AF]">Free to book · Rs. 2,499 total · one-time payment</p>
         </form>
       )}
 
@@ -592,14 +562,14 @@ function BookingFlow() {
             </button>
             <button
               type="button"
-              disabled={!selectedDate || !selectedSlot || paying}
-              onClick={handleProceedToPayment}
+              disabled={!selectedDate || !selectedSlot || submitting}
+              onClick={handleConfirmBooking}
               className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {paying ? 'Opening Payment...' : 'Pay Rs. 9 & Confirm →'}
+              {submitting ? 'Opening WhatsApp...' : 'Confirm on WhatsApp →'}
             </button>
           </div>
-          <p className="text-center text-xs text-[#9CA3AF] mt-2">Secure payment via Razorpay</p>
+          <p className="text-center text-xs text-[#9CA3AF] mt-2">You'll be taken to WhatsApp to confirm your slot</p>
         </div>
       )}
     </div>
@@ -619,7 +589,7 @@ export default function LearnSEOPage() {
           href="#enrol"
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-sm font-semibold hover:opacity-90 transition shadow-md shadow-green-100"
         >
-          Pay Rs. 9 Now · Rs. 4,990 After Session
+          Book Your Seat — Rs. 2,499
         </a>
       </nav>
 
@@ -671,7 +641,7 @@ export default function LearnSEOPage() {
             <div className="inline-flex items-center gap-4 bg-white border border-[#E5E7EB] rounded-2xl px-6 py-4 shadow-sm">
               <div>
                 <div className="text-3xl font-extrabold text-[#16A34A]">Rs. 2,499</div>
-                <div className="text-xs text-[#9CA3AF] mt-0.5">Rs. 9 now · Rs. 4,990 after session</div>
+                <div className="text-xs text-[#9CA3AF] mt-0.5">One-time · 4 hours live</div>
               </div>
               <div className="w-px h-10 bg-[#E5E7EB]" />
               <div>
@@ -689,7 +659,7 @@ export default function LearnSEOPage() {
           {/* Right — Booking Flow */}
           <div id="enrol" className="bg-white border border-[#E5E7EB] rounded-2xl p-6 lg:sticky lg:top-24 shadow-xl shadow-gray-100">
             <h3 className="text-[#0F172A] text-lg font-bold mb-0.5">Book Your Seat</h3>
-            <p className="text-[#9CA3AF] text-xs mb-4">Pay Rs. 9 now to confirm · Rs. 4,990 at start of session</p>
+            <p className="text-[#9CA3AF] text-xs mb-4">Fill in your details & pick a slot — we'll confirm via WhatsApp</p>
             <OfferCountdown />
             <BookingFlow />
           </div>
@@ -820,7 +790,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="inline-block px-10 py-4 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-base font-bold hover:opacity-90 transition shadow-lg shadow-green-100"
             >
-              Pay Rs. 9 Now · Rs. 4,990 After Session
+              Book Your Seat — Rs. 2,499
             </a>
           </div>
         </div>
@@ -877,7 +847,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="mt-8 w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition flex items-center justify-center text-sm shadow-lg shadow-green-100"
             >
-              Pay Rs. 9 Now · Rs. 4,990 After Session
+              Book Your Seat — Rs. 2,499
             </a>
           </div>
         </div>
@@ -994,9 +964,9 @@ export default function LearnSEOPage() {
             href="#enrol"
             className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-lg font-extrabold hover:opacity-90 transition shadow-2xl shadow-green-100"
           >
-            Pay Rs. 9 Now · Rs. 4,990 After Session
+            Book Your Seat — Rs. 2,499
           </a>
-          <p className="mt-4 text-sm text-[#9CA3AF]">Pay just Rs. 9 now — Rs. 4,990 remaining at the start of your session.</p>
+          <p className="mt-4 text-sm text-[#9CA3AF]">Rs. 2,499 · one-time payment · 4-hour live session + 1 year support.</p>
         </div>
       </section>
 
