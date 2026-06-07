@@ -37,8 +37,8 @@ const FALLBACK_OFFERS = [
     name: 'Scalify Pro',
     description: 'Everything you need to grow your business online',
     plan_type: 'pro',
-    price: 1499,
-    original_price: 2499,
+    price: 3999,
+    original_price: 5000,
     trial_days: 0,
     features: [
       'Website + Search Engine Optimization',
@@ -85,17 +85,6 @@ async function handleOffers() {
   return Response.json({ offers: FALLBACK_OFFERS });
 }
 
-// Always offer ₹1,299 first-month price with a fresh 1-hour window
-function getWelcomeCoupon(_user: { id: string }) {
-  return {
-    tier: 1 as const,
-    code: 'SCALE200',
-    price: 1299,
-    discount: 200,
-    expiresAt: new Date(Date.now() + 3600000).toISOString(),
-    label: 'First Month Offer',
-  };
-}
 
 // ─── GET /payment/status ───────────────────────────────────────────────────────
 async function handleStatus(req: Request) {
@@ -111,7 +100,7 @@ async function handleStatus(req: Request) {
     .maybeSingle();
 
   if (adminCoupon && new Date(adminCoupon.expires_at) > new Date()) {
-    const discount = (adminCoupon.original_price || 1499) - adminCoupon.price;
+    const discount = (adminCoupon.original_price || 3999) - adminCoupon.price;
     coupon = {
       tier: 1 as const,
       code: 'SPECIAL' + user.id.replace(/[^0-9]/g, '').slice(0, 3).padEnd(3, '0'),
@@ -120,8 +109,6 @@ async function handleStatus(req: Request) {
       expiresAt: adminCoupon.expires_at,
       label: 'Special Offer',
     };
-  } else {
-    coupon = await getWelcomeCoupon(user);
   }
 
   const { data: sub } = await db()
@@ -240,16 +227,14 @@ async function handleCreateOrder(req: Request) {
     .eq('user_id', user.id)
     .maybeSingle();
   if (adminCouponOrder && new Date(adminCouponOrder.expires_at) > new Date()) {
-    const discount = (adminCouponOrder.original_price || 1499) - adminCouponOrder.price;
+    const discount = (adminCouponOrder.original_price || 3999) - adminCouponOrder.price;
     coupon = { price: adminCouponOrder.price, discount, label: 'Special Offer' };
-  } else {
-    coupon = await getWelcomeCoupon(user);
   }
 
-  const amount = coupon ? coupon.price * 100 : 149900;
+  const amount = coupon ? coupon.price * 100 : 399900;
   const description = coupon
-    ? `Scalify Pro — ₹${coupon.price} first month (${coupon.label})`
-    : 'Scalify Pro — ₹1,499/month';
+    ? `Scalify Pro — ₹${coupon.price} (${coupon.label})`
+    : 'Scalify Pro — ₹3,999/month';
 
   try {
     const credentials = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
@@ -280,7 +265,7 @@ async function handleCreateOrder(req: Request) {
       currency: rzData.currency,
       keyId,
       description,
-      displayPrice: coupon ? coupon.price : 1499,
+      displayPrice: coupon ? coupon.price : 3999,
     });
   } catch (err) {
     console.error('Razorpay request exception:', err);
@@ -326,7 +311,7 @@ async function handleVerifyPayment(req: Request) {
   const end = new Date(now);
   end.setDate(end.getDate() + 30);
 
-  const paidAmount = body.amount || 1499;
+  const paidAmount = body.amount || 3999;
 
   const { error: subErr } = await db().from('subscriptions').insert({
     user_id: user.id,
@@ -423,7 +408,7 @@ async function handleInitiateCheckout(req: Request) {
       fbc: fbc || undefined,
       fbp: fbp || undefined,
     },
-    customData: { value: body.amount || 1499, currency: 'INR' },
+    customData: { value: body.amount || 3999, currency: 'INR' },
   }).catch(() => {});
 
   return Response.json({ ok: true });
@@ -455,7 +440,7 @@ async function handleWebhook(req: Request) {
     paymentData
   ) {
     const userId = (paymentData.notes as Record<string, string>)?.userId;
-    const amount = Number(paymentData.amount || 149900);
+    const amount = Number(paymentData.amount || 399900);
     const razorpayId = String(paymentData.id || '');
 
     if (userId) {

@@ -5,15 +5,11 @@ import Script from 'next/script';
 import Image from 'next/image';
 import { Logo } from '@/components/Logo';
 import { SearchConsoleStats } from '@/components/SearchConsoleStats';
-import { SignupModal } from '@/components/SignupModal';
 import {
   ChatBotIcon, PhoneIcon, SearchIcon, GlobeIcon,
   ChartIcon, WhatsAppIcon, ShieldIcon, HeadsetIcon,
 } from '@/components/Icons';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { validateCompanyName } from '@/lib/validateCompanyName';
+import React, { useState, useEffect, useRef } from 'react';
 
 const TOTAL_LAUNCH_SEATS = 1000;
 const SPOTS_TAKEN_KEY = 'sxSpotsTaken';
@@ -46,17 +42,10 @@ function generatePassword() {
   return pwd;
 }
 
-function SignupForm({ spotsLeft }: { spotsLeft: number }) {
-  const { signUp } = useAuth();
-  const router = useRouter();
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+function LeadForm() {
+  const [form, setForm] = useState({ name: '', category: '', phone: '', bizType: '', website: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loadingText, setLoadingText] = useState('');
 
   const planFeatures = [
     'Website + Search Engine Optimization',
@@ -73,44 +62,33 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
     'Google Map Integration',
   ];
 
-  useEffect(() => {
-    if (!loading) return;
-    const base = 'Creating your account';
-    let dots = 0;
-    setLoadingText(base);
-    const interval = setInterval(() => {
-      dots = (dots + 1) % 4;
-      setLoadingText(base + '.'.repeat(dots));
-    }, 400);
-    return () => clearInterval(interval);
-  }, [loading]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const nameError = validateCompanyName(name);
-    if (nameError) { setError(nameError); return; }
-    if (!category.trim()) { setError('Please enter your business category.'); return; }
-    if (!phone.trim() || phone.replace(/\D/g, '').length < 10) {
-      setError('Please enter a valid WhatsApp number.'); return;
-    }
-    if (!email.trim()) { setError('Please enter your email.'); return; }
-    if (!password.trim()) { setError('Please enter a password.'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (!form.name.trim()) { setError('Please enter your company name.'); return; }
+    if (!form.category.trim()) { setError('Please enter your business category.'); return; }
+    if (form.phone.replace(/\D/g, '').length < 10) { setError('Please enter a valid WhatsApp number.'); return; }
+    if (!form.bizType) { setError('Please select your business type.'); return; }
 
     setLoading(true);
-    const result = await signUp(email, password, name, phone, category);
-
-    if (!result.success) {
-      setError(result.error || 'Something went wrong. Please try again.');
-      setLoading(false);
-      return;
-    }
-
     if (typeof window !== 'undefined' && (window as any).fbq) {
       (window as any).fbq('track', 'Lead');
     }
-    router.replace('/dashboard/plans?checkout=1');
+
+    const msg = [
+      `Hi! I'm interested in getting my business online with Scalify.`,
+      ``,
+      `Company: ${form.name}`,
+      `Category: ${form.category}`,
+      `Business Type: ${form.bizType}`,
+      `WhatsApp: +91${form.phone}`,
+      form.website ? `Website: ${form.website}` : null,
+      ``,
+      `Please share the registration link.`,
+    ].filter(l => l !== null).join('\n');
+
+    window.open(`https://wa.me/916353583138?text=${encodeURIComponent(msg)}`, '_blank');
+    setLoading(false);
   };
 
   return (
@@ -120,7 +98,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           Get Your Business Online Today
         </h2>
         <p className="text-xs sm:text-sm text-zinc-500">
-          Website + SEO + WhatsApp leads — starting at ₹1,499/month
+          Website + SEO + WhatsApp leads — ₹3,999/month
         </p>
       </div>
 
@@ -131,8 +109,8 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           </label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={form.name}
+            onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))}
             required
             className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
             placeholder="e.g. Sharma Electricals, Priya Salon"
@@ -144,8 +122,8 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           </label>
           <input
             type="text"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={form.category}
+            onChange={(e) => setForm(f => ({ ...f, category: e.target.value }))}
             required
             className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
             placeholder="e.g. Salon, Restaurant, Clinic, Gym"
@@ -155,28 +133,32 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           <span className="flex items-center px-3 text-zinc-500 text-xs sm:text-sm border-r border-border select-none">+91</span>
           <input
             type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+            value={form.phone}
+            onChange={(e) => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
             required
             className="flex-1 py-2 px-3 bg-transparent text-xs sm:text-sm text-white placeholder-zinc-600 focus:outline-none"
             placeholder="WhatsApp number"
           />
         </div>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+        <select
           required
-          className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-          placeholder="Email address"
-        />
+          value={form.bizType}
+          onChange={(e) => setForm(f => ({ ...f, bizType: e.target.value }))}
+          className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm focus:border-green-500/50 focus:outline-none transition appearance-none"
+          style={{ color: form.bizType ? '#fff' : '#52525b' }}
+        >
+          <option value="" disabled>I am a... *</option>
+          <option value="Small Business Owner">Small Business Owner</option>
+          <option value="Freelancer">Freelancer</option>
+          <option value="Agency / Marketing Team">Agency / Marketing Team</option>
+          <option value="Other">Other</option>
+        </select>
         <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          type="text"
+          value={form.website}
+          onChange={(e) => setForm(f => ({ ...f, website: e.target.value }))}
           className="w-full rounded-lg border border-border bg-inputBg px-3 py-2 text-xs sm:text-sm text-white placeholder-zinc-600 focus:border-green-500/50 focus:outline-none transition"
-          placeholder="Password (min 6 chars)"
+          placeholder="Your website URL (optional)"
         />
         {error && (
           <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
@@ -188,7 +170,7 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
           disabled={loading}
           className="w-full rounded-lg bg-green-500 px-3 py-2.5 text-xs sm:text-sm font-bold text-white transition hover:bg-green-400 active:scale-[0.99] disabled:opacity-50"
         >
-          {loading ? loadingText : 'Get Started — ₹1,499/month'}
+          {loading ? 'Opening WhatsApp...' : 'Get Started — Chat on WhatsApp →'}
         </button>
       </form>
 
@@ -212,10 +194,10 @@ function SignupForm({ spotsLeft }: { spotsLeft: number }) {
 const FAQS = [
   {
     q: 'How much does Scalify cost?',
-    a: 'Scalify Pro is ₹1,499/month (regular price ₹2,499 — you save ₹1,000). No setup fee, no hidden charges. Cancel anytime. Pay manually each month — no auto-debit.',
+    a: 'Scalify Pro is ₹3,999/month. No setup fee, no hidden charges. Cancel anytime. Pay manually each month — no auto-debit.',
   },
   {
-    q: 'What exactly do I get for ₹1,499/month?',
+    q: 'What exactly do I get for ₹3,999/month?',
     a: 'Everything: AI-built professional website, Local SEO & Google Search Console setup, WhatsApp lead capture, mobile-first design, SSL certificate, managed hosting, analytics dashboard, 10+ templates, and 24/7 priority support.',
   },
   {
@@ -236,7 +218,7 @@ const FAQS = [
   },
   {
     q: 'How do I pay?',
-    a: 'Payment is via Razorpay — India\'s most trusted payment gateway. Pay ₹1,499/month manually each month. No auto-debit, no hidden charges, no setup fee. Cancel anytime.',
+    a: 'Payment is via Razorpay — India\'s most trusted payment gateway. Pay ₹3,999/month manually each month. No auto-debit, no hidden charges, no setup fee. Cancel anytime.',
   },
   {
     q: 'Is Scalify legitimate? Can I trust you?',
@@ -296,88 +278,10 @@ function FAQSection() {
   );
 }
 
-function VideoPlayer() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [showControls, setShowControls] = useState(true);
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const flashControls = useCallback(() => {
-    setShowControls(true);
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => {
-      setPlaying(p => { if (p) setShowControls(false); return p; });
-    }, 2500);
-  }, []);
-
-  const togglePlay = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    if (v.paused) { v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); }
-    flashControls();
-  };
-
-  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-
-  return (
-    <div
-      className="relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black cursor-pointer shadow-2xl shadow-black/40"
-      style={{ aspectRatio: '16/9' }}
-      onClick={togglePlay}
-      onMouseMove={flashControls}
-    >
-      <video
-        ref={videoRef}
-        src="/Landingvideo.mp4"
-        poster="/landing-thumb.jpg"
-        className="w-full h-full object-cover"
-        playsInline
-        preload="metadata"
-        onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
-        onLoadedMetadata={() => setDuration(videoRef.current?.duration || 0)}
-        onEnded={() => { setPlaying(false); setShowControls(true); }}
-      />
-
-      {!playing && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-2xl hover:scale-105 transition">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="#000" className="ml-1">
-              <polygon points="5,3 19,12 5,21" />
-            </svg>
-          </div>
-        </div>
-      )}
-
-      <div className={`absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${showControls || !playing ? 'opacity-100' : 'opacity-0'}`}>
-        <input
-          type="range" min={0} max={duration || 100} value={currentTime}
-          onChange={e => {
-            const v = videoRef.current;
-            if (v) { v.currentTime = Number(e.target.value); setCurrentTime(Number(e.target.value)); }
-          }}
-          onClick={e => e.stopPropagation()}
-          className="w-full h-1 accent-green-400 mb-2 cursor-pointer"
-        />
-        <div className="flex items-center gap-3">
-          <button onClick={e => { e.stopPropagation(); togglePlay(); }} className="text-white hover:text-zinc-300 transition">
-            {playing
-              ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-              : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
-            }
-          </button>
-          <span className="text-xs text-white/70 tabular-nums">{fmt(currentTime)} / {fmt(duration)}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function LandingPage() {
   const spotsLeft = useSpotsTaken();
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  const pricingRef = useRef<HTMLDivElement>(null);
+const pricingRef = useRef<HTMLDivElement>(null);
   const viewContentFired = useRef(false);
 
   useEffect(() => {
@@ -449,7 +353,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm text-zinc-500 hover:text-white transition px-3 py-2">Login</Link>
             <button
-              onClick={() => setShowSignupModal(true)}
+              onClick={scrollToForm}
               className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-lg transition"
             >
               Get Started
@@ -476,11 +380,6 @@ export default function LandingPage() {
               We build your website, set up Local SEO, and connect every lead directly to your WhatsApp — in 60 seconds.
             </p>
 
-            {/* Demo video */}
-            <div className="mb-8">
-              <VideoPlayer />
-            </div>
-
             <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600 mb-8 pb-8 border-b border-border">
               {['No agency needed', 'No tech skills required', 'Live in 60 seconds', 'Leads on WhatsApp daily'].map((t) => (
                 <span key={t} className="flex items-center gap-2">
@@ -492,79 +391,12 @@ export default function LandingPage() {
 
             <div className="text-sm text-zinc-600">
               <p className="mb-2">✓ Secure payment via Razorpay · ✓ No auto-debit · ✓ Cancel anytime</p>
-              <p className="text-xs text-zinc-700">{spotsLeft} launch spots remaining — Act now to secure yours</p>
             </div>
           </div>
 
-          {/* Right: Pricing Card */}
-          <div>
-            <div ref={pricingRef} className="relative lg:sticky lg:top-24">
-              {/* Best value badge */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                <span className="bg-green-500 text-black text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-green-500/30">
-                  Best Value
-                </span>
-              </div>
-
-              <div className="rounded-3xl border border-green-500/20 bg-gradient-to-b from-zinc-900 to-zinc-950 p-8 shadow-2xl shadow-green-500/5">
-                {/* Plan name + urgency */}
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400">Growth Plan</p>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2.5 py-1 rounded-full">
-                    🔥 First 1000 users
-                  </span>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-end gap-2 mb-1">
-                  <span className="text-zinc-500 line-through text-xl">₹2,499</span>
-                  <span className="text-4xl font-extrabold text-white leading-none">₹1,499</span>
-                  <span className="text-zinc-500 text-sm mb-1">/month</span>
-                </div>
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="px-2 py-0.5 bg-red-500 text-white text-[11px] font-extrabold rounded-md">40% OFF</span>
-                  <span className="text-green-400 text-xs font-semibold">You save ₹12,000/year</span>
-                </div>
-                <p className="text-zinc-600 text-xs mb-8">Billed monthly · Cancel anytime · No auto-debit</p>
-
-                {/* Feature list */}
-                <ul className="space-y-3.5 mb-9">
-                  {[
-                    'Website + Search Engine Optimization',
-                    'Unlimited Pages Professional Website',
-                    'Add Your Custom Domain',
-                    'Free Hosting',
-                    'Website Maintenance',
-                    'On-Page & Technical SEO',
-                    'Google Search Console Setup',
-                    'Mobile Responsive Design',
-                    'SSL Certificate',
-                    'Priority Chat Support',
-                    'Monthly Analytics & SEO Report',
-                    'Google Map Integration',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3">
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center">
-                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                          <path d="M1 4L3.5 6.5L9 1" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </span>
-                      <span className="text-sm text-zinc-300">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {/* CTA */}
-                <button
-                  onClick={() => setShowSignupModal(true)}
-                  className="block w-full text-center bg-green-500 hover:bg-green-400 text-black font-extrabold text-sm py-4 rounded-xl transition-all duration-200 shadow-lg shadow-green-500/20 hover:shadow-green-400/30 tracking-wide"
-                >
-                  Get Started — ₹1,499/month
-                </button>
-
-                <p className="text-center text-zinc-600 text-xs mt-4">Secure payment · No auto-debit · Cancel anytime</p>
-              </div>
-            </div>
+          {/* Right: Lead Form */}
+          <div ref={pricingRef} className="lg:sticky lg:top-24">
+            <LeadForm />
           </div>
         </div>
       </section>
@@ -653,12 +485,11 @@ export default function LandingPage() {
           </div>
           <div className="mt-14 text-center">
             <button
-              onClick={() => setShowSignupModal(true)}
+              onClick={scrollToForm}
               className="px-10 py-4 bg-green-500 hover:bg-green-400 text-white text-base font-bold rounded-xl transition"
             >
-              Get Started — ₹1,499/month
+              Get Started — ₹3,999/month
             </button>
-            <p className="mt-3 text-zinc-700 text-sm">Only {spotsLeft} launch seats remaining</p>
           </div>
         </div>
       </section>
@@ -676,7 +507,7 @@ export default function LandingPage() {
               Beautiful Websites<br />
               <span className="text-green-400">We've Built</span>
             </h2>
-            <p className="text-zinc-500 text-lg max-w-2xl mx-auto">750+ businesses across industries. All starting at ₹1,499/month.</p>
+            <p className="text-zinc-500 text-lg max-w-2xl mx-auto">750+ businesses across industries. All starting at ₹3,999/month.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -821,10 +652,10 @@ export default function LandingPage() {
               Just real customers — on the phone that&apos;s already in your hand.
             </p>
             <button
-              onClick={() => setShowSignupModal(true)}
+              onClick={scrollToForm}
               className="px-7 py-3.5 bg-green-500 hover:bg-green-400 text-white text-sm font-bold rounded-xl transition"
             >
-              Get Started — ₹1,499/month
+              Get Started — ₹3,999/month
             </button>
           </div>
         </div>
@@ -874,10 +705,10 @@ export default function LandingPage() {
                 <p className="text-zinc-600 text-sm leading-relaxed flex-1">{s.desc}</p>
                 {s.cta && (
                   <button
-                    onClick={() => setShowSignupModal(true)}
+                    onClick={scrollToForm}
                     className="mt-6 w-full py-3 bg-green-500 hover:bg-green-400 text-white rounded-xl font-bold text-sm transition"
                   >
-                    Get Started — ₹1,499/month
+                    Get Started — ₹3,999/month
                   </button>
                 )}
               </div>
@@ -940,10 +771,6 @@ export default function LandingPage() {
       {/* ── FINAL CTA ── */}
       <section className="py-32 px-4 sm:px-6 border-y border-border">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-10 border border-violet-500/20 bg-violet-500/10 rounded-full text-violet-400 text-xs font-bold uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-            {spotsLeft} launch seats remaining
-          </div>
           <h2 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[0.95] tracking-tight mb-8">
             Your Competitor<br />
             Is on Google.<br />
@@ -956,10 +783,10 @@ export default function LandingPage() {
             AI at Work. · Website · SEO · WhatsApp Leads · All-in-One.
           </p>
           <button
-            onClick={() => setShowSignupModal(true)}
+            onClick={scrollToForm}
             className="px-14 py-5 bg-green-500 hover:bg-green-400 text-white text-lg font-extrabold rounded-2xl transition"
           >
-            Get Started — ₹1,499/month
+            Get Started — ₹3,999/month
           </button>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-zinc-700">
             {['Secure payment via Razorpay', 'Cancel anytime', 'No auto-debit'].map((t) => (
@@ -1017,11 +844,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* ── SIGNUP MODAL ── */}
-      <SignupModal
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-      />
     </div>
   );
 }
