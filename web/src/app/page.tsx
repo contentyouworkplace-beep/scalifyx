@@ -768,6 +768,83 @@ const pricingRef = useRef<HTMLDivElement>(null);
         </div>
       </section>
 
+      {/* ── PRICING ── */}
+      <section id="pricing" className="py-28 px-4 sm:px-6 border-t border-border">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14">
+            <div className="flex items-center gap-3 justify-center mb-6">
+              <span className="h-px w-8 bg-zinc-800" />
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Pricing</span>
+              <span className="h-px w-8 bg-zinc-800" />
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
+              Simple Pricing.<br />
+              <span className="text-green-400">No Hidden Charges.</span>
+            </h2>
+          </div>
+
+          <div className="relative max-w-lg mx-auto">
+            {/* Limited offer badge */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+              <span className="bg-orange-500 text-white text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-orange-500/30">
+                🔥 First 500 people only
+              </span>
+            </div>
+
+            <div className="rounded-3xl border border-green-500/20 bg-gradient-to-b from-zinc-900 to-zinc-950 p-8 shadow-2xl shadow-green-500/5">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400 mb-6">Growth Plan — Everything Included</p>
+
+              {/* Price */}
+              <div className="flex items-end gap-3 mb-2">
+                <span className="text-zinc-500 line-through text-2xl">₹5,000</span>
+                <span className="text-6xl font-black text-white leading-none">₹3,999</span>
+                <span className="text-zinc-500 text-lg mb-1">/month</span>
+              </div>
+              <div className="flex items-center gap-2 mb-8">
+                <span className="px-2.5 py-1 bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-extrabold rounded-lg">
+                  You save ₹1,000/month
+                </span>
+              </div>
+
+              {/* Feature table */}
+              <div className="space-y-3 mb-8">
+                {[
+                  'Website + Search Engine Optimization',
+                  'Unlimited Pages Professional Website',
+                  'Add Your Custom Domain',
+                  'Free Hosting',
+                  'Website Maintenance',
+                  'On-Page & Technical SEO',
+                  'Google Search Console Setup',
+                  'Mobile Responsive Design',
+                  'SSL Certificate',
+                  'Priority Chat Support',
+                  'Monthly Analytics & SEO Report',
+                  'Google Map Integration',
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3 py-2.5 border-b border-white/5">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center">
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4L3.5 6.5L9 1" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    <span className="text-sm text-zinc-300">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={scrollToForm}
+                className="w-full py-4 bg-green-500 hover:bg-green-400 text-black font-extrabold text-base rounded-xl transition shadow-lg shadow-green-500/20"
+              >
+                Get Started — ₹3,999/month →
+              </button>
+              <p className="text-center text-zinc-600 text-xs mt-4">Billed monthly · Cancel anytime · No auto-debit</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── FINAL CTA ── */}
       <section className="py-32 px-4 sm:px-6 border-y border-border">
         <div className="max-w-3xl mx-auto text-center">
