@@ -470,6 +470,22 @@ const pricingRef = useRef<HTMLDivElement>(null);
             </div>
           </div>
 
+          {/* Website design not included note */}
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 px-6 py-5 mb-8 flex flex-col sm:flex-row items-start gap-4">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-base mt-0.5">⚠️</div>
+            <div>
+              <p className="text-white text-sm font-bold mb-1">Website Design is NOT included in this plan.</p>
+              <p className="text-zinc-500 text-xs leading-relaxed">
+                SEO works on your existing website. If you need a website built, that is charged separately based on your requirement —
+                <span className="text-zinc-300 font-semibold"> Landing Page</span>,
+                <span className="text-zinc-300 font-semibold"> Service-Based Website</span>, or
+                <span className="text-zinc-300 font-semibold"> E-commerce / Catalog Website</span>.
+                {' '}Pricing is shared after understanding your needs.{' '}
+                <a href="https://wa.me/916353583138" target="_blank" rel="noopener noreferrer" className="text-green-400 font-semibold underline underline-offset-2">WhatsApp us to discuss →</a>
+              </p>
+            </div>
+          </div>
+
           {/* CTA */}
           <div className="text-center">
             <button
