@@ -48,18 +48,16 @@ function LeadForm() {
   const [loading, setLoading] = useState(false);
 
   const planFeatures = [
-    'Website + Search Engine Optimization',
-    'Unlimited Pages Professional Website',
-    'Add Your Custom Domain',
-    'Free Hosting',
-    'Website Maintenance',
     'On-Page & Technical SEO',
     'Google Search Console Setup',
-    'Mobile Responsive Design',
-    'SSL Certificate',
+    'Local SEO — City & Near Me Keywords',
+    'Google Business Profile Optimisation',
+    'Monthly SEO & Analytics Report',
+    'Keyword Research for Your Business',
+    'Meta Tags, Sitemaps & Structured Data',
+    'Competitor SEO Analysis',
+    'Google Map / Local Pack Ranking',
     'Priority Chat Support',
-    'Monthly Analytics & SEO Report',
-    'Google Map Integration',
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,7 +74,7 @@ function LeadForm() {
     }
 
     const msg = [
-      `Hi! I'm interested in getting my business online with Scalify.`,
+      `Hi! I'm interested in getting my business ranked on Google with Scalify SEO.`,
       ``,
       `Company: ${form.name}`,
       `Category: ${form.category}`,
@@ -95,10 +93,10 @@ function LeadForm() {
     <div id="signup-form" className="rounded-2xl border border-border bg-card p-5 sm:p-6">
       <div className="mb-4">
         <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-[1.15] mb-2">
-          Get Your Business Online Today
+          Get Found on Google Today
         </h2>
         <p className="text-xs sm:text-sm text-zinc-500">
-          Website + SEO + WhatsApp leads — ₹3,999/month
+          Local SEO done for you — ₹3,999/month
         </p>
       </div>
 
@@ -198,23 +196,19 @@ const FAQS = [
   },
   {
     q: 'What exactly do I get for ₹3,999/month?',
-    a: 'Everything: AI-built professional website, Local SEO & Google Search Console setup, WhatsApp lead capture, mobile-first design, SSL certificate, managed hosting, analytics dashboard, 10+ templates, and 24/7 priority support.',
-  },
-  {
-    q: 'How quickly will my website go live?',
-    a: 'In 60 seconds after signing up. Just tell our AI about your business — it writes the copy, designs the pages, sets up SEO, and wires your WhatsApp automatically. No coding, no waiting.',
+    a: 'Complete Local SEO done for you: Google Search Console setup, on-page & technical SEO, keyword research, meta tags, sitemaps, structured data, Google Business Profile optimisation, city & near-me keyword targeting, competitor analysis, and a monthly ranking report.',
   },
   {
     q: 'How does Local SEO work? Will I actually rank on Google?',
-    a: 'We set up Google Search Console, optimize meta tags, build your sitemap, add structured data, and target "near me" keywords for your city. Most businesses start appearing in local searches within 2–4 months. An SEO agency charges ₹8,000/month for exactly this — it\'s included in your plan.',
+    a: 'We set up Google Search Console, optimise meta tags, build your sitemap, add structured data, and target "near me" keywords for your city. Most businesses start appearing in local searches within 2–4 months. An SEO agency charges ₹8,000/month for exactly this — it\'s included in your plan.',
   },
   {
-    q: 'How do leads come to me via WhatsApp?',
-    a: 'Every page of your website has a prominent WhatsApp button. When a visitor taps it, they\'re instantly in your WhatsApp chat. You reply, you close. No forms to check, no CRM, no email threads — real customers on the phone in your pocket.',
+    q: 'How long before I see results?',
+    a: 'SEO takes time — typically 2 to 4 months to see meaningful ranking movement. We start your technical setup immediately, submit your sitemap to Google, and track progress every month with a detailed report.',
   },
   {
-    q: 'Can I use my own domain name (like mybusiness.com)?',
-    a: 'Yes! You get a free subdomain (yourbusiness.scalifyapp.com) instantly. If you want your own domain, buy it from GoDaddy or Hostinger (₹500–800/year) and we connect it for free.',
+    q: 'Do you need access to my website?',
+    a: 'Yes — we\'ll need access to your website (WordPress, Wix, Squarespace, or any platform) to implement on-page SEO changes. We guide you through the process step by step.',
   },
   {
     q: 'How do I pay?',
@@ -327,7 +321,7 @@ const pricingRef = useRef<HTMLDivElement>(null);
         <div className="max-w-7xl mx-auto px-4 h-9 flex items-center justify-center gap-3">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
           <p className="text-white/70 text-xs font-medium flex items-center gap-3 overflow-hidden">
-            <span className="truncate">Your customers are searching right now — is your business showing up?</span>
+            <span className="truncate">Your customers are searching on Google right now — is your business ranking?</span>
             <span className="flex-shrink-0 bg-white/10 border border-white/10 rounded-full px-2.5 py-0.5 text-white font-bold text-xs">
               {spotsLeft} spots left
             </span>
@@ -346,8 +340,8 @@ const pricingRef = useRef<HTMLDivElement>(null);
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/"><Logo size={30} /></Link>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-zinc-500 hover:text-white text-sm transition">Features</a>
-            <a href="#portfolio" className="text-zinc-500 hover:text-white text-sm transition">Portfolio</a>
+            <a href="#features" className="text-zinc-500 hover:text-white text-sm transition">What We Do</a>
+            <a href="#pricing" className="text-zinc-500 hover:text-white text-sm transition">Pricing</a>
             <a href="#faq" className="text-zinc-500 hover:text-white text-sm transition">FAQ</a>
           </div>
           <div className="flex items-center gap-3">
@@ -369,7 +363,7 @@ const pricingRef = useRef<HTMLDivElement>(null);
           <div>
             <div className="flex items-center gap-3 mb-8">
               <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">India&apos;s Growth Platform for Small Businesses</span>
+              <span className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">Local SEO for Small Businesses — India</span>
             </div>
             <h1 className="text-5xl sm:text-6xl lg:text-5xl font-extrabold leading-[0.95] tracking-tight mb-8">
               The Business<br />
@@ -377,11 +371,11 @@ const pricingRef = useRef<HTMLDivElement>(null);
               <span className="text-green-400">Gets the Customer.</span>
             </h1>
             <p className="text-lg sm:text-xl text-zinc-400 max-w-lg leading-relaxed mb-10">
-              We build your website, set up Local SEO, and connect every lead directly to your WhatsApp — in 60 seconds.
+              We do your Local SEO — Google Search Console, keyword research, on-page optimisation, and Google Maps ranking. You focus on your business. We get you found.
             </p>
 
             <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600 mb-8 pb-8 border-b border-border">
-              {['No agency needed', 'No tech skills required', 'Live in 60 seconds', 'Leads on WhatsApp daily'].map((t) => (
+              {['No agency needed', 'Done-for-you SEO', 'Rank in 2–4 months', 'Monthly ranking reports'].map((t) => (
                 <span key={t} className="flex items-center gap-2">
                   <span className="w-1 h-1 rounded-full bg-green-500" />
                   {t}
@@ -449,18 +443,18 @@ const pricingRef = useRef<HTMLDivElement>(null);
           <div className="rounded-2xl border border-border bg-card overflow-hidden mb-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x-0">
               {[
-                ['🌐', 'Professional Website', 'Unlimited pages, mobile-first, live in 60 seconds'],
-                ['🔍', 'Local SEO Setup', 'Search Console, meta tags, sitemaps & structured data'],
-                ['📍', 'Google Map Integration', 'Show up on Google Maps for your city & area'],
-                ['💬', 'WhatsApp Lead Capture', 'Every visitor lands in your WhatsApp — no forms, no delay'],
-                ['🔒', 'Free Hosting + SSL', 'Enterprise servers, 99.9% uptime, HTTPS out of the box'],
-                ['🌍', 'Custom Domain Support', 'Connect your own .com or .in domain — free setup'],
-                ['📊', 'Monthly SEO Report', 'Track clicks, impressions & rankings every month'],
-                ['🎨', 'Website Maintenance', 'Updates, fixes & changes handled for you'],
-                ['⚡', 'On-Page & Technical SEO', 'Page speed, canonical tags, crawl fixes included'],
-                ['🤖', 'AI Website Builder', 'Describe your biz — AI writes copy & builds pages instantly'],
-                ['🛡️', 'Priority Chat Support', 'Real humans. Fast replies. Always available.'],
-                ['📱', 'Mobile Responsive Design', 'Looks perfect on every phone, tablet & screen'],
+                ['🔍', 'On-Page SEO', 'Title tags, meta descriptions, headings, image alt text — fully optimised'],
+                ['📍', 'Local SEO & Google Maps', 'Rank for city + near me searches. Show up where your customers look'],
+                ['🗺️', 'Google Business Profile', 'Setup, optimisation & regular updates to your GBP listing'],
+                ['🔧', 'Technical SEO', 'Site speed, crawl errors, canonical tags, XML sitemap, robots.txt'],
+                ['🎯', 'Keyword Research', 'Find exactly what your customers type — and rank for those terms'],
+                ['📊', 'Google Search Console', 'Full setup, verification, sitemap submission & monthly monitoring'],
+                ['📈', 'Monthly Ranking Report', 'Clicks, impressions, position tracking — delivered every month'],
+                ['🔎', 'Competitor SEO Analysis', 'See what your competitors rank for and close the gap'],
+                ['🏗️', 'Schema & Structured Data', 'LocalBusiness, FAQ & breadcrumb markup for better visibility'],
+                ['📝', 'Content SEO Guidance', 'What pages to add, what to write, how to structure your content'],
+                ['🔗', 'Internal Linking Strategy', 'Connect your pages to pass authority and improve rankings'],
+                ['🛡️', 'Priority Chat Support', 'Real humans. Fast replies. Questions answered — always.'],
               ].map(([icon, title, desc]) => (
                 <div key={title} className="flex items-start gap-4 px-6 py-5 border-b border-border last:border-b-0 sm:even:border-l sm:border-b hover:bg-white/[0.02] transition">
                   <span className="text-2xl flex-shrink-0 mt-0.5">{icon}</span>
@@ -500,61 +494,61 @@ const pricingRef = useRef<HTMLDivElement>(null);
               <span className="h-px w-8 bg-zinc-800" />
             </div>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
-              Your Entire Digital Presence.<br />
-              <span className="text-green-400">Built by AI. Managed by Us.</span>
+              Everything in SEO.<br />
+              <span className="text-green-400">Done for You.</span>
             </h2>
             <p className="mt-5 text-zinc-500 max-w-xl mx-auto text-lg">
-              Everything a ₹50,000/year agency delivers — done for you automatically, without a single briefing call.
+              An SEO agency charges ₹8,000–15,000/month for this. We do it all for ₹3,999/month — no contracts, no fluff.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               {
-                Icon: ChatBotIcon,
-                title: 'AI Website Builder',
-                desc: 'Describe your business in plain language. AI writes the copy, designs the pages, and publishes it — without you touching a line of code.',
-                included: true,
-              },
-              {
                 Icon: SearchIcon,
                 title: 'Local SEO — Done for You',
-                desc: 'Search Console, meta tags, sitemaps, structured data. All of it, handled automatically. You rank, you get found, you get customers.',
-                included: true,
-              },
-              {
-                Icon: WhatsAppIcon,
-                title: 'Leads Land on WhatsApp',
-                desc: 'Every visitor sees one button. They tap. They\'re in your chat. You close from your phone. No form. No delay. No middleman.',
-                included: true,
-              },
-              {
-                Icon: PhoneIcon,
-                title: 'Mobile-First Design',
-                desc: 'Your customers are on their phones. Your site loads instantly, looks flawless, and converts on every screen and every network.',
-                included: true,
-              },
-              {
-                Icon: ShieldIcon,
-                title: 'Hosting + SSL',
-                desc: 'Enterprise-grade servers. 99.9% uptime. SSL certificate. Google trusts you from day one — and so do your customers.',
+                desc: 'Search Console, meta tags, sitemaps, structured data. All of it handled. You rank, you get found, you get customers.',
                 included: true,
               },
               {
                 Icon: GlobeIcon,
-                title: 'Live Domain in Seconds',
-                desc: 'yourbusiness.scalifyapp.com the moment you sign up. Add your own .com or .in domain anytime — one click.',
+                title: 'Google Business Profile',
+                desc: 'Full setup & optimisation of your GBP listing so you appear on Google Maps and the local pack for your city.',
                 included: true,
               },
               {
                 Icon: ChartIcon,
-                title: 'Monthly Analytics & SEO Report',
-                desc: 'Who visited. Where they came from. Which page made them message you. Monthly SEO performance reports — to your inbox.',
+                title: 'Keyword Research',
+                desc: 'We find exactly what your customers type into Google — then optimise your pages to rank for those terms.',
+                included: true,
+              },
+              {
+                Icon: ShieldIcon,
+                title: 'Technical SEO',
+                desc: 'Site speed, crawl errors, XML sitemap, canonical tags, robots.txt — all fixed and maintained for you.',
+                included: true,
+              },
+              {
+                Icon: ChatBotIcon,
+                title: 'On-Page SEO',
+                desc: 'Title tags, meta descriptions, headings, image alt text, internal linking — every page fully optimised.',
+                included: true,
+              },
+              {
+                Icon: PhoneIcon,
+                title: 'Schema & Structured Data',
+                desc: 'LocalBusiness, FAQ, and breadcrumb schema so Google understands your business and shows rich results.',
+                included: true,
+              },
+              {
+                Icon: ChartIcon,
+                title: 'Monthly Ranking Report',
+                desc: 'Clicks, impressions, position tracking and SEO progress — a clear report delivered to you every month.',
                 included: true,
               },
               {
                 Icon: HeadsetIcon,
                 title: 'Priority Chat Support',
-                desc: 'Real people watching your site around the clock. AI-backed so response time is instant. Problems fixed before you notice them.',
+                desc: 'SEO questions? Stuck on something? Message us anytime. Real people, fast replies.',
                 included: true,
               },
             ].map((f) => (
@@ -678,7 +672,7 @@ const pricingRef = useRef<HTMLDivElement>(null);
             <span className="text-zinc-700">They went to your competitor.</span>
           </h2>
           <p className="text-lg text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10">
-            Not because your competitor is better. Because they showed up on Google and you didn&apos;t. That&apos;s the only difference — and it&apos;s fixable in 60 seconds.
+            Not because your competitor is better. Because they showed up on Google and you didn&apos;t. That&apos;s the only difference — and SEO fixes it.
           </p>
           <button
             onClick={scrollToForm}
@@ -869,7 +863,7 @@ const pricingRef = useRef<HTMLDivElement>(null);
             Right now, someone is searching for exactly what you offer. If you&apos;re not showing up — they go to whoever is. That customer is gone. It happens a hundred times a day. Scalify ends that.
           </p>
           <p className="text-green-400 font-bold text-lg mb-12">
-            AI at Work. · Website · SEO · WhatsApp Leads · All-in-One.
+            Local SEO · Google Maps · Search Console · Monthly Reports · Done for You.
           </p>
           <button
             onClick={scrollToForm}
