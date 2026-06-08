@@ -583,14 +583,14 @@ const pricingRef = useRef<HTMLDivElement>(null);
           <div className="text-center mb-16">
             <div className="flex items-center gap-3 justify-center mb-6">
               <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Built & Live</span>
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Real Results</span>
               <span className="h-px w-8 bg-zinc-800" />
             </div>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] mb-4">
-              Beautiful Websites<br />
-              <span className="text-green-400">We've Built</span>
+              We've Done SEO<br />
+              <span className="text-green-400">For These Businesses.</span>
             </h2>
-            <p className="text-zinc-500 text-lg max-w-2xl mx-auto">750+ businesses across industries. All starting at ₹3,999/month.</p>
+            <p className="text-zinc-500 text-lg max-w-2xl mx-auto">Check any of these sites with an SEO audit tool — the results speak for themselves.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -629,7 +629,7 @@ const pricingRef = useRef<HTMLDivElement>(null);
             ))}
           </div>
 
-          <p className="text-center text-zinc-500 text-sm mt-10">All live websites built with our service. Click any to see them in action.</p>
+          <p className="text-center text-zinc-500 text-sm mt-10">Real businesses. Real SEO. Click any site and run it through Ahrefs, SEMrush, or Google Search Console to verify.</p>
         </div>
       </section>
 
