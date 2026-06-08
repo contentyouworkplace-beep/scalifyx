@@ -401,6 +401,95 @@ const pricingRef = useRef<HTMLDivElement>(null);
         </div>
       </section>
 
+      {/* ── PRICING TABLE ── */}
+      <section id="pricing" className="py-20 px-4 sm:px-6 border-t border-border bg-zinc-950">
+        <div className="max-w-5xl mx-auto">
+
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-extrabold uppercase tracking-widest px-4 py-2 rounded-full mb-5">
+              🔥 Limited offer — First 500 people only
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] mb-3">
+              One Plan. <span className="text-green-400">Everything Included.</span>
+            </h2>
+            <p className="text-zinc-500 text-lg">No hidden fees. No agency bills. Cancel anytime.</p>
+          </div>
+
+          {/* Price highlight bar */}
+          <div className="rounded-2xl bg-gradient-to-r from-green-500/10 to-green-500/5 border border-green-500/20 p-6 sm:p-8 mb-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-end gap-4">
+              <div>
+                <p className="text-zinc-500 text-sm mb-1">Regular price</p>
+                <span className="text-zinc-500 line-through text-3xl font-bold">₹5,000</span>
+              </div>
+              <div className="w-px h-12 bg-zinc-700" />
+              <div>
+                <p className="text-green-400 text-sm font-bold mb-1">Your price today</p>
+                <div className="flex items-end gap-2">
+                  <span className="text-6xl font-black text-white leading-none">₹3,999</span>
+                  <span className="text-zinc-400 text-lg mb-1">/month</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center sm:items-end gap-3">
+              <div className="flex gap-3 flex-wrap justify-center sm:justify-end">
+                <span className="px-4 py-2 bg-green-500 text-black text-sm font-extrabold rounded-xl">
+                  💰 You save ₹1,000/month
+                </span>
+                <span className="px-4 py-2 bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-extrabold rounded-xl">
+                  ₹12,000 saved/year
+                </span>
+              </div>
+              <p className="text-zinc-600 text-xs">Billed monthly · No auto-debit · Cancel anytime</p>
+            </div>
+          </div>
+
+          {/* Feature table */}
+          <div className="rounded-2xl border border-border bg-card overflow-hidden mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x-0">
+              {[
+                ['🌐', 'Professional Website', 'Unlimited pages, mobile-first, live in 60 seconds'],
+                ['🔍', 'Local SEO Setup', 'Search Console, meta tags, sitemaps & structured data'],
+                ['📍', 'Google Map Integration', 'Show up on Google Maps for your city & area'],
+                ['💬', 'WhatsApp Lead Capture', 'Every visitor lands in your WhatsApp — no forms, no delay'],
+                ['🔒', 'Free Hosting + SSL', 'Enterprise servers, 99.9% uptime, HTTPS out of the box'],
+                ['🌍', 'Custom Domain Support', 'Connect your own .com or .in domain — free setup'],
+                ['📊', 'Monthly SEO Report', 'Track clicks, impressions & rankings every month'],
+                ['🎨', 'Website Maintenance', 'Updates, fixes & changes handled for you'],
+                ['⚡', 'On-Page & Technical SEO', 'Page speed, canonical tags, crawl fixes included'],
+                ['🤖', 'AI Website Builder', 'Describe your biz — AI writes copy & builds pages instantly'],
+                ['🛡️', 'Priority Chat Support', 'Real humans. Fast replies. Always available.'],
+                ['📱', 'Mobile Responsive Design', 'Looks perfect on every phone, tablet & screen'],
+              ].map(([icon, title, desc]) => (
+                <div key={title} className="flex items-start gap-4 px-6 py-5 border-b border-border last:border-b-0 sm:even:border-l sm:border-b hover:bg-white/[0.02] transition">
+                  <span className="text-2xl flex-shrink-0 mt-0.5">{icon}</span>
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-sm font-bold text-white">{title}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+                    </div>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <button
+              onClick={scrollToForm}
+              className="inline-block px-12 py-4 bg-green-500 hover:bg-green-400 text-black font-extrabold text-lg rounded-xl transition shadow-xl shadow-green-500/20"
+            >
+              Get Started — ₹3,999/month →
+            </button>
+            <p className="mt-3 text-zinc-600 text-sm">Offer valid for first 500 people only · Price goes up after that</p>
+          </div>
+
+        </div>
+      </section>
+
       {/* ── FEATURES ── */}
       <section id="features" className="py-28 px-4 sm:px-6 bg-surface/20">
         <div className="max-w-6xl mx-auto">
@@ -764,83 +853,6 @@ const pricingRef = useRef<HTMLDivElement>(null);
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PRICING ── */}
-      <section id="pricing" className="py-28 px-4 sm:px-6 border-t border-border">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="flex items-center gap-3 justify-center mb-6">
-              <span className="h-px w-8 bg-zinc-800" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Pricing</span>
-              <span className="h-px w-8 bg-zinc-800" />
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
-              Simple Pricing.<br />
-              <span className="text-green-400">No Hidden Charges.</span>
-            </h2>
-          </div>
-
-          <div className="relative max-w-lg mx-auto">
-            {/* Limited offer badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
-              <span className="bg-orange-500 text-white text-[11px] font-extrabold uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-orange-500/30">
-                🔥 First 500 people only
-              </span>
-            </div>
-
-            <div className="rounded-3xl border border-green-500/20 bg-gradient-to-b from-zinc-900 to-zinc-950 p-8 shadow-2xl shadow-green-500/5">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-400 mb-6">Growth Plan — Everything Included</p>
-
-              {/* Price */}
-              <div className="flex items-end gap-3 mb-2">
-                <span className="text-zinc-500 line-through text-2xl">₹5,000</span>
-                <span className="text-6xl font-black text-white leading-none">₹3,999</span>
-                <span className="text-zinc-500 text-lg mb-1">/month</span>
-              </div>
-              <div className="flex items-center gap-2 mb-8">
-                <span className="px-2.5 py-1 bg-green-500/20 border border-green-500/30 text-green-400 text-xs font-extrabold rounded-lg">
-                  You save ₹1,000/month
-                </span>
-              </div>
-
-              {/* Feature table */}
-              <div className="space-y-3 mb-8">
-                {[
-                  'Website + Search Engine Optimization',
-                  'Unlimited Pages Professional Website',
-                  'Add Your Custom Domain',
-                  'Free Hosting',
-                  'Website Maintenance',
-                  'On-Page & Technical SEO',
-                  'Google Search Console Setup',
-                  'Mobile Responsive Design',
-                  'SSL Certificate',
-                  'Priority Chat Support',
-                  'Monthly Analytics & SEO Report',
-                  'Google Map Integration',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-3 py-2.5 border-b border-white/5">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500/10 border border-green-500/25 flex items-center justify-center">
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                        <path d="M1 4L3.5 6.5L9 1" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </span>
-                    <span className="text-sm text-zinc-300">{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={scrollToForm}
-                className="w-full py-4 bg-green-500 hover:bg-green-400 text-black font-extrabold text-base rounded-xl transition shadow-lg shadow-green-500/20"
-              >
-                Get Started — ₹3,999/month →
-              </button>
-              <p className="text-center text-zinc-600 text-xs mt-4">Billed monthly · Cancel anytime · No auto-debit</p>
-            </div>
           </div>
         </div>
       </section>
