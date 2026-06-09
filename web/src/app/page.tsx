@@ -85,7 +85,7 @@ function LeadForm() {
       `Please share the registration link.`,
     ].filter(l => l !== null).join('\n');
 
-    window.open(`https://wa.me/916353583138?text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://wa.me/916353583148?text=${encodeURIComponent(msg)}`, '_blank');
     setLoading(false);
   };
 
@@ -481,7 +481,7 @@ const pricingRef = useRef<HTMLDivElement>(null);
                 <span className="text-zinc-300 font-semibold"> Service-Based Website</span>, or
                 <span className="text-zinc-300 font-semibold"> E-commerce / Catalog Website</span>.
                 {' '}Pricing is shared after understanding your needs.{' '}
-                <a href="https://wa.me/916353583138" target="_blank" rel="noopener noreferrer" className="text-green-400 font-semibold underline underline-offset-2">WhatsApp us to discuss →</a>
+                <a href="https://wa.me/916353583148" target="_blank" rel="noopener noreferrer" className="text-green-400 font-semibold underline underline-offset-2">WhatsApp us to discuss →</a>
               </p>
             </div>
           </div>
