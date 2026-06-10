@@ -10,14 +10,20 @@
     {
       "name": "web",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "cd /Users/rahulmedhe/ScalifyX/web && npm run dev -- -p 3002"],
-      "port": 3002
+      "runtimeArgs": ["-c", "cd /Users/rahulmedhe/ScalifyX/web && npm run dev -- -p 3000"],
+      "port": 3000
+    },
+    {
+      "name": "color-themes",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "python3 -m http.server 3099 --directory /tmp"],
+      "port": 3099
     }
   ],
   "staticFiles": [
     {
-      "name": "colors-preview",
-      "file": "/tmp/colors.html",
+      "name": "color-themes",
+      "file": "/tmp/color-themes.html",
       "port": 3099
     }
   ]

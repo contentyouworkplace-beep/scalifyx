@@ -28,6 +28,7 @@ const adminLinks = [
   { href: '/admin/payments', label: 'Payments', icon: CreditCardIcon },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: ClipboardIcon },
   { href: '/admin/notifications', label: 'Notifications', icon: BellIcon },
+  { href: '/admin/viral-vadodara', label: 'Viral Vadodara', icon: ChartIcon },
 ];
 
 export function Sidebar({ variant }: { variant: 'user' | 'admin' }) {
