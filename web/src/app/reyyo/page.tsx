@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Fredoka, Nunito } from 'next/font/google';
 import {
   IcoGift, IcoStar, IcoPhone, IcoUsers, IcoCamera, IcoGlobe,
@@ -118,7 +119,7 @@ function OrderForm({ onBack, onNext }: { onBack: ()=>void; onNext: (d:OrderData)
           Back
         </button>
         <div className="flex flex-col items-center">
-          <Image src="/reyyo/logo.png" alt="Reyyo" width={110} height={48} className="object-contain h-11 w-auto"/>
+          <Image src="/reyyo/logo.webp" alt="Reyyo" width={110} height={48} className="object-contain h-11 w-auto"/>
           <span className={`${nunito.className} text-[9px] font-semibold text-gray-400 -mt-0.5 tracking-wide`}>by Scalify</span>
         </div>
         <div className="w-16"/>
@@ -268,7 +269,7 @@ function OrderSummary({ data, onEdit, onConfirm }: { data:OrderData; onEdit:()=>
           Edit
         </button>
         <div className="flex flex-col items-center">
-          <Image src="/reyyo/logo.png" alt="Reyyo" width={110} height={48} className="object-contain h-11 w-auto"/>
+          <Image src="/reyyo/logo.webp" alt="Reyyo" width={110} height={48} className="object-contain h-11 w-auto"/>
           <span className={`${nunito.className} text-[9px] font-semibold text-gray-400 -mt-0.5 tracking-wide`}>by Scalify</span>
         </div>
         <div className="w-16"/>
@@ -375,9 +376,9 @@ function ThankYou({ data }: { data: OrderData }) {
     <div className="min-h-screen" style={{background:'linear-gradient(135deg,#F0FFF4,#fff,#F5F0FF)',animation:'reyyoSlideIn 0.4s cubic-bezier(.22,.68,0,1.2) both'}}>
       <style>{`@keyframes reyyoSlideIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}`}</style>
       <div className="bg-white border-b px-5 py-4 flex flex-col items-center">
-        <Image src="/reyyo/logo.png" alt="Reyyo" width={120} height={52} className="object-contain h-12 w-auto"/>
-        <span className={`${nunito.className} text-[9px] font-semibold text-gray-400 -mt-0.5 tracking-wide`}>by Scalify</span>
-      </div>
+          <Image src="/reyyo/logo.webp" alt="Reyyo" width={120} height={52} className="object-contain h-12 w-auto"/>
+          <span className={`${nunito.className} text-[9px] font-semibold text-gray-400 -mt-0.5 tracking-wide`}>by Scalify</span>
+        </div>
       <div className="max-w-lg mx-auto px-5 py-10">
         <div className="text-center mb-8">
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xl"
@@ -472,26 +473,18 @@ const trustItems = [
 
 // ── MAIN LANDING PAGE ────────────────────────────────────────────────────────
 export default function ReyyoPage() {
-  const [view, setView]         = useState<View>('landing');
-  const [order, setOrder]       = useState<OrderData|null>(null);
+  const router                  = useRouter();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    if (view !== 'landing') return;
     const h = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', h);
     return () => window.removeEventListener('scroll', h);
-  }, [view]);
+  }, []);
 
-  const goToForm = () => { setView('form'); window.scrollTo(0, 0); };
-
-  if (view === 'form') return (
-    <OrderForm onBack={() => setView('landing')} onNext={d => { setOrder(d); setView('summary'); window.scrollTo(0,0); }}/>
-  );
-  if (view === 'summary' && order) return (
-    <OrderSummary data={order} onEdit={() => setView('form')} onConfirm={() => { setView('success'); window.scrollTo(0,0); }}/>
-  );
-  if (view === 'success' && order) return <ThankYou data={order}/>;
+  const goToForm = () => {
+    router.push('/reyyo/checkout');
+  };
 
   const pills = [
     { icon:<IcoGift size={18}/>,    label:'Loyalty Rewards',    color:'#FF2D78', bg:'#FFF0F5' },
@@ -507,7 +500,7 @@ export default function ReyyoPage() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-white/80 backdrop-blur-sm'}`}>
         <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between h-20">
           <Link href="/reyyo" className="flex flex-col items-center">
-            <Image src="/reyyo/logo.png" alt="Reyyo" width={180} height={80} className="object-contain h-[72px] w-auto"/>
+            <Image src="/reyyo/logo.webp" alt="Reyyo" width={180} height={80} className="object-contain h-[72px] w-auto"/>
             <span className={`${nunito.className} text-[10px] font-semibold text-gray-400 -mt-1 tracking-wide`}>by Scalify</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-bold text-gray-600">
@@ -633,7 +626,7 @@ export default function ReyyoPage() {
                 </svg>
               </div>
 
-              <Image src="/reyyo/qr-stand-v2.png" alt="Reyyo QR Stand Kit"
+              <Image src="/reyyo/qr-stand-v2.webp" alt="Reyyo QR Stand Kit"
                      width={520} height={693} priority
                      className="relative drop-shadow-2xl object-contain"/>
             </div>
@@ -841,10 +834,10 @@ export default function ReyyoPage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { t:'Earn Points',    sub:'Track visit progress',     img:'/reyyo/customer-home.png',   c:'#FF2D78' },
-              { t:'Special Offers', sub:'Exclusive deals & actions', img:'/reyyo/customer-offers.png', c:'#7B2FBE' },
-              { t:'My Wallet',      sub:'Redeem rewards anytime',   img:'/reyyo/customer-wallet.png', c:'#FF8C00' },
-              { t:'Google Review',  sub:'Auto-generated for them',  img:'/reyyo/customer-review.png', c:'#00C853' },
+              { t:'Earn Points',    sub:'Track visit progress',     img:'/reyyo/customer-home.webp',   c:'#FF2D78' },
+              { t:'Special Offers', sub:'Exclusive deals & actions', img:'/reyyo/customer-offers.webp', c:'#7B2FBE' },
+              { t:'My Wallet',      sub:'Redeem rewards anytime',   img:'/reyyo/customer-wallet.webp', c:'#FF8C00' },
+              { t:'Google Review',  sub:'Auto-generated for them',  img:'/reyyo/customer-review.webp', c:'#00C853' },
             ].map(s => (
               <div key={s.t} className="flex flex-col items-center">
                 <div className="relative w-52 shadow-2xl rounded-[2.5rem] overflow-hidden border-[3px]"
@@ -871,10 +864,10 @@ export default function ReyyoPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              { t:'Business Overview',  sub:'Members · Repeat customers · Reviews — all in one view', img:'/reyyo/dashboard-main.png',       c:'#7B2FBE', icon:<IcoChart size={22}/> },
-              { t:'Customer Hub',        sub:'Every customer, every visit, every point. One place.',    img:'/reyyo/dashboard-members.png',    c:'#FF2D78', icon:<IcoUsers size={22}/> },
-              { t:'Create Rewards',      sub:'Free Coffee after 5 visits. You decide the reward.',       img:'/reyyo/dashboard-rewards.png',    c:'#FF8C00', icon:<IcoGift size={22}/>  },
-              { t:'Engagement Center',   sub:'Google Reviews · Instagram · Website Traffic',             img:'/reyyo/dashboard-engagement.png', c:'#00AEEF', icon:<IcoStar size={22}/>  },
+              { t:'Business Overview',  sub:'Members · Repeat customers · Reviews — all in one view', img:'/reyyo/dashboard-main.webp',       c:'#7B2FBE', icon:<IcoChart size={22}/> },
+              { t:'Customer Hub',        sub:'Every customer, every visit, every point. One place.',    img:'/reyyo/dashboard-members.webp',    c:'#FF2D78', icon:<IcoUsers size={22}/> },
+              { t:'Create Rewards',      sub:'Free Coffee after 5 visits. You decide the reward.',       img:'/reyyo/dashboard-rewards.webp',    c:'#FF8C00', icon:<IcoGift size={22}/>  },
+              { t:'Engagement Center',   sub:'Google Reviews · Instagram · Website Traffic',             img:'/reyyo/dashboard-engagement.webp', c:'#00AEEF', icon:<IcoStar size={22}/>  },
             ].map(d => (
               <div key={d.t} className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all"
                    style={{border:`2px solid ${d.c}20`}}>
@@ -964,7 +957,7 @@ export default function ReyyoPage() {
                      style={{background:'linear-gradient(135deg,#FF2D78,#7B2FBE)'}}/>
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4"
                      style={{borderColor:'#FF2D7830'}}>
-                  <Image src="/reyyo/qr-design.png" alt="Reyyo QR Code Design"
+                  <Image src="/reyyo/qr-design.webp" alt="Reyyo QR Code Design"
                          width={500} height={500} className="w-full object-contain"/>
                 </div>
               </div>
@@ -988,10 +981,10 @@ export default function ReyyoPage() {
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              {img:'/reyyo/standy-1.png', label:'Café Display',     c:'#FF2D78'},
-              {img:'/reyyo/standy-2.png', label:'Restaurant Setup', c:'#7B2FBE'},
-              {img:'/reyyo/standy-3.png', label:'Retail Counter',   c:'#FF8C00'},
-              {img:'/reyyo/standy-4.png', label:'Salon & Spa',      c:'#00AEEF'},
+              {img:'/reyyo/standy-1.webp', label:'Café Display',     c:'#FF2D78'},
+              {img:'/reyyo/standy-2.webp', label:'Restaurant Setup', c:'#7B2FBE'},
+              {img:'/reyyo/standy-3.webp', label:'Retail Counter',   c:'#FF8C00'},
+              {img:'/reyyo/standy-4.webp', label:'Salon & Spa',      c:'#00AEEF'},
             ].map(s => (
               <div key={s.label} className="group relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 aspect-[3/4]">
                 <Image src={s.img} alt={s.label} fill className="object-cover transition-transform duration-500 group-hover:scale-105"/>
@@ -1104,7 +1097,7 @@ export default function ReyyoPage() {
       <footer className="py-16 px-5 sm:px-8" style={{background:'#0F0A1E'}}>
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col items-center mb-10">
-            <Image src="/reyyo/logo.png" alt="Reyyo" width={320} height={144} className="object-contain h-32 w-auto"/>
+            <Image src="/reyyo/logo.webp" alt="Reyyo" width={320} height={144} className="object-contain h-32 w-auto"/>
             <p className={`text-gray-500 mt-3 font-semibold`}>scan. unlock rewards. enjoy.</p>
           </div>
           <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-500 mb-10">

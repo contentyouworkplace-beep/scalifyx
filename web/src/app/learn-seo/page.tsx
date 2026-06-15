@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 function fbq(...args: any[]) {
   if (typeof window !== 'undefined' && (window as any).fbq) {
     (window as any).fbq(...args);
@@ -44,8 +45,8 @@ function OfferCountdown() {
   if (secondsLeft <= 0) {
     return (
       <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 mb-4 text-center">
-        <p className="text-xs font-bold text-red-600">⏰ Rs. 9 offer has expired</p>
-        <p className="text-[11px] text-red-500 mt-0.5">Seats still available — WhatsApp us for current price</p>
+        <p className="text-xs font-bold text-red-600">⏰ ₹1 booking offer has expired</p>
+        <p className="text-[11px] text-red-500 mt-0.5">Seats still available — Reserve slot to get ₹999 price</p>
       </div>
     );
   }
@@ -54,7 +55,7 @@ function OfferCountdown() {
     <div className={`rounded-xl border px-4 py-2.5 mb-4 flex items-center justify-between ${urgent ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
       <div>
         <p className={`text-xs font-bold ${urgent ? 'text-red-700' : 'text-amber-800'}`}>
-          🔥 Rs. 9 offer expires in
+          🔥 ₹1 booking offer expires in
         </p>
         <p className={`text-[10px] mt-0.5 ${urgent ? 'text-red-500' : 'text-amber-600'}`}>Price goes up after timer ends</p>
       </div>
@@ -198,8 +199,8 @@ const FAQS = [
     a: 'After the session, you can WhatsApp us anytime you\'re stuck — whether it\'s a Google Search Console question, a keyword doubt, or something you forgot from the session. We\'ll reply.',
   },
   {
-    q: 'Is Rs. 2,499 a one-time payment?',
-    a: 'Yes. One payment of Rs. 2,499 covers the full 4-hour session + 1 year of WhatsApp support. No monthly fees, no hidden costs.',
+    q: 'Is ₹999 the total fee?',
+    a: 'Yes. The total fee is ₹999 (you pay ₹1 today to book your seat, and the remaining ₹998 at the start of your session). It covers the full 4-hour session + 1 year of WhatsApp support. No hidden charges.',
   },
   {
     q: 'Can I do this for my client\'s business?',
@@ -302,7 +303,18 @@ function getAvailabilityStyle(totalBooked: number) {
   return { dot: 'bg-green-500', text: 'text-green-600', label: 'Available', bg: 'bg-green-50 border-green-200' };
 }
 
+const loadRazorpay = (): Promise<boolean> =>
+  new Promise((resolve) => {
+    if ((window as unknown as Record<string, unknown>).Razorpay) return resolve(true);
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+
 function BookingFlow() {
+  const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState({ name: '', company: '', phone: '', bizType: '', website: '' });
   const [selectedDate, setSelectedDate] = useState('');
@@ -346,36 +358,75 @@ function BookingFlow() {
     setError('');
     setSubmitting(true);
 
-    // Save booking to DB (fire-and-forget)
-    fetch('/api/seo-course/create-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, date: selectedDate, slot: selectedSlot }),
-    }).catch(() => {});
+    try {
+      const res = await fetch('/api/seo-course/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, date: selectedDate, slot: selectedSlot }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Something went wrong. Please try again.');
+        setSubmitting(false);
+        return;
+      }
 
-    fbq('track', 'Contact');
+      const { orderId, bookingId, keyId, amount } = data;
 
-    // Build WhatsApp message
-    const slotLabel = { morning: '10 AM – 2 PM', afternoon: '3 PM – 7 PM', evening: '7 PM – 11 PM' }[selectedSlot] || selectedSlot;
-    const dateFormatted = new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const msg = [
-      `Hi! I'd like to book the SEO Masterclass.`,
-      ``,
-      `Name: ${form.name}`,
-      `Business: ${form.company}`,
-      `Type: ${form.bizType}`,
-      `WhatsApp: +91${form.phone}`,
-      form.website ? `Website: ${form.website}` : null,
-      ``,
-      `Preferred Date: ${dateFormatted}`,
-      `Slot: ${slotLabel}`,
-      ``,
-      `Please confirm my booking.`,
-    ].filter(l => l !== null).join('\n');
+      // Fire Meta Pixel InitiateCheckout event
+      fbq('track', 'InitiateCheckout', { value: 1, currency: 'INR' });
 
-    const waUrl = `https://wa.me/916353583138?text=${encodeURIComponent(msg)}`;
-    window.open(waUrl, '_blank');
-    setSubmitting(false);
+      const loaded = await loadRazorpay();
+      if (!loaded) {
+        setError('Payment gateway failed to load. Try again.');
+        setSubmitting(false);
+        return;
+      }
+
+      const rzp = new (window as any).Razorpay({
+        key: keyId,
+        amount,
+        currency: 'INR',
+        name: 'Scalify SEO Masterclass',
+        description: 'Seat Booking — ₹1',
+        order_id: orderId,
+        prefill: { name: form.name, contact: `+91${form.phone}` },
+        theme: { color: '#16A34A' },
+        handler: async (response: any) => {
+          try {
+            const verifyRes = await fetch('/api/seo-course/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingId,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              router.push(`/learn-seo/success?name=${encodeURIComponent(form.name)}&date=${selectedDate}&slot=${selectedSlot}`);
+            } else {
+              setError('Payment verified but booking failed. Please WhatsApp us at +91 6353583148.');
+              setSubmitting(false);
+            }
+          } catch {
+            setError('Payment verification failed. Please WhatsApp us.');
+            setSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setSubmitting(false);
+          }
+        }
+      });
+      rzp.open();
+    } catch {
+      setError('Something went wrong. Please try again.');
+      setSubmitting(false);
+    }
   }
 
   // Step indicator
@@ -417,7 +468,7 @@ function BookingFlow() {
           <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm shadow-lg shadow-green-100">
             Next — Pick Your Slot →
           </button>
-          <p className="text-center text-xs text-[#9CA3AF]">Free to book · Rs. 2,499 total · one-time payment</p>
+          <p className="text-center text-xs text-[#9CA3AF]">Pay ₹1 now · ₹999 total · remaining ₹998 paid at start</p>
         </form>
       )}
 
@@ -566,10 +617,10 @@ function BookingFlow() {
               onClick={handleConfirmBooking}
               className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Opening WhatsApp...' : 'Confirm on WhatsApp →'}
+              {submitting ? 'Opening Payment...' : 'Pay ₹1 & Book Seat →'}
             </button>
           </div>
-          <p className="text-center text-xs text-[#9CA3AF] mt-2">You'll be taken to WhatsApp to confirm your slot</p>
+          <p className="text-center text-xs text-[#9CA3AF] mt-2">Secure payment via Razorpay · Remaining ₹998 due at session start</p>
         </div>
       )}
     </div>
@@ -589,7 +640,7 @@ export default function LearnSEOPage() {
           href="#enrol"
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-sm font-semibold hover:opacity-90 transition shadow-md shadow-green-100"
         >
-          Book your Slot on WhatsApp
+          Book your Seat for ₹1
         </a>
       </nav>
 
@@ -640,8 +691,8 @@ export default function LearnSEOPage() {
             {/* Price pill */}
             <div className="inline-flex items-center gap-4 bg-white border border-[#E5E7EB] rounded-2xl px-6 py-4 shadow-sm">
               <div>
-                <div className="text-3xl font-extrabold text-[#16A34A]">Rs. 2,499</div>
-                <div className="text-xs text-[#9CA3AF] mt-0.5">One-time · 4 hours live</div>
+                <div className="text-3xl font-extrabold text-[#16A34A]">₹999</div>
+                <div className="text-xs text-[#9CA3AF] mt-0.5">₹1 booking fee today</div>
               </div>
               <div className="w-px h-10 bg-[#E5E7EB]" />
               <div>
@@ -741,7 +792,7 @@ export default function LearnSEOPage() {
               Everything Included.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Nothing Hidden.</span>
             </h2>
-            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">Rs. 2,499 — one time. Here's exactly what you walk away with.</p>
+            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">₹999 — total fee (pay ₹1 today to book). Here's exactly what you walk away with.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5">
@@ -790,7 +841,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="inline-block px-10 py-4 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-base font-bold hover:opacity-90 transition shadow-lg shadow-green-100"
             >
-              Book your Slot on WhatsApp
+              Book your Seat for ₹1
             </a>
           </div>
         </div>
@@ -823,7 +874,7 @@ export default function LearnSEOPage() {
           </div>
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">What You Walk Away With</p>
-            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">Rs. 2,499 — everything included</h3>
+            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">₹999 — everything included</h3>
             <div className="space-y-4">
               {[
                 '4-hour live one-on-one session',
@@ -831,6 +882,7 @@ export default function LearnSEOPage() {
                 '50+ step SEO checklist (the full Scalify task list)',
                 'Local SEO & Google Profile strategy',
                 'AI tools for SEO — what to use & how',
+                'Pay ₹1 today, remaining ₹998 at session start',
                 '1 year WhatsApp support — ask anything, anytime',
               ].map(item => (
                 <div key={item} className="flex items-start gap-3">
@@ -847,7 +899,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="mt-8 w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition flex items-center justify-center text-sm shadow-lg shadow-green-100"
             >
-              Book your Slot on WhatsApp
+              Book your Seat for ₹1
             </a>
           </div>
         </div>
@@ -958,15 +1010,15 @@ export default function LearnSEOPage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Are you?</span>
           </h2>
           <p className="text-[#6B7280] text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-            4 hours. Rs. 2,499. 1 year of support. Everything you need to start ranking your business on Google — taught with your business in mind.
+            4 hours. ₹999 total. Pay ₹1 today to book. 1 year of support. Everything you need to start ranking your business on Google — taught with your business in mind.
           </p>
           <a
             href="#enrol"
             className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-lg font-extrabold hover:opacity-90 transition shadow-2xl shadow-green-100"
           >
-            Book your Slot on WhatsApp
+            Book your Seat for ₹1
           </a>
-          <p className="mt-4 text-sm text-[#9CA3AF]">Rs. 2,499 · one-time payment · 4-hour live session + 1 year support.</p>
+          <p className="mt-4 text-sm text-[#9CA3AF]">₹999 total · pay ₹1 today, remaining ₹998 at start of session.</p>
         </div>
       </section>
 

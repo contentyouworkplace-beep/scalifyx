@@ -101,7 +101,7 @@ export default function ReyyoAdmin() {
            style={{background:'linear-gradient(135deg,#FFF0F5,#F5F0FF)'}}>
         <div className="bg-white rounded-3xl shadow-xl p-10 w-full max-w-sm text-center">
           <div className="flex flex-col items-center mb-1">
-            <Image src="/reyyo/logo.png" alt="Reyyo" width={140} height={60} className="object-contain h-14 w-auto"/>
+            <Image src="/reyyo/logo.webp" alt="Reyyo" width={140} height={60} className="object-contain h-14 w-auto"/>
             <span className="text-[10px] font-semibold text-gray-400 tracking-wide -mt-1">by Scalify</span>
           </div>
           <p className="text-gray-400 font-semibold mb-8">Admin Panel</p>
@@ -131,7 +131,7 @@ export default function ReyyoAdmin() {
       {/* Header */}
       <div className="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
         <div className="flex flex-col items-start">
-          <Image src="/reyyo/logo.png" alt="Reyyo" width={100} height={44} className="object-contain h-10 w-auto"/>
+          <Image src="/reyyo/logo.webp" alt="Reyyo" width={100} height={44} className="object-contain h-10 w-auto"/>
           <p className="text-xs text-gray-400 font-semibold -mt-0.5">Admin Panel</p>
         </div>
         <div className="flex items-center gap-3">

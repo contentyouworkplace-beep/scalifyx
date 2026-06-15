@@ -13,7 +13,7 @@ function SuccessContent() {
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).fbq) {
       (window as any).fbq('track', 'Purchase', {
-        value: 9,
+        value: 1,
         currency: 'INR',
         content_name: 'SEO Masterclass Seat Booking',
         content_category: 'SEO Course',
@@ -107,7 +107,7 @@ function SuccessContent() {
         </div>
 
         <p className="mt-8 text-xs text-[#9CA3AF]">
-          Remaining Rs. 4,990 to be paid at the start of the session.
+          Remaining ₹998 to be paid at the start of the session.
         </p>
 
         <div className="mt-6">

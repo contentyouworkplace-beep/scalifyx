@@ -59,7 +59,7 @@ export default function AdminPage() {
   });
 
   const totalPaid = bookings.filter(b => b.paid).length;
-  const totalRevenue = totalPaid * 99;
+  const totalRevenue = totalPaid * 1;
 
   if (!authed) {
     return (
@@ -106,7 +106,7 @@ export default function AdminPage() {
           {[
             { label: 'Total Bookings', value: bookings.length },
             { label: 'Confirmed (Paid)', value: totalPaid },
-            { label: 'Revenue (Rs. 99 each)', value: `Rs. ${totalRevenue.toLocaleString('en-IN')}` },
+            { label: 'Revenue (Rs. 1 each)', value: `Rs. ${totalRevenue.toLocaleString('en-IN')}` },
           ].map(s => (
             <div key={s.label} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
               <p className="text-2xl font-extrabold text-[#16A34A]">{s.value}</p>

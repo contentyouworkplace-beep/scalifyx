@@ -34,17 +34,18 @@ export async function POST(req: NextRequest) {
     process.env.REYYO_SUPABASE_SERVICE_KEY || process.env.REYYO_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_REYYO_SUPABASE_ANON_KEY!,
   );
 
+  const orderId = generateOrderId();
   const { error } = await supabase.from('reyyo_orders').insert({
-    order_id:      generateOrderId(),
+    order_id:      orderId,
     name:          body.name,
     whatsapp:      body.whatsapp,
     business_name: body.businessName,
     business_type: body.businessType || null,
     website:       body.website || null,
     address:       body.address,
-    city:          body.city,
-    state:         body.state,
-    pincode:       body.pincode,
+    city:          body.city || 'Vadodara',
+    state:         body.state || 'Gujarat',
+    pincode:       body.pincode || '',
     status:        'pending',
   });
 
@@ -53,5 +54,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, orderId });
 }
