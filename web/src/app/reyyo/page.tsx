@@ -559,6 +559,60 @@ export default function ReyyoPage() {
             <div className="relative w-96 sm:w-[420px] lg:w-[480px]">
               <div className="absolute -inset-8 rounded-full blur-3xl opacity-20 pointer-events-none"
                    style={{background:'linear-gradient(135deg,#FF2D78,#7B2FBE,#00AEEF)'}}/>
+
+              {/* ── Floating decorative elements ── */}
+              {/* Coin — top left */}
+              <div className="absolute -left-8 top-12 animate-bounce" style={{animationDuration:'3s'}}>
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                  <circle cx="24" cy="24" r="22" fill="#FFD600" stroke="#FF8C00" strokeWidth="2.5"/>
+                  <circle cx="24" cy="24" r="16" fill="#FFC200" opacity="0.6"/>
+                  <text x="24" y="30" textAnchor="middle" fontSize="18" fontWeight="bold" fill="#FF8C00">₹</text>
+                </svg>
+              </div>
+              {/* Star — top right */}
+              <div className="absolute -right-6 top-16 animate-bounce" style={{animationDuration:'2.5s',animationDelay:'0.4s'}}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <path d="M20 4L23.5 15H36L26.5 22L30 33L20 26L10 33L13.5 22L4 15H16.5L20 4Z" fill="#FF2D78" stroke="#FF2D78" strokeWidth="1.5" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              {/* Gift box — bottom left */}
+              <div className="absolute -left-10 bottom-28 animate-bounce" style={{animationDuration:'3.5s',animationDelay:'0.8s'}}>
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                  <rect x="4" y="18" width="36" height="22" rx="3" fill="#7B2FBE"/>
+                  <rect x="4" y="12" width="36" height="8" rx="2" fill="#9B4FDE"/>
+                  <rect x="19" y="12" width="6" height="28" fill="#FFD600"/>
+                  <path d="M22 12C22 12 16 6 14 8C12 10 17 12 22 12Z" fill="#FF2D78"/>
+                  <path d="M22 12C22 12 28 6 30 8C32 10 27 12 22 12Z" fill="#FF2D78"/>
+                </svg>
+              </div>
+              {/* Sparkle — top center-right */}
+              <div className="absolute right-4 top-4 animate-spin" style={{animationDuration:'8s'}}>
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 2L17.5 13L28 8L19 17L28 22L17.5 19L16 30L14.5 19L4 22L13 17L4 8L14.5 13L16 2Z" fill="#00AEEF" opacity="0.85"/>
+                </svg>
+              </div>
+              {/* Reward badge — bottom right */}
+              <div className="absolute -right-8 bottom-20 animate-bounce" style={{animationDuration:'2.8s',animationDelay:'1s'}}>
+                <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+                  <circle cx="25" cy="25" r="22" fill="#00C853" stroke="#00A040" strokeWidth="2"/>
+                  <circle cx="25" cy="25" r="15" fill="#00E860" opacity="0.5"/>
+                  <text x="25" y="21" textAnchor="middle" fontSize="9" fontWeight="bold" fill="white">FREE</text>
+                  <text x="25" y="33" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white">REWARD</text>
+                </svg>
+              </div>
+              {/* Small star — far left mid */}
+              <div className="absolute -left-6 top-1/2 animate-bounce" style={{animationDuration:'4s',animationDelay:'1.5s'}}>
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <path d="M14 2L16.5 10H25L18.5 15L21 23L14 18L7 23L9.5 15L3 10H11.5L14 2Z" fill="#FF8C00"/>
+                </svg>
+              </div>
+              {/* Lightning bolt — top left area */}
+              <div className="absolute left-6 top-2 animate-bounce" style={{animationDuration:'2.2s',animationDelay:'0.6s'}}>
+                <svg width="26" height="36" viewBox="0 0 26 36" fill="none">
+                  <path d="M15 2L4 20H12L11 34L22 14H14L15 2Z" fill="#FFD600" stroke="#FF8C00" strokeWidth="1.5" strokeLinejoin="round"/>
+                </svg>
+              </div>
+
               <Image src="/reyyo/qr-stand-v2.png" alt="Reyyo QR Stand Kit"
                      width={520} height={693} priority
                      className="relative drop-shadow-2xl object-contain"/>
