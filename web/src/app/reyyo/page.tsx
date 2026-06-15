@@ -485,9 +485,10 @@ export default function ReyyoPage() {
 
       {/* ══ NAVBAR ══════════════════════════════════════════════════════════ */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-white/80 backdrop-blur-sm'}`}>
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between h-16">
-          <Link href="/reyyo">
-            <Image src="/reyyo/logo.png" alt="Reyyo" width={160} height={72} className="object-contain h-16 w-auto"/>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between h-20">
+          <Link href="/reyyo" className="flex flex-col items-center">
+            <Image src="/reyyo/logo.png" alt="Reyyo" width={180} height={80} className="object-contain h-[72px] w-auto"/>
+            <span className={`${nunito.className} text-[10px] font-semibold text-gray-400 -mt-1 tracking-wide`}>by Scalify</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-bold text-gray-600">
             {[['#pricing','Pricing'],['#features','Features'],['#how-it-works','How It Works'],['#faq','FAQ']].map(([h,l]) => (
