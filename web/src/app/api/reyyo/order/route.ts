@@ -43,9 +43,6 @@ export async function POST(req: NextRequest) {
     business_type: body.businessType || null,
     website:       body.website || null,
     address:       body.address,
-    city:          body.city || 'Vadodara',
-    state:         body.state || 'Gujarat',
-    pincode:       body.pincode || '',
     status:        'pending',
   });
 

@@ -197,7 +197,7 @@ export default function ReyyoAdmin() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left" style={{background:'#F9FAFB'}}>
-                    {['Order ID','Date','Name','WhatsApp','Business','City','Status','Action'].map(h=>(
+                    {['Order ID','Date','Name','WhatsApp','Business','Status','Action'].map(h=>(
                       <th key={h} className="px-5 py-4 font-bold text-gray-600 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -222,7 +222,6 @@ export default function ReyyoAdmin() {
                           <p className="font-bold text-gray-900">{o.business_name}</p>
                           {o.business_type && <p className="text-gray-400 text-xs font-semibold">{o.business_type}</p>}
                         </td>
-                        <td className="px-5 py-4 font-semibold text-gray-600">{o.city}</td>
                         <td className="px-5 py-4">
                           <span className="px-3 py-1 rounded-full text-xs font-bold capitalize"
                                 style={{background:st.bg, color:st.text}}>
