@@ -51,6 +51,21 @@ function OrderSuccessContent() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (!order) return;
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Purchase', {
+        value: 99,
+        currency: 'INR',
+        contents: [
+          {
+            quantity: 1
+          }
+        ],
+      });
+    }
+  }, [order]);
+
   if (!order) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 ${nunito.className}`}>
