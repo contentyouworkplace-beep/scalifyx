@@ -110,13 +110,17 @@ function OrderForm({ onBack, onNext }: { onBack: ()=>void; onNext: (d:OrderData)
   const errCls = `text-red-500 text-xs mt-1.5 font-bold ${nunito.className}`;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" style={{animation:'reyyoSlideIn 0.35s cubic-bezier(.22,.68,0,1.2) both'}}>
+      <style>{`@keyframes reyyoSlideIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}`}</style>
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b px-5 py-4 flex items-center justify-between">
         <button onClick={onBack} className={`font-bold text-gray-500 hover:text-gray-900 flex items-center gap-2 ${nunito.className}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           Back
         </button>
-        <ReyyoLogo size="sm"/>
+        <div className="flex flex-col items-center">
+          <Image src="/reyyo/logo.png" alt="Reyyo" width={110} height={48} className="object-contain h-11 w-auto"/>
+          <span className={`${nunito.className} text-[9px] font-semibold text-gray-400 -mt-0.5 tracking-wide`}>by Scalify</span>
+        </div>
         <div className="w-16"/>
       </div>
 
@@ -256,13 +260,17 @@ function OrderSummary({ data, onEdit, onConfirm }: { data:OrderData; onEdit:()=>
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" style={{animation:'reyyoSlideIn 0.35s cubic-bezier(.22,.68,0,1.2) both'}}>
+      <style>{`@keyframes reyyoSlideIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}`}</style>
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b px-5 py-4 flex items-center justify-between">
         <button onClick={onEdit} className={`font-bold text-gray-500 hover:text-gray-900 flex items-center gap-2 ${nunito.className}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           Edit
         </button>
-        <ReyyoLogo size="sm"/>
+        <div className="flex flex-col items-center">
+          <Image src="/reyyo/logo.png" alt="Reyyo" width={110} height={48} className="object-contain h-11 w-auto"/>
+          <span className={`${nunito.className} text-[9px] font-semibold text-gray-400 -mt-0.5 tracking-wide`}>by Scalify</span>
+        </div>
         <div className="w-16"/>
       </div>
 
@@ -363,8 +371,12 @@ function ThankYou({ data }: { data: OrderData }) {
   ];
 
   return (
-    <div className="min-h-screen" style={{background:'linear-gradient(135deg,#F0FFF4,#fff,#F5F0FF)'}}>
-      <div className="bg-white border-b px-5 py-4 flex justify-center"><ReyyoLogo size="sm"/></div>
+    <div className="min-h-screen" style={{background:'linear-gradient(135deg,#F0FFF4,#fff,#F5F0FF)',animation:'reyyoSlideIn 0.4s cubic-bezier(.22,.68,0,1.2) both'}}>
+      <style>{`@keyframes reyyoSlideIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <div className="bg-white border-b px-5 py-4 flex flex-col items-center">
+        <Image src="/reyyo/logo.png" alt="Reyyo" width={120} height={52} className="object-contain h-12 w-auto"/>
+        <span className={`${nunito.className} text-[9px] font-semibold text-gray-400 -mt-0.5 tracking-wide`}>by Scalify</span>
+      </div>
       <div className="max-w-lg mx-auto px-5 py-10">
         <div className="text-center mb-8">
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xl"
@@ -515,7 +527,7 @@ export default function ReyyoPage() {
           <div className="flex-1 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-full mb-6"
                  style={{background:'#FFF0F5',color:'#FF2D78',border:'1.5px solid #FFCCD9'}}>
-              <IcoSparkle size={16}/> Founder Plan — ₹99 Lifetime · Only First 500 Businesses
+              <IcoSparkle size={16}/> Founder Plan — ₹99 Lifetime · Only First 500 Businesses in Vadodara
             </div>
 
             <h1 className={`${fredoka.className} font-bold leading-[1.1] mb-6`}
