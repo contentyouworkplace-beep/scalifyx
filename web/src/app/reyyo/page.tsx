@@ -655,33 +655,62 @@ export default function ReyyoPage() {
       </section>
 
       {/* ══ PROBLEM ═════════════════════════════════════════════════════════ */}
-      <section className="py-24 px-5 sm:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
+      <section className="py-24 px-5 sm:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none" style={{background:'linear-gradient(160deg,#fff 0%,#FFF5F8 60%,#F5F0FF 100%)'}}/>
+        <div className="max-w-4xl mx-auto relative">
+          <div className="text-center mb-14">
+            <span className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-5`}
+                  style={{background:'#FFF0F5',color:'#FF2D78',border:'1.5px solid #FFCCD9'}}>
+              😬 The Problem
+            </span>
             <h2 className={`${fredoka.className} font-bold`} style={{fontSize:'clamp(2rem,5vw,3.5rem)',color:'#0F0A1E'}}>
               Most Businesses Lose Customers<br/>
               <span style={{color:'#FF2D78'}}>After The First Visit</span>
             </h2>
-            <p className={`text-gray-400 text-xl mt-3 font-semibold`}>Sound familiar?</p>
+            <p className={`text-gray-400 text-lg mt-3 font-semibold`}>Sound familiar? You're not alone.</p>
           </div>
-          <div className="rounded-3xl p-8 sm:p-12 mb-10" style={{background:'linear-gradient(135deg,#1A1A2E,#2D1B69)'}}>
-            <div className="grid sm:grid-cols-2 gap-5">
-              {['No customer database','No follow-up system','No loyalty program','No way to bring customers back'].map(p => (
-                <div key={p} className="flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{background:'#FF2D7825'}}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#FF2D78" strokeWidth="3" strokeLinecap="round"/></svg>
-                  </div>
-                  <span className={`text-white text-lg font-bold`}>{p}</span>
+
+          {/* Problem cards grid */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-10">
+            {[
+              { icon:<IcoUsers size={28}/>, title:'No Customer Database', desc:'You have no idea who visited last week — or how to reach them again.', c:'#FF2D78', bg:'#FFF0F5' },
+              { icon:<IcoMessage size={28}/>, title:'No Follow-Up System', desc:'Customers walk out and you have zero way to send them an offer or reminder.', c:'#7B2FBE', bg:'#F5F0FF' },
+              { icon:<IcoGift size={28}/>, title:'No Loyalty Program', desc:'Your competitor down the road gives stamp cards. You give… nothing.', c:'#FF8C00', bg:'#FFF8F0' },
+              { icon:<IcoRepeat size={28}/>, title:'No Way to Bring Them Back', desc:'First-time customers never become regulars because there\'s no reason to return.', c:'#00AEEF', bg:'#F0F8FF' },
+            ].map(p => (
+              <div key={p.title} className="flex items-start gap-4 p-5 rounded-2xl border-2 transition-all hover:shadow-md"
+                   style={{background:p.bg, borderColor:p.c+'30'}}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
+                     style={{background:p.c+'15'}}>
+                  <span style={{color:p.c}}>{p.icon}</span>
                 </div>
-              ))}
-            </div>
+                <div>
+                  <p className={`${fredoka.className} font-bold text-lg mb-1`} style={{color:'#0F0A1E'}}>{p.title}</p>
+                  <p className="text-gray-500 font-semibold text-sm leading-relaxed">{p.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="text-center">
-            <div className="inline-flex items-center gap-3 px-8 py-5 rounded-2xl shadow-lg text-xl font-bold"
-                 style={{background:'linear-gradient(135deg,#F0FFF4,#E8F5FF)',border:'2px solid #00C85340'}}>
-              <IcoScan size={36}/>
-              <span className="text-gray-900 font-bold">Reyyo fixes all of this with{' '}<span style={{color:'#00C853'}}>one simple QR code.</span></span>
+
+          {/* Solution callout */}
+          <div className="rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-5 shadow-xl"
+               style={{background:'linear-gradient(135deg,#0F0A1E,#2D1B69)',border:'2px solid #7B2FBE40'}}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg"
+                 style={{background:'linear-gradient(135deg,#00C853,#00AEEF)'}}>
+              <IcoScan size={32}/>
             </div>
+            <div className="text-center sm:text-left">
+              <p className={`${fredoka.className} text-2xl font-bold text-white`}>
+                Reyyo fixes all of this with{' '}
+                <span style={{color:'#00C853'}}>one simple QR code.</span>
+              </p>
+              <p className="text-gray-400 font-semibold text-sm mt-1">Place it on your counter. Customers scan. You grow.</p>
+            </div>
+            <a href="#pricing"
+               className={`${fredoka.className} flex-shrink-0 text-base font-bold text-white px-6 py-3 rounded-2xl transition-all hover:scale-105 shadow-lg`}
+               style={{background:'linear-gradient(135deg,#FF2D78,#7B2FBE)'}}>
+              Get Started →
+            </a>
           </div>
         </div>
       </section>
@@ -711,12 +740,16 @@ export default function ReyyoPage() {
                 </span>
               </div>
               <div className="text-center mb-8">
-                <div className="flex items-end justify-center gap-2">
+                <div className="flex items-end justify-center gap-2 mb-3">
                   <span className={`${fredoka.className} font-bold`} style={{fontSize:'5rem',lineHeight:1,color:'#FF2D78'}}>₹99</span>
                   <div className="mb-3 text-left">
-                    <span className={`text-2xl text-gray-400 font-bold block`}>Lifetime</span>
-                    <span className={`text-xs text-gray-400 font-semibold`}>then ₹99/year for later</span>
+                    <span className={`text-2xl text-gray-800 font-bold block`}>Lifetime</span>
+                    <span className={`text-xs text-gray-400 font-semibold`}>one-time · pay on delivery</span>
                   </div>
+                </div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold"
+                     style={{background:'#FFF8F0',border:'1.5px dashed #FF8C00',color:'#FF8C00'}}>
+                  ⏳ After first 500 spots fill → ₹99/year for new businesses
                 </div>
               </div>
               <div className="space-y-3 mb-10">
