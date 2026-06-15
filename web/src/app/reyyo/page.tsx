@@ -363,11 +363,12 @@ function OrderSummary({ data, onEdit, onConfirm }: { data:OrderData; onEdit:()=>
 function ThankYou({ data }: { data: OrderData }) {
   const orderId = `REY-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
   const steps = [
-    { icon:<IcoMessage size={28}/>, bg:'#F0FFF4', t:'WhatsApp Confirmation',  d:'Order details on your WhatsApp within 5 minutes' },
+    { icon:<IcoMessage size={28}/>, bg:'#F0FFF4', t:'WhatsApp Confirmation',  d:'Order details sent to your WhatsApp within 5 minutes' },
     { icon:<IcoBox size={28}/>,     bg:'#F0F8FF', t:'Kit Packed & Shipped',   d:'QR Sticker + Acrylic Stand shipped within 2 days' },
     { icon:<IcoTruck size={28}/>,   bg:'#FFF8F0', t:'Delivery in 3–4 Days',  d:'Delivered to your doorstep in 3–4 business days' },
-    { icon:<IcoCoin size={28}/>,    bg:'#F5F0FF', t:'Pay on Delivery',        d:'Pay ₹99 cash to the delivery agent. Simple.' },
-    { icon:<IcoGift size={28}/>,    bg:'#FFF0F5', t:'Go Live!',               d:'Place your QR stand & start earning loyal customers' },
+    { icon:<IcoCoin size={28}/>,    bg:'#F5F0FF', t:'Pay on Delivery — ₹99 Cash', d:'Our agent collects ₹99 cash when your kit arrives. No online payment needed.' },
+    { icon:<IcoBook size={28}/>,    bg:'#FFF8F0', t:'In-Store Tutorial by Our Agent', d:'Our agent will visit your store and personally teach you how to use Reyyo — plus you get a step-by-step tutorial guide.' },
+    { icon:<IcoGift size={28}/>,    bg:'#FFF0F5', t:'Go Live!',               d:'Place your QR stand on your counter & start earning loyal customers from day one.' },
   ];
 
   return (
@@ -435,11 +436,18 @@ function ThankYou({ data }: { data: OrderData }) {
           </div>
         </div>
 
-        <p className={`text-center text-sm text-gray-400 font-semibold mt-6 ${nunito.className}`}>
-          Questions?{' '}
-          <a href="https://wa.me/916353583148" style={{color:'#00C853'}} className="font-bold hover:underline">
-            WhatsApp us at +91 63535 83148
-          </a>
+        <a href="https://wa.me/916353583148?text=Hey%20Reyyo!%20I%20have%20a%20question%20about%20my%20order%20%F0%9F%99%8F"
+           target="_blank" rel="noreferrer"
+           className={`${fredoka.className} flex items-center justify-center gap-3 w-full text-lg font-bold text-white py-4 rounded-2xl shadow-lg mt-6 transition-all hover:scale-105`}
+           style={{background:'linear-gradient(135deg,#00C853,#00A040)'}}>
+          <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="white"/>
+            <path d="M10 22L12 19.5C13.5 20.5 15 21 16 21C20 21 23 18 23 14.5C23 11 20 8 16 8C12 8 9 11 9 14.5C9 16 9.5 17.5 10.5 18.5L10 22Z" fill="#00C853"/>
+          </svg>
+          Questions? Chat on WhatsApp
+        </a>
+        <p className={`text-center text-xs text-gray-400 font-semibold mt-2 ${nunito.className}`}>
+          +91 63535 83148 · Pre-filled message ready to send
         </p>
       </div>
     </div>
@@ -927,7 +935,7 @@ export default function ReyyoPage() {
                 How Your <span style={{color:'#FF2D78'}}>QR Code</span><br/>Will Look
               </h2>
               <p className={`text-gray-500 text-lg font-semibold leading-relaxed mb-6 ${nunito.className}`}>
-                Every Reyyo QR code is uniquely designed with your brand colours and business name — ready to print and display on your acrylic stand.
+                Every Reyyo QR code is vibrant, colourful, and eye-catching — professionally designed to grab attention and make customers want to scan it instantly.
               </p>
               <div className="space-y-3">
                 {[

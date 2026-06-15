@@ -7,7 +7,8 @@ import { Fredoka, Nunito } from 'next/font/google';
 const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '600', '700'] });
 const nunito  = Nunito({ subsets: ['latin'], weight: ['400', '600', '700', '800'] });
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_REYYO_ADMIN_PASSWORD || 'reyyo2025';
+const ADMIN_EMAIL    = process.env.NEXT_PUBLIC_REYYO_ADMIN_EMAIL    || 'founder@reyyo.in';
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_REYYO_ADMIN_PASSWORD || 'Vardaan@5678';
 
 interface Order {
   id: string;
@@ -34,6 +35,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 
 export default function ReyyoAdmin() {
   const [authed, setAuthed]     = useState(false);
+  const [email, setEmail]       = useState('');
   const [pw, setPw]             = useState('');
   const [pwErr, setPwErr]       = useState('');
   const [orders, setOrders]     = useState<Order[]>([]);
@@ -43,8 +45,8 @@ export default function ReyyoAdmin() {
   const [updating, setUpdating] = useState<string | null>(null);
 
   const login = () => {
-    if (pw === ADMIN_PASSWORD) { setAuthed(true); setPwErr(''); }
-    else setPwErr('Incorrect password');
+    if (email === ADMIN_EMAIL && pw === ADMIN_PASSWORD) { setAuthed(true); setPwErr(''); }
+    else setPwErr('Incorrect email or password');
   };
 
   useEffect(() => {
@@ -99,9 +101,14 @@ export default function ReyyoAdmin() {
         <div className="bg-white rounded-3xl shadow-xl p-10 w-full max-w-sm text-center">
           <p className={`${fredoka.className} text-5xl font-bold mb-1`} style={{color:'#FF2D78'}}>reyyo</p>
           <p className="text-gray-400 font-semibold mb-8">Admin Panel</p>
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
+                 onKeyDown={e=>e.key==='Enter'&&login()}
+                 placeholder="Admin email"
+                 className="w-full px-4 py-3.5 rounded-2xl border-2 font-semibold text-gray-900 outline-none focus:border-purple-500 mb-3"
+                 style={{borderColor:pwErr?'#EF4444':'#E5E7EB'}}/>
           <input type="password" value={pw} onChange={e=>setPw(e.target.value)}
                  onKeyDown={e=>e.key==='Enter'&&login()}
-                 placeholder="Enter admin password"
+                 placeholder="Password"
                  className="w-full px-4 py-3.5 rounded-2xl border-2 font-semibold text-gray-900 outline-none focus:border-purple-500 mb-3"
                  style={{borderColor:pwErr?'#EF4444':'#E5E7EB'}}/>
           {pwErr && <p className="text-red-500 text-sm font-bold mb-3">{pwErr}</p>}
