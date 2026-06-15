@@ -339,9 +339,9 @@ function OrderSummary({ data, onEdit, onConfirm }: { data:OrderData; onEdit:()=>
         <div className="rounded-2xl p-4 mb-6 flex gap-3" style={{background:'#FFFBEB',border:'2px solid #FDE68A'}}>
           <IcoCoin size={36}/>
           <div>
-            <p className={`font-bold text-yellow-800 ${nunito.className}`}>Pay on Delivery — Cash Only</p>
+            <p className={`font-bold text-yellow-800 ${nunito.className}`}>Pay on Delivery</p>
             <p className={`text-yellow-700 text-sm font-semibold mt-0.5 ${nunito.className}`}>
-              Our agent collects ₹99 cash when your kit arrives. No online payment needed.
+              Our agent collects ₹99 when your kit arrives. You can pay via Cash, UPI, or any method you prefer.
             </p>
           </div>
         </div>
@@ -366,7 +366,7 @@ function ThankYou({ data }: { data: OrderData }) {
     { icon:<IcoMessage size={28}/>, bg:'#F0FFF4', t:'WhatsApp Confirmation',  d:'Order details sent to your WhatsApp within 5 minutes' },
     { icon:<IcoBox size={28}/>,     bg:'#F0F8FF', t:'Kit Packed & Shipped',   d:'QR Sticker + Acrylic Stand shipped within 2 days' },
     { icon:<IcoTruck size={28}/>,   bg:'#FFF8F0', t:'Delivery in 3–4 Days',  d:'Delivered to your doorstep in 3–4 business days' },
-    { icon:<IcoCoin size={28}/>,    bg:'#F5F0FF', t:'Pay on Delivery — ₹99 Cash', d:'Our agent collects ₹99 cash when your kit arrives. No online payment needed.' },
+    { icon:<IcoCoin size={28}/>,    bg:'#F5F0FF', t:'Pay on Delivery — ₹99', d:'Our agent collects ₹99 when your kit arrives. Pay via Cash, UPI, or any method you prefer.' },
     { icon:<IcoBook size={28}/>,    bg:'#FFF8F0', t:'In-Store Tutorial by Our Agent', d:'Our agent will visit your store and personally teach you how to use Reyyo — plus you get a step-by-step tutorial guide.' },
     { icon:<IcoGift size={28}/>,    bg:'#FFF0F5', t:'Go Live!',               d:'Place your QR stand on your counter & start earning loyal customers from day one.' },
   ];
@@ -436,7 +436,7 @@ function ThankYou({ data }: { data: OrderData }) {
           </div>
         </div>
 
-        <a href="https://wa.me/916353583148?text=Hey%20Reyyo!%20I%20have%20a%20question%20about%20my%20order%20%F0%9F%99%8F"
+        <a href="https://wa.me/916353583148?text=Hey%20Reyyo%2C%20I%20have%20a%20question%20about%20my%20order."
            target="_blank" rel="noreferrer"
            className={`${fredoka.className} flex items-center justify-center gap-3 w-full text-lg font-bold text-white py-4 rounded-2xl shadow-lg mt-6 transition-all hover:scale-105`}
            style={{background:'linear-gradient(135deg,#00C853,#00A040)'}}>

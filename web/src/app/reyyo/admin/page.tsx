@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 import { Fredoka, Nunito } from 'next/font/google';
 
@@ -99,7 +100,10 @@ export default function ReyyoAdmin() {
       <div className={`min-h-screen flex items-center justify-center px-5 ${nunito.className}`}
            style={{background:'linear-gradient(135deg,#FFF0F5,#F5F0FF)'}}>
         <div className="bg-white rounded-3xl shadow-xl p-10 w-full max-w-sm text-center">
-          <p className={`${fredoka.className} text-5xl font-bold mb-1`} style={{color:'#FF2D78'}}>reyyo</p>
+          <div className="flex flex-col items-center mb-1">
+            <Image src="/reyyo/logo.png" alt="Reyyo" width={140} height={60} className="object-contain h-14 w-auto"/>
+            <span className="text-[10px] font-semibold text-gray-400 tracking-wide -mt-1">by Scalify</span>
+          </div>
           <p className="text-gray-400 font-semibold mb-8">Admin Panel</p>
           <input type="email" value={email} onChange={e=>setEmail(e.target.value)}
                  onKeyDown={e=>e.key==='Enter'&&login()}
@@ -126,9 +130,9 @@ export default function ReyyoAdmin() {
     <div className={`min-h-screen bg-gray-50 ${nunito.className}`}>
       {/* Header */}
       <div className="bg-white border-b px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div>
-          <p className={`${fredoka.className} text-2xl font-bold`} style={{color:'#FF2D78'}}>reyyo</p>
-          <p className="text-xs text-gray-400 font-semibold">Admin Panel</p>
+        <div className="flex flex-col items-start">
+          <Image src="/reyyo/logo.png" alt="Reyyo" width={100} height={44} className="object-contain h-10 w-auto"/>
+          <p className="text-xs text-gray-400 font-semibold -mt-0.5">Admin Panel</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={loadOrders}
