@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -23,7 +23,7 @@ interface OrderData {
   orderId: string;
 }
 
-export default function ReyyoOrderSuccessPage() {
+function OrderSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderData | null>(null);
@@ -160,5 +160,17 @@ export default function ReyyoOrderSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReyyoOrderSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className={`min-h-screen flex items-center justify-center bg-gray-50 p-6 ${nunito.className}`}>
+        <p className="text-gray-400 font-bold">Loading order details...</p>
+      </div>
+    }>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }
