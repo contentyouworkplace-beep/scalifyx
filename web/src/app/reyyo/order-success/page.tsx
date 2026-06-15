@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Script from 'next/script';
 import { Fredoka, Nunito } from 'next/font/google';
 import {
   IcoCheck, IcoLock, IcoMessage, IcoBox, IcoTruck, IcoCoin,
@@ -88,6 +89,26 @@ function OrderSuccessContent() {
 
   return (
     <div className="min-h-screen pb-16" style={{background:'linear-gradient(135deg,#F0FFF4,#fff,#F5F0FF)',animation:'reyyoSlideIn 0.4s cubic-bezier(.22,.68,0,1.2) both'}}>
+      <Script id="meta-purchase-pixel" strategy="afterInteractive">
+        {`
+          if (typeof fbq !== 'undefined') {
+            fbq('track', 'Purchase', {
+              value: 99,
+              currency: 'INR',
+              contents: [{ quantity: 1 }]
+            });
+          }
+        `}
+      </Script>
+      <noscript>
+        <img
+          height="1"
+          width="1"
+          style={{ display: 'none' }}
+          src="https://www.facebook.com/tr?id=1624622505434138&ev=Purchase&cd[value]=99&cd[currency]=INR&noscript=1"
+          alt=""
+        />
+      </noscript>
       <style>{`@keyframes reyyoSlideIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}`}</style>
       <div className="bg-white border-b px-5 py-4 flex flex-col items-center">
         <Link href="/reyyo" className="flex flex-col items-center">
