@@ -22,10 +22,16 @@ export default function WebinarAdmin() {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (localStorage.getItem('webinar_admin_authed') === '1') setAuthed(true);
+  }, []);
+
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) { setAuthed(true); setError(''); }
-    else setError('Incorrect password.');
+    if (password === ADMIN_PASSWORD) {
+      localStorage.setItem('webinar_admin_authed', '1');
+      setAuthed(true); setError('');
+    } else setError('Incorrect password.');
   }
 
   useEffect(() => {
