@@ -8,82 +8,78 @@ export default function SeoWebinarSuccess() {
   useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
 
   return (
-    <main style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0D4A35 0%, #0a3828 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Plus Jakarta Sans', 'Poppins', system-ui, sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap'); * { box-sizing: border-box; margin: 0; padding: 0; }`}</style>
+    <main className="min-h-screen bg-slate-950 text-white font-sans flex items-center justify-center py-16 px-4 selection:bg-cyan-500 selection:text-slate-950 relative overflow-hidden">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        
+        .glow-green {
+          box-shadow: 0 8px 30px rgba(37, 211, 102, 0.35);
+        }
+        .glow-green:hover {
+          box-shadow: 0 12px 40px rgba(37, 211, 102, 0.5);
+        }
+      `}</style>
 
-      <div style={{
-        maxWidth: 560, width: '100%', textAlign: 'center',
-        opacity: show ? 1 : 0, transform: show ? 'translateY(0)' : 'translateY(32px)',
-        transition: 'opacity 0.7s ease, transform 0.7s ease',
-      }}>
-        {/* Checkmark */}
-        <div style={{
-          width: 96, height: 96, borderRadius: '50%', background: '#FF6B35',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 28px', fontSize: 44,
-          boxShadow: '0 16px 48px rgba(255,107,53,0.4)',
-          animation: 'popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.3s both',
-        }}>
+      {/* Background glow */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none z-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full blur-[100px]" />
+      </div>
+
+      <div
+        className="max-w-xl w-full text-center relative z-10 transition-all duration-700 ease-out transform"
+        style={{
+          opacity: show ? 1 : 0,
+          transform: show ? 'translateY(0)' : 'translateY(24px)',
+        }}
+      >
+        {/* Checkmark Icon */}
+        <div className="w-24 h-24 rounded-full bg-[#FF6B35] flex items-center justify-center text-4xl mx-auto mb-8 shadow-xl shadow-orange-500/30 animate-bounce">
           🎉
         </div>
 
-        <style>{`
-          @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        `}</style>
-
-        <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 900, color: '#fff', lineHeight: 1.15, marginBottom: 16 }}>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
           You're Registered!
         </h1>
-        <p style={{ fontSize: 18, color: '#a8cfbc', lineHeight: 1.7, marginBottom: 32 }}>
-          Your seat is confirmed for the <strong style={{ color: '#FF6B35' }}>Free SEO Webinar</strong> on <strong style={{ color: '#fff' }}>15th July 2026 at 7:00 PM IST</strong>. We'll send details on WhatsApp.
+        
+        <p className="text-base sm:text-lg text-slate-300 mb-8 leading-relaxed font-semibold">
+          Your seat is confirmed for the <span className="text-[#FF6B35] font-black">Free SEO Webinar</span> on <span className="text-white font-black">15th July 2026 at 7:00 PM IST</span>. We'll send details on WhatsApp.
         </p>
 
-        {/* WhatsApp Group CTA */}
-        <div style={{
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: 24, padding: '32px 28px', marginBottom: 28,
-        }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📲</div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 10 }}>Join Our WhatsApp Group</h2>
-          <p style={{ color: '#8fbfa8', fontSize: 15, lineHeight: 1.6, marginBottom: 24 }}>
-            Get reminders, pre-webinar resources, and connect with 500+ business owners already growing with SEO.
+        {/* WhatsApp Group CTA Card */}
+        <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 sm:p-8 mb-8 shadow-2xl backdrop-blur-md">
+          <div className="text-4xl mb-4">📲</div>
+          <h2 className="text-xl sm:text-2xl font-black text-white mb-2.5">Join our 1% Group</h2>
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed mb-6 font-semibold">
+            Get updates on WhatsApp. Get reminders, pre-webinar resources, and connect with 500+ business owners already growing with SEO.
           </p>
           <a
-            href="https://chat.whatsapp.com/DEMO_LINK"
+            href="https://chat.whatsapp.com/IG0tgdFUjmc6h6JDEx1YXs?s=cl&p=i&mlu=3"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'inline-block', background: '#25D366', color: '#fff',
-              padding: '16px 40px', borderRadius: 50, fontSize: 16, fontWeight: 700,
-              textDecoration: 'none', boxShadow: '0 8px 32px rgba(37,211,102,0.35)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.transform = ''; }}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-base font-black px-8 py-4.5 rounded-full transition-all duration-300 transform hover:-translate-y-0.5 glow-green"
           >
-            👉 Join the WhatsApp Group
+            👉 Join the 1% Group
           </a>
         </div>
 
-        {/* What's next */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+        {/* Next Steps List */}
+        <div className="flex flex-col gap-3 mb-8">
           {[
             { icon: '📩', text: 'Check WhatsApp for your confirmation message' },
             { icon: '📅', text: 'Save the date: 15th July 2026, 7:00 PM IST' },
             { icon: '🎁', text: 'Your 6 bonuses will be shared inside the webinar' },
           ].map((item, i) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left',
-              background: 'rgba(255,255,255,0.05)', borderRadius: 14, padding: '14px 18px',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}>
-              <span style={{ fontSize: 22, flexShrink: 0 }}>{item.icon}</span>
-              <span style={{ color: '#c8e6d8', fontSize: 15, fontWeight: 500 }}>{item.text}</span>
+            <div
+              key={i}
+              className="flex items-center gap-4 bg-white/5 border border-white/5 rounded-2xl p-4 text-left backdrop-blur-sm"
+            >
+              <span className="text-2xl flex-shrink-0">{item.icon}</span>
+              <span className="text-slate-300 text-xs sm:text-sm font-bold">{item.text}</span>
             </div>
           ))}
         </div>
 
-        <p style={{ color: '#3d6e55', fontSize: 13 }}>© 2026 · SEO Webinar · All Rights Reserved</p>
+        <p className="text-xs text-slate-500 font-bold">© 2026 · SEO Webinar · All Rights Reserved</p>
       </div>
     </main>
   );
