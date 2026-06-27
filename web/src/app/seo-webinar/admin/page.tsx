@@ -10,6 +10,7 @@ type Lead = {
   name: string;
   whatsapp: string;
   company: string;
+  website: string | null;
   pain_point: string;
   created_at: string;
 };
@@ -97,10 +98,10 @@ export default function WebinarAdmin() {
   }
 
   function exportCsv() {
-    const header = 'Name,WhatsApp,Company,Pain Point,Status,Notes,Joined Group,Converted,Revenue,Date\n';
+    const header = 'Name,WhatsApp,Company,Website,Pain Point,Status,Notes,Joined Group,Converted,Revenue,Date\n';
     const rows = leads.map(l => {
       const { pain_point, meta } = parsePainPoint(l.pain_point);
-      return `"${l.name}","${l.whatsapp}","${l.company}","${pain_point.replace(/"/g, '""')}","${meta.status}","${meta.notes.replace(/"/g, '""')}","${meta.joined_group ? 'Yes' : 'No'}","${meta.converted ? 'Yes' : 'No'}","${meta.revenue}","${new Date(l.created_at).toLocaleString('en-IN')}"`;
+      return `"${l.name}","${l.whatsapp}","${l.company}","${l.website || ''}","${pain_point.replace(/"/g, '""')}","${meta.status}","${meta.notes.replace(/"/g, '""')}","${meta.joined_group ? 'Yes' : 'No'}","${meta.converted ? 'Yes' : 'No'}","${meta.revenue}","${new Date(l.created_at).toLocaleString('en-IN')}"`;
     }).join('\n');
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'webinar-leads.csv'; a.click();
@@ -295,6 +296,17 @@ export default function WebinarAdmin() {
                   {/* Expanded Panel */}
                   {isExpanded && (
                     <div className="border-t border-slate-100 bg-slate-50/60 p-4 space-y-4">
+
+                      {/* Website */}
+                      {lead.website && (
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Website</p>
+                          <a href={lead.website} target="_blank" rel="noopener noreferrer"
+                            className="text-sm font-bold text-blue-500 hover:text-blue-600 hover:underline break-all">
+                            {lead.website}
+                          </a>
+                        </div>
+                      )}
 
                       {/* Pain point */}
                       <div>

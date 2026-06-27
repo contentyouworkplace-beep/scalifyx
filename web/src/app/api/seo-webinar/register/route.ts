@@ -6,7 +6,7 @@ const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, whatsapp, company, pain_point } = body;
+  const { name, whatsapp, company, pain_point, website } = body;
 
   if (!name || !whatsapp || !company || !pain_point) {
     return NextResponse.json({ error: 'All fields are required.' }, { status: 400 });
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     whatsapp: whatsapp.replace(/\s/g, '').trim(),
     company: company.trim(),
     pain_point: pain_point.trim(),
+    website: website?.trim() || null,
   }]);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

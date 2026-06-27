@@ -87,7 +87,7 @@ const BONUSES = [
 
 export default function SeoWebinarPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', whatsapp: '', company: '', pain_point: '' });
+  const [form, setForm] = useState({ name: '', whatsapp: '', company: '', website: '', pain_point: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const countdown = useCountdown(WEBINAR_DATE);
@@ -278,6 +278,7 @@ export default function SeoWebinarPage() {
                     { id: 'name', label: 'Your Full Name', type: 'text', placeholder: 'Rahul Sharma' },
                     { id: 'whatsapp', label: 'WhatsApp Number', type: 'tel', placeholder: '9876543210' },
                     { id: 'company', label: 'Business / Company Name', type: 'text', placeholder: 'My Business Name' },
+                    { id: 'website', label: 'Website URL (Optional)', type: 'url', placeholder: 'https://mybusiness.com' },
                   ].map(f => (
                     <div key={f.id}>
                       <label htmlFor={f.id} className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
