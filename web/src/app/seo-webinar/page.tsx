@@ -211,8 +211,8 @@ export default function SeoWebinarPage() {
                 <img
                   src="/hero-image.png"
                   alt="Rahul Medhe"
-                  className="photo-glow relative z-10 w-full max-w-[340px] lg:max-w-[420px] object-contain object-bottom"
-                  style={{ maxHeight: '540px' }}
+                  className="photo-glow relative z-10 w-full max-w-[420px] lg:max-w-[560px] object-contain object-bottom"
+                  style={{ maxHeight: '680px' }}
                 />
                 {/* Fade at bottom */}
                 <div className="absolute bottom-0 left-0 right-0 h-24 z-20 pointer-events-none"
@@ -473,8 +473,8 @@ export default function SeoWebinarPage() {
             </div>
           </Anim>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {['testimonial-1.mp4', 'testimonial-2.mp4', 'testimonial-3.mp4', 'testimonial-4.mp4'].map((file, i) => (
+          <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
+            {['testimonial-1.mp4', 'testimonial-2.mp4'].map((file, i) => (
               <Anim key={i} delay={i * 80}>
                 <div className="relative rounded-2xl overflow-hidden bg-slate-800/60 border border-white/8"
                   style={{ aspectRatio: '9/16' }}>
