@@ -545,7 +545,7 @@ export default function SeoWebinarPage() {
             </div>
           </Anim>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n, i) => (
               <Anim key={n} delay={i * 50}>
                 <div className="rounded-2xl overflow-hidden border border-white/8 hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-0.5 group">
