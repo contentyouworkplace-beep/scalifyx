@@ -61,9 +61,9 @@ export default function SeoWebinarSuccess() {
             href="https://chat.whatsapp.com/IG0tgdFUjmc6h6JDEx1YXs?s=cl&p=i&mlu=3"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-base font-black px-8 py-4.5 rounded-full transition-all duration-300 transform hover:-translate-y-0.5 glow-green"
+            className="w-full inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20ba59] text-white text-xl font-black px-10 py-6 rounded-2xl transition-all duration-300 transform hover:-translate-y-0.5 glow-green"
           >
-            👉 Join the 1% Group
+            👉 Join our WhatsApp Group
           </a>
         </div>
 
