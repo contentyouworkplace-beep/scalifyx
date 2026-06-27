@@ -5,7 +5,12 @@ import Link from 'next/link';
 
 export default function SeoWebinarSuccess() {
   const [show, setShow] = useState(false);
-  useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
+  useEffect(() => {
+    setTimeout(() => setShow(true), 100);
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'Lead', { content_name: 'SEO Webinar Registration' });
+    }
+  }, []);
 
   return (
     <main className="min-h-screen bg-slate-950 text-white font-sans flex items-center justify-center py-16 px-4 selection:bg-cyan-500 selection:text-slate-950 relative overflow-hidden">

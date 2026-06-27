@@ -122,9 +122,6 @@ export default function SeoWebinarPage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error('Registration failed');
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'Lead', { content_name: 'SEO Webinar Registration' });
-      }
       router.push('/seo-webinar/success');
     } catch {
       setError('Something went wrong. Please try again.');
@@ -401,15 +398,6 @@ export default function SeoWebinarPage() {
             ))}
           </div>
 
-          {/* CTA after learns */}
-          <Anim delay={200}>
-            <div className="text-center mt-12">
-              <button onClick={scrollToForm}
-                className="cta-btn inline-block px-10 py-4 text-white font-black text-base rounded-2xl cursor-pointer tracking-wide uppercase">
-                I Want to Learn This — Register Free
-              </button>
-            </div>
-          </Anim>
         </div>
       </section>
 
