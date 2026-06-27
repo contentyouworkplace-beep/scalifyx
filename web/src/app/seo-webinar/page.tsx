@@ -458,6 +458,51 @@ export default function SeoWebinarPage() {
         </div>
       </section>
 
+      <Divider label="What Our Students Say" />
+
+      {/* ── TESTIMONIALS ── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <Anim>
+            <div className="text-center mb-14">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500 mb-3 block">Real Results</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
+                Hear It From Them Directly
+              </h2>
+              <p className="text-slate-400 text-base font-semibold mt-3">Business owners who attended and saw results.</p>
+            </div>
+          </Anim>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {['testimonial-1.mp4', 'testimonial-2.mp4', 'testimonial-3.mp4', 'testimonial-4.mp4'].map((file, i) => (
+              <Anim key={i} delay={i * 80}>
+                <div className="relative rounded-2xl overflow-hidden bg-slate-800/60 border border-white/8"
+                  style={{ aspectRatio: '9/16' }}>
+                  <video
+                    src={`/testimonials/${file}`}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  {/* Placeholder overlay shown while video loads or if missing */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none"
+                    style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.06), rgba(99,102,241,0.06))' }}>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
+                      <svg className="w-5 h-5 text-cyan-400 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Testimonial {i + 1}</p>
+                  </div>
+                </div>
+              </Anim>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <Divider label="Exclusive Bonuses" />
 
       {/* ── BONUSES ── */}
