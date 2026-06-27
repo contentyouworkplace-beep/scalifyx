@@ -527,6 +527,49 @@ export default function SeoWebinarPage() {
         </div>
       </section>
 
+      <Divider label="Proof It Works" />
+
+      {/* ── REAL RESULTS SCREENSHOTS ── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 cinema-border-top"
+        style={{ background: 'linear-gradient(180deg, rgba(6,182,212,0.03) 0%, transparent 100%)' }}>
+        <div className="max-w-5xl mx-auto">
+          <Anim>
+            <div className="text-center mb-14">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500 mb-3 block">Real Results From Our Members</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
+                These Are Actual Google Numbers
+              </h2>
+              <p className="text-slate-400 text-base font-semibold mt-3 max-w-2xl mx-auto">
+                Real Google Search Console screenshots from real businesses who learned SEO with Scalify. This is what happens when you show up on Page 1.
+              </p>
+            </div>
+          </Anim>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n, i) => (
+              <Anim key={n} delay={i * 50}>
+                <div className="rounded-2xl overflow-hidden border border-white/8 hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-0.5 group">
+                  <img
+                    src={`/search-console/${n}.png`}
+                    alt={`Member Result ${n}`}
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+              </Anim>
+            ))}
+          </div>
+
+          <Anim delay={200}>
+            <div className="text-center mt-10">
+              <p className="text-slate-400 text-sm font-semibold">
+                🔒 All screenshots are from real clients. Names hidden for privacy.
+              </p>
+            </div>
+          </Anim>
+        </div>
+      </section>
+
       <Divider label="Exclusive Bonuses" />
 
       {/* ── BONUSES ── */}
