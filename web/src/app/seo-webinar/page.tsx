@@ -93,6 +93,12 @@ export default function SeoWebinarPage() {
   const countdown = useCountdown(WEBINAR_DATE);
   const formRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).fbq) {
+      (window as any).fbq('track', 'ViewContent', { content_name: 'SEO Webinar Landing Page' });
+    }
+  }, []);
+
   function scrollToForm() {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -116,6 +122,9 @@ export default function SeoWebinarPage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error('Registration failed');
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Lead', { content_name: 'SEO Webinar Registration' });
+      }
       router.push('/seo-webinar/success');
     } catch {
       setError('Something went wrong. Please try again.');
