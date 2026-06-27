@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import './webinar.css';
 
 function useCountdown(targetDate: Date) {
   const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
@@ -125,77 +126,6 @@ export default function SeoWebinarPage() {
   return (
     <main className="min-h-screen bg-[#0a0f1a] text-slate-100 overflow-x-hidden antialiased">
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-
-        @keyframes glowPulse {
-          0%,100% { box-shadow: 0 0 20px rgba(255,107,53,0.35), 0 4px 24px rgba(255,107,53,0.2); }
-          50%      { box-shadow: 0 0 40px rgba(255,107,53,0.65), 0 4px 32px rgba(255,107,53,0.35); }
-        }
-        @keyframes badgePulse {
-          0%,100% { opacity:1; } 50% { opacity:0.5; }
-        }
-        @keyframes floatY {
-          0%,100% { transform: translateY(0px); }
-          50%      { transform: translateY(-6px); }
-        }
-        @keyframes shimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position:  200% center; }
-        }
-
-        .cta-btn {
-          background: linear-gradient(135deg, #FF6B35 0%, #ff8c42 50%, #FF6B35 100%);
-          background-size: 200% auto;
-          animation: glowPulse 2.5s infinite ease-in-out;
-          transition: all 0.25s ease;
-        }
-        .cta-btn:hover {
-          transform: translateY(-2px) scale(1.02);
-          animation: shimmer 1s linear infinite, glowPulse 2.5s infinite;
-        }
-        .cta-btn:active { transform: scale(0.98); }
-
-        .live-dot { animation: badgePulse 1.2s infinite ease-in-out; }
-        .float-card { animation: floatY 4s ease-in-out infinite; }
-
-        .glass {
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          backdrop-filter: blur(16px);
-        }
-        .glass-cyan {
-          background: rgba(6,182,212,0.05);
-          border: 1px solid rgba(6,182,212,0.15);
-        }
-        .cinema-border-top {
-          border-top: 1px solid transparent;
-          border-image: linear-gradient(90deg, transparent, rgba(6,182,212,0.5) 30%, rgba(99,102,241,0.5) 70%, transparent) 1;
-        }
-        .cinema-border-bottom {
-          border-bottom: 1px solid transparent;
-          border-image: linear-gradient(90deg, transparent, rgba(6,182,212,0.5) 30%, rgba(99,102,241,0.5) 70%, transparent) 1;
-        }
-        .photo-glow {
-          filter: drop-shadow(0 0 40px rgba(6,182,212,0.25)) drop-shadow(0 30px 60px rgba(0,0,0,0.8));
-        }
-        .number-glow {
-          text-shadow: 0 0 20px rgba(6,182,212,0.6);
-        }
-        input, textarea {
-          background: rgba(255,255,255,0.04) !important;
-          border: 1px solid rgba(255,255,255,0.1) !important;
-          color: white !important;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-        }
-        input:focus, textarea:focus {
-          border-color: rgba(6,182,212,0.6) !important;
-          box-shadow: 0 0 0 3px rgba(6,182,212,0.1) !important;
-          outline: none !important;
-        }
-        ::placeholder { color: rgba(148,163,184,0.5) !important; }
-      `}</style>
 
       {/* ── HEADER ── */}
       <header className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-5 sm:px-8"
