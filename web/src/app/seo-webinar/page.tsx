@@ -27,122 +27,61 @@ function useInView(ref: React.RefObject<Element | null>) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     if (!ref.current) return;
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true); }, { threshold: 0.1 });
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true); }, { threshold: 0.08 });
     obs.observe(ref.current);
     return () => obs.disconnect();
   }, [ref]);
   return visible;
 }
 
-function AnimSection({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+function Anim({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const visible = useInView(ref);
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(16px)',
-        transition: `opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`,
-      }}
-    >
+    <div ref={ref} className={className} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(24px)',
+      transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+    }}>
       {children}
+    </div>
+  );
+}
+
+/* ─── Cinematic section divider ─── */
+function Divider({ label }: { label?: string }) {
+  return (
+    <div className="relative flex items-center justify-center py-2">
+      <div className="absolute inset-0 flex items-center">
+        <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent" />
+      </div>
+      {label && (
+        <span className="relative z-10 bg-slate-900 px-5 text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500/70">
+          {label}
+        </span>
+      )}
     </div>
   );
 }
 
 const WEBINAR_DATE = new Date('2026-07-02T16:00:00+05:30');
 
-// Custom premium SVGs replacing emojis
-const MicrophoneIcon = (
-  <svg className="w-3.5 h-3.5 text-cyan-400 mr-1.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
-  </svg>
-);
-
-const ClockIcon = (
-  <svg className="w-3.5 h-3.5 text-slate-300 mr-1.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const GiftIcon = (
-  <svg className="w-3.5 h-3.5 text-slate-300 mr-1.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h17.25c.621 0 1.125-.504 1.125-1.125V8.625c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-  </svg>
-);
-
-const CheckIcon = (
-  <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
-const CalendarIcon = (
-  <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75" />
-  </svg>
-);
-
 const LEARNS = [
-  {
-    icon: (
-      <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
-      </svg>
-    ),
-    text: 'Why your competitors rank higher — and exactly how to beat them'
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-2.23 2.23m2.23-2.23A12.016 12.016 0 0018 7.5" />
-      </svg>
-    ),
-    text: 'The 3-step SEO framework that works for any business in India'
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21m-9-3a3 3 0 100 6 3 3 0 000-6z" />
-      </svg>
-    ),
-    text: 'How to pick keywords your ideal customers are actually searching'
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519" />
-      </svg>
-    ),
-    text: 'What Google looks for in 2025 (most businesses get this wrong)'
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.214.113a3.433 3.433 0 003.957-.495l.024-.025M16.5 12h-9" />
-      </svg>
-    ),
-    text: 'How to turn website visitors into paying customers'
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A1.5 1.5 0 0019.5 21l2.25-2.25a1.5 1.5 0 000-2.25l-5.83-5.83" />
-      </svg>
-    ),
-    text: 'Live website audit — see real mistakes fixed in real time'
-  }
+  { n: '01', head: 'Why Your Competitors Rank Above You', body: 'We\'ll show you exactly what they\'re doing — and how to beat them in your own city.' },
+  { n: '02', head: 'The 3-Step SEO Formula', body: 'A simple framework that works for any business in India, even if you\'ve never done SEO before.' },
+  { n: '03', head: 'How to Pick the Right Keywords', body: 'Find what your customers are searching right now — and show up exactly when they need you.' },
+  { n: '04', head: 'What Google Wants in 2025', body: 'Most businesses get this wrong. We\'ll fix that in plain English — no jargon.' },
+  { n: '05', head: 'Turn Visitors into Paying Customers', body: 'Getting traffic is only half the job. Learn how to convert clicks into enquiries.' },
+  { n: '06', head: 'Live Website Audit on Screen', body: 'Watch Rahul fix a real website live. You\'ll instantly see what to do for your own.' },
 ];
 
 const BONUSES = [
-  { num: '01', title: 'SEO Checklist PDF', desc: '47-point checklist to audit your website today', value: '₹2,000' },
-  { num: '02', title: 'Keyword Research Template', desc: 'Ready-to-use Google Sheets template', value: '₹1,500' },
-  { num: '03', title: 'Competitor Analysis Guide', desc: 'Spy on what\'s working for your rivals', value: '₹1,500' },
-  { num: '04', title: 'Local SEO Blueprint', desc: 'Dominate your city on Google Maps & Search', value: '₹2,500' },
-  { num: '05', title: 'Content Calendar Template', desc: '90 days of content ideas pre-planned', value: '₹1,000' },
-  { num: '06', title: '1-on-1 Strategy Session', desc: '15-minute free call with me after the webinar', value: '₹5,000' },
+  { title: 'SEO Checklist PDF', desc: '47-point checklist — audit your website tonight', value: '₹2,000' },
+  { title: 'Keyword Research Template', desc: 'Ready-to-use Google Sheets — plug and play', value: '₹1,500' },
+  { title: 'Competitor Spy Guide', desc: 'See exactly what\'s working for your rivals', value: '₹1,500' },
+  { title: 'Local SEO Blueprint', desc: 'Dominate Google Maps in your city', value: '₹2,500' },
+  { title: 'Content Calendar (90 Days)', desc: '90 days of content ideas, fully planned out', value: '₹1,000' },
+  { title: '15-Min Strategy Call With Rahul', desc: 'Free 1-on-1 call after the webinar — limited slots', value: '₹5,000' },
 ];
 
 export default function SeoWebinarPage() {
@@ -184,594 +123,504 @@ export default function SeoWebinarPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 font-sans overflow-x-hidden antialiased selection:bg-cyan-500 selection:text-slate-900">
-      
-      {/* Dynamic Keyframes for Glow Buttons (funnel style) */}
+    <main className="min-h-screen bg-[#0a0f1a] text-slate-100 overflow-x-hidden antialiased">
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        
-        body {
-          font-family: 'Plus Jakarta Sans', sans-serif;
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        @keyframes glowPulse {
+          0%,100% { box-shadow: 0 0 20px rgba(255,107,53,0.35), 0 4px 24px rgba(255,107,53,0.2); }
+          50%      { box-shadow: 0 0 40px rgba(255,107,53,0.65), 0 4px 32px rgba(255,107,53,0.35); }
+        }
+        @keyframes badgePulse {
+          0%,100% { opacity:1; } 50% { opacity:0.5; }
+        }
+        @keyframes floatY {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-6px); }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position:  200% center; }
         }
 
-        @keyframes pulseBorder {
-          0%, 100% {
-            border-color: rgba(255, 107, 53, 0.4);
-            box-shadow: 0 0 12px rgba(255, 107, 53, 0.2), inset 0 0 6px rgba(255, 107, 53, 0.1);
-          }
-          50% {
-            border-color: rgba(255, 107, 53, 1);
-            box-shadow: 0 0 24px rgba(255, 107, 53, 0.6), inset 0 0 12px rgba(255, 107, 53, 0.3);
-          }
+        .cta-btn {
+          background: linear-gradient(135deg, #FF6B35 0%, #ff8c42 50%, #FF6B35 100%);
+          background-size: 200% auto;
+          animation: glowPulse 2.5s infinite ease-in-out;
+          transition: all 0.25s ease;
         }
+        .cta-btn:hover {
+          transform: translateY(-2px) scale(1.02);
+          animation: shimmer 1s linear infinite, glowPulse 2.5s infinite;
+        }
+        .cta-btn:active { transform: scale(0.98); }
 
-        .lightning-btn {
-          position: relative;
-          background: linear-gradient(135deg, #FF6B35, #ff8454);
-          border: 2px solid rgba(255, 107, 53, 0.5);
-          animation: pulseBorder 2s infinite ease-in-out;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        
-        .lightning-btn:hover {
-          transform: translateY(-1px);
-          filter: brightness(1.08);
-          box-shadow: 0 0 28px rgba(255, 107, 53, 0.7);
-        }
+        .live-dot { animation: badgePulse 1.2s infinite ease-in-out; }
+        .float-card { animation: floatY 4s ease-in-out infinite; }
 
-        .premium-card {
-          background: rgba(30, 41, 59, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(20px);
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        .glass {
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          backdrop-filter: blur(16px);
         }
-        .premium-card:hover {
-          border-color: rgba(6, 182, 212, 0.3);
-          background: rgba(30, 41, 59, 0.55);
+        .glass-cyan {
+          background: rgba(6,182,212,0.05);
+          border: 1px solid rgba(6,182,212,0.15);
         }
+        .cinema-border-top {
+          border-top: 1px solid transparent;
+          border-image: linear-gradient(90deg, transparent, rgba(6,182,212,0.5) 30%, rgba(99,102,241,0.5) 70%, transparent) 1;
+        }
+        .cinema-border-bottom {
+          border-bottom: 1px solid transparent;
+          border-image: linear-gradient(90deg, transparent, rgba(6,182,212,0.5) 30%, rgba(99,102,241,0.5) 70%, transparent) 1;
+        }
+        .photo-glow {
+          filter: drop-shadow(0 0 40px rgba(6,182,212,0.25)) drop-shadow(0 30px 60px rgba(0,0,0,0.8));
+        }
+        .number-glow {
+          text-shadow: 0 0 20px rgba(6,182,212,0.6);
+        }
+        input, textarea {
+          background: rgba(255,255,255,0.04) !important;
+          border: 1px solid rgba(255,255,255,0.1) !important;
+          color: white !important;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+        }
+        input:focus, textarea:focus {
+          border-color: rgba(6,182,212,0.6) !important;
+          box-shadow: 0 0 0 3px rgba(6,182,212,0.1) !important;
+          outline: none !important;
+        }
+        ::placeholder { color: rgba(148,163,184,0.5) !important; }
       `}</style>
 
-      {/* FLOAT HEADER */}
-      <header className="absolute top-0 left-0 right-0 h-20 flex items-center justify-between px-6 sm:px-8 z-40 bg-transparent">
-        <div className="text-xl sm:text-2xl font-black text-white tracking-tight select-none">
-          Scalify
-        </div>
-        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] sm:text-xs font-black tracking-wider px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md shadow-black/10">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
-          LIMITED SEATS AVAILABLE
+      {/* ── HEADER ── */}
+      <header className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-5 sm:px-8"
+        style={{ background: 'rgba(10,15,26,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="text-xl font-black text-white tracking-tight">Scalify<span className="text-cyan-400">.</span></div>
+        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/25 text-red-400 text-[10px] font-black tracking-widest px-3.5 py-1.5 rounded-full">
+          <span className="live-dot w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+          LIMITED SEATS
         </div>
       </header>
 
-      {/* HERO SECTION */}
-      <section className="relative pt-24 pb-0 overflow-hidden bg-slate-900 border-b border-white/5">
-        {/* Soft background glows */}
-        <div className="absolute top-0 left-0 right-0 bottom-0 opacity-15 pointer-events-none z-0">
-          <div className="absolute top-[-10%] left-[-15%] w-[45%] aspect-square bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full blur-[140px]" />
-          <div className="absolute bottom-[-10%] right-[-15%] w-[45%] aspect-square bg-gradient-to-tl from-indigo-600 to-purple-500 rounded-full blur-[140px]" />
+      {/* ── HERO ── */}
+      <section className="relative pt-20 pb-0 overflow-hidden">
+        {/* Background orbs */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-cyan-600/10 rounded-full blur-[120px]" />
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px]" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-blue-900/20 rounded-full blur-[80px]" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-end">
-            
-            {/* COLUMN 1: HERO TEXT (order-1 on mobile, order-1 on desktop) */}
-            <div className="col-span-1 lg:col-span-5 py-8 lg:py-16 order-1 lg:order-1 flex flex-col justify-center">
-              {/* Top Banner */}
-              <div className="inline-flex self-start items-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[10px] sm:text-xs uppercase tracking-widest px-4.5 py-1.5 rounded-full shadow-lg shadow-yellow-500/10 mb-6">
-                <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-2.23 2.23m2.23-2.23A12.016 12.016 0 0018 7.5" />
-                </svg>
-                DOMINATE YOUR LOCAL MARKET
-              </div>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-0">
 
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                <span className="inline-flex items-center gap-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3.5 py-1 rounded-full text-xs font-bold">
-                  {MicrophoneIcon}
-                  Free Live Webinar
-                </span>
-                <span className="inline-flex items-center gap-1 bg-white/5 text-slate-300 border border-white/10 px-3.5 py-1 rounded-full text-xs font-bold">
-                  {ClockIcon}
-                  60 Minutes
-                </span>
-                <span className="inline-flex items-center gap-1 bg-white/5 text-slate-300 border border-white/10 px-3.5 py-1 rounded-full text-xs font-bold">
-                  {GiftIcon}
-                  6 Free Bonuses
-                </span>
-              </div>
+          {/* ── Event badge ── */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-400/90 to-yellow-500/90 text-slate-950 font-black text-[11px] uppercase tracking-widest px-5 py-2 rounded-full shadow-lg shadow-yellow-500/20">
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 1l2.39 4.84L18 6.91l-4 3.9.94 5.5L10 13.77l-4.94 2.54.94-5.5L2 6.91l5.61-.07z"/></svg>
+              FREE Live Webinar · 2nd July 2026 · 4:00 PM IST
+            </div>
+          </div>
 
-              {/* Main Title */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6.5xl font-black tracking-tight leading-[1.05] text-white mb-6">
-                THE <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">LOCAL GROWTH</span> SUMMIT
-              </h1>
+          {/* ── Main headline ── */}
+          <div className="text-center mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight leading-[1.03] text-white mb-4">
+              Get Your Business on{' '}
+              <span style={{ background: 'linear-gradient(135deg,#22d3ee,#6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Page One of Google
+              </span>
+              <br />
+              <span className="text-[#FF6B35]">Without Spending on Ads</span>
+            </h1>
+            <p className="text-slate-300 text-lg sm:text-xl font-semibold max-w-2xl mx-auto leading-relaxed mt-4">
+              A free 60-minute live webinar for business owners who are tired of being invisible on Google and want real customers — not just website traffic.
+            </p>
+          </div>
 
-              {/* Tagline */}
-              <div className="text-lg sm:text-xl lg:text-2xl font-extrabold text-[#FF6B35] mb-2 tracking-tight">
-                Rank on Google Without Spending on Ads
-              </div>
-
-              {/* Sub-tagline */}
-              <div className="text-sm sm:text-base font-bold text-slate-300 mb-6 leading-relaxed">
-                Rank on Google &amp; Generate Organic Leads. Don't just depend on referrals.
-              </div>
-
-              {/* Description */}
-              <p className="text-slate-400 text-sm sm:text-base mb-8 leading-relaxed font-medium">
-                A free 60-minute live webinar for local business owners who want more customers from Google — organically. No paid ads. No guesswork. Just results.
-              </p>
-
-              {/* Date & Time info block */}
-              <div className="bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl p-5 mb-8 shadow-xl">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                      {CalendarIcon} Date
-                    </div>
-                    <div className="text-base sm:text-lg font-black text-white mt-1.5">2nd July 2026</div>
-                  </div>
-                  <div className="border-l border-white/10 pl-4">
-                    <div className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Time
-                    </div>
-                    <div className="text-base sm:text-lg font-black text-white mt-1.5">4:00 PM - 5:00 PM IST</div>
+          {/* ── Countdown ── */}
+          <div className="flex justify-center mb-10">
+            <div className="inline-flex items-center gap-1 glass rounded-2xl px-6 py-4 shadow-xl">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-3">Starts in</span>
+              {[
+                { val: countdown.d, label: 'Days' },
+                { val: countdown.h, label: 'Hrs' },
+                { val: countdown.m, label: 'Min' },
+                { val: countdown.s, label: 'Sec' },
+              ].map(({ val, label }, i) => (
+                <div key={label} className="flex items-center">
+                  {i > 0 && <span className="text-cyan-500 text-xl font-black px-2">:</span>}
+                  <div className="text-center w-10">
+                    <div className="text-2xl sm:text-3xl font-black text-white number-glow">{String(val).padStart(2, '0')}</div>
+                    <div className="text-[9px] text-cyan-400 font-black tracking-widest uppercase mt-1">{label}</div>
                   </div>
                 </div>
-              </div>
-
-              {/* Countdown block */}
-              <div className="flex gap-4 items-center bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl p-4 shadow-lg self-start">
-                {[
-                  { val: countdown.d, label: 'Days' },
-                  { val: countdown.h, label: 'Hrs' },
-                  { val: countdown.m, label: 'Min' },
-                  { val: countdown.s, label: 'Sec' },
-                ].map(({ val, label }, i) => (
-                  <div key={label} className="flex items-center">
-                    {i > 0 && <span className="text-[#FF6B35] text-lg font-bold px-1.5 animate-pulse">:</span>}
-                    <div className="text-center min-w-[36px]">
-                      <div className="text-xl font-extrabold text-white leading-none">{String(val).padStart(2, '0')}</div>
-                      <div className="text-[9px] text-cyan-400 font-bold tracking-wider uppercase mt-1.5">{label}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
+          </div>
 
-            {/* COLUMN 2: SPEAKER PHOTO (order-3 on mobile, order-2 on desktop) */}
-            <div className="col-span-1 lg:col-span-3 flex flex-col justify-end relative min-h-[480px] sm:min-h-[580px] lg:min-h-[700px] order-3 lg:order-2 select-none">
-              <div className="relative w-full h-full flex items-end justify-center">
-                {/* Speaker image */}
+          {/* ── SPEAKER + FORM — two column ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-16 items-end">
+
+            {/* Speaker photo column */}
+            <div className="flex flex-col items-center order-2 lg:order-1">
+              <div className="relative w-full max-w-sm lg:max-w-none flex flex-col items-center">
+                {/* Glow platform behind photo */}
+                <div className="absolute bottom-0 w-72 h-32 bg-cyan-500/15 rounded-full blur-3xl z-0" />
+                <div className="absolute bottom-0 w-48 h-20 bg-indigo-500/20 rounded-full blur-2xl z-0" />
+                {/* Photo */}
                 <img
                   src="/hero-image.png"
                   alt="Rahul Medhe"
-                  className="max-h-[480px] sm:max-h-[580px] lg:max-h-[680px] w-auto object-contain object-bottom relative z-10 scale-110 sm:scale-115 lg:scale-120 transform origin-bottom"
+                  className="photo-glow relative z-10 w-full max-w-[340px] lg:max-w-[420px] object-contain object-bottom"
+                  style={{ maxHeight: '540px' }}
                 />
-                {/* Glow behind photo */}
-                <div className="absolute bottom-10 w-48 sm:w-64 h-48 sm:h-64 bg-cyan-500/20 rounded-full blur-3xl z-0 scale-95" />
-                {/* Fading gradient to cover cutoff */}
-                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent z-20 pointer-events-none" />
+                {/* Fade at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 h-24 z-20 pointer-events-none"
+                  style={{ background: 'linear-gradient(to top, #0a0f1a 0%, transparent 100%)' }} />
+              </div>
+
+              {/* Name + credential — below photo */}
+              <div className="relative z-30 -mt-4 text-center pb-8 lg:pb-0">
+                <p className="text-base text-slate-300 font-semibold tracking-wide">— By</p>
+                <h2 className="text-2xl sm:text-3xl font-black text-white mt-0.5">Rahul Medhe</h2>
+                <div className="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-full"
+                  style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.15),rgba(99,102,241,0.15))', border: '1px solid rgba(6,182,212,0.3)' }}>
+                  <svg className="w-4 h-4 text-cyan-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-black text-white">5+ Years in Digital Entrepreneurship</span>
+                </div>
               </div>
             </div>
 
-            {/* COLUMN 3: REGISTRATION FORM (order-2 on mobile, order-3 on desktop) */}
-            <div className="col-span-1 lg:col-span-4 order-2 lg:order-3 py-6 lg:py-16" ref={formRef}>
-              <div className="bg-slate-800/60 border border-white/10 rounded-3xl p-6 backdrop-blur-md shadow-2xl">
-                
-                {/* Form header pill */}
-                <div className="bg-gradient-to-r from-sky-400 to-cyan-500 text-slate-950 font-black text-center text-[10px] sm:text-xs tracking-wider py-2.5 px-4 rounded-full mb-6 shadow-md uppercase">
-                  ⚡ Reserve Your Free Seat Now
+            {/* Registration form */}
+            <div className="order-1 lg:order-2 pb-8 lg:pb-10" ref={formRef}>
+              <div className="rounded-3xl overflow-hidden shadow-2xl"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(24px)' }}>
+
+                {/* Form header */}
+                <div className="px-6 pt-6 pb-5 text-center"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-cyan-300 mb-2">
+                    <span className="live-dot w-2 h-2 rounded-full bg-cyan-400 inline-block" />
+                    Reserve Your Free Seat
+                  </div>
+                  <p className="text-white text-xl font-black">Join 500+ Business Owners</p>
+                  <p className="text-slate-400 text-sm font-semibold mt-1">Seats are filling fast. Register now — it's 100% free.</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Your Full Name *</label>
-                    <input
-                      id="name"
-                      type="text"
-                      placeholder="Rahul Sharma"
-                      value={form.name}
-                      onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                      className="w-full bg-slate-900 border border-white/10 text-white placeholder-slate-600 rounded-xl px-4 py-2.5 text-xs focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all duration-300 font-semibold"
-                    />
-                  </div>
+                <form onSubmit={handleSubmit} className="px-6 py-6 flex flex-col gap-4">
+                  {[
+                    { id: 'name', label: 'Your Full Name', type: 'text', placeholder: 'Rahul Sharma' },
+                    { id: 'whatsapp', label: 'WhatsApp Number', type: 'tel', placeholder: '9876543210' },
+                    { id: 'company', label: 'Business / Company Name', type: 'text', placeholder: 'My Business Name' },
+                  ].map(f => (
+                    <div key={f.id}>
+                      <label htmlFor={f.id} className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                        {f.label} <span className="text-cyan-400">*</span>
+                      </label>
+                      <input
+                        id={f.id}
+                        type={f.type}
+                        placeholder={f.placeholder}
+                        value={(form as Record<string, string>)[f.id]}
+                        onChange={e => setForm(prev => ({ ...prev, [f.id]: e.target.value }))}
+                        className="w-full rounded-xl px-4 py-3 text-sm font-semibold"
+                      />
+                    </div>
+                  ))}
 
                   <div>
-                    <label htmlFor="whatsapp" className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">WhatsApp Number *</label>
-                    <input
-                      id="whatsapp"
-                      type="tel"
-                      placeholder="9876543210"
-                      value={form.whatsapp}
-                      onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))}
-                      className="w-full bg-slate-900 border border-white/10 text-white placeholder-slate-600 rounded-xl px-4 py-2.5 text-xs focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all duration-300 font-semibold"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="company" className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Company / Business *</label>
-                    <input
-                      id="company"
-                      type="text"
-                      placeholder="My Business Name"
-                      value={form.company}
-                      onChange={e => setForm(f => ({ ...f, company: e.target.value }))}
-                      className="w-full bg-slate-900 border border-white/10 text-white placeholder-slate-600 rounded-xl px-4 py-2.5 text-xs focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all duration-300 font-semibold"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="pain_point" className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">What is your #1 SEO / Local Google pain point? *</label>
+                    <label htmlFor="pain_point" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                      Your Biggest SEO Problem <span className="text-cyan-400">*</span>
+                    </label>
                     <textarea
                       id="pain_point"
-                      placeholder="e.g. My business doesn't appear on Google Maps..."
+                      placeholder="e.g. My business doesn't show up on Google Maps..."
                       value={form.pain_point}
-                      onChange={e => setForm(f => ({ ...f, pain_point: e.target.value }))}
+                      onChange={e => setForm(prev => ({ ...prev, pain_point: e.target.value }))}
                       rows={2}
-                      className="w-full bg-slate-900 border border-white/10 text-white placeholder-slate-600 rounded-xl px-4 py-2.5 text-xs focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all duration-300 font-semibold resize-y min-h-[60px]"
+                      className="w-full rounded-xl px-4 py-3 text-sm font-semibold resize-none"
                     />
                   </div>
 
                   {error && (
-                    <p className="text-red-400 text-[11px] font-bold bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
-                      ⚠️ {error}
-                    </p>
+                    <div className="text-red-300 text-xs font-bold bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                      ⚠ {error}
+                    </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-4.5 text-white font-black text-sm rounded-full transition-all duration-300 cursor-pointer uppercase tracking-wider lightning-btn"
-                  >
-                    {submitting ? 'Registering...' : '🎟 Register For Free'}
+                  <button type="submit" disabled={submitting}
+                    className="cta-btn w-full py-4 text-white font-black text-base rounded-2xl cursor-pointer tracking-wide uppercase">
+                    {submitting ? 'Registering...' : '🎟  Claim My Free Seat Now'}
                   </button>
 
-                  <p className="text-center text-[9px] text-slate-500 font-bold">🔒 Details safe. No spam, ever.</p>
+                  <p className="text-center text-[10px] text-slate-500 font-semibold">
+                    🔒 We never share your details. No spam, ever.
+                  </p>
                 </form>
-
               </div>
             </div>
 
           </div>
         </div>
-
-        {/* Bottom glowing line to cover cut */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent z-30" />
       </section>
 
-      {/* STATS BAR */}
-      <section className="bg-slate-900 border-b border-white/5 py-8 px-4 sm:px-6 relative z-20">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      {/* ── SOCIAL PROOF BAR ── */}
+      <Divider />
+      <section className="py-8 px-4 sm:px-6 cinema-border-top cinema-border-bottom"
+        style={{ background: 'rgba(255,255,255,0.02)' }}>
+        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           {[
             { val: '500+', label: 'Seats Available' },
             { val: '60 Min', label: 'Live Training' },
             { val: '6', label: 'Free Bonuses' },
-            { val: '100%', label: 'Free to Attend' },
+            { val: '100%', label: 'Free to Join' },
           ].map(s => (
-            <div key={s.label} className="flex flex-col gap-1">
-              <div className="text-2xl sm:text-3xl font-black text-cyan-400">{s.val}</div>
-              <div className="text-xs sm:text-sm text-slate-400 font-bold tracking-wide">{s.label}</div>
+            <div key={s.label}>
+              <div className="text-3xl sm:text-4xl font-black text-cyan-400 number-glow">{s.val}</div>
+              <div className="text-xs text-slate-400 font-bold tracking-wider mt-1 uppercase">{s.label}</div>
             </div>
           ))}
         </div>
       </section>
+      <Divider />
 
-      {/* INSTAGRAM STYLE COMPARISON GRID */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-900 relative overflow-hidden border-b border-white/5">
-        {/* Subtle glow background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            
-            {/* LEFT COLUMN */}
-            <div className="flex flex-col gap-8">
-              
-              {/* NOT ABOUT TEACHING SEO */}
-              <AnimSection>
-                <div className="bg-slate-800/40 border border-red-500/20 hover:border-red-500/40 rounded-3xl p-6 sm:p-8 backdrop-blur-md shadow-xl transition-all duration-300 relative overflow-hidden group">
-                  <div className="absolute -top-12 -left-12 w-24 h-24 bg-red-500/10 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-all duration-500" />
-                  
-                  <div className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-400 text-2xl font-bold border border-red-500/20">
-                      <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-black text-white mb-3">
-                        This Webinar is <span className="text-red-500 uppercase font-black">NOT</span> about teaching you SEO.
-                      </h3>
-                      <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-semibold">
-                        It's about showing you how we help local businesses generate more qualified leads from <span className="text-cyan-400 font-bold">Google</span>, <span className="text-emerald-400 font-bold">ChatGPT</span>, <span className="text-purple-400 font-bold">Gemini</span>, and AI-powered search.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </AnimSection>
-
-              {/* PERFECT FOR */}
-              <AnimSection delay={80}>
-                <div className="premium-card rounded-3xl p-6 sm:p-8 shadow-xl">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-cyan-400 mb-6">
-                    PERFECT FOR:
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      {
-                        label: 'Local Business Owners',
-                        icon: (
-                          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 00-.75-.75h-1.5a.75.75 0 00-.75.75V21m-6-10.5V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18v-7.5M12 3v18M3 10.5h18" />
-                          </svg>
-                        )
-                      },
-                      {
-                        label: 'Clinics',
-                        icon: (
-                          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                          </svg>
-                        )
-                      },
-                      {
-                        label: 'Service Businesses',
-                        icon: (
-                          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A1.5 1.5 0 0019.5 21l2.25-2.25a1.5 1.5 0 000-2.25l-5.83-5.83" />
-                          </svg>
-                        )
-                      },
-                      {
-                        label: 'Consultants',
-                        icon: (
-                          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372" />
-                          </svg>
-                        )
-                      },
-                      {
-                        label: 'Agencies',
-                        icon: (
-                          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-10.5h16.5" />
-                          </svg>
-                        )
-                      },
-                      {
-                        label: 'Struggling Businesses',
-                        icon: (
-                          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519" />
-                          </svg>
-                        )
-                      },
-                    ].map(item => (
-                      <div key={item.label} className="flex items-center gap-3 bg-white/5 border border-white/5 rounded-2xl p-3.5 hover:bg-white/10 hover:border-white/10 transition-all duration-300">
-                        {item.icon}
-                        <span className="text-xs sm:text-sm font-bold text-slate-200">{item.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </AnimSection>
-
+      {/* ── IS THIS FOR YOU ── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <Anim>
+            <div className="text-center mb-14">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500 mb-3 block">Is This For You?</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+                If You Said "Yes" to Any of These,<br />
+                <span className="text-[#FF6B35]">You Need to Attend</span>
+              </h2>
             </div>
+          </Anim>
 
-            {/* RIGHT COLUMN */}
-            <div className="flex flex-col gap-8">
-              
-              {/* GET FOUND ON */}
-              <AnimSection delay={120}>
-                <div className="premium-card rounded-3xl p-6 sm:p-8 shadow-xl">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-cyan-400 mb-6">
-                    GET FOUND ON:
-                  </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: '📍', text: 'Your business doesn\'t show up on Google Maps or Search.' },
+              { icon: '💸', text: 'You\'re spending money on ads but getting zero results.' },
+              { icon: '😤', text: 'Your competitors rank above you, and you don\'t know why.' },
+              { icon: '📉', text: 'Your website gets visitors but no one calls or enquires.' },
+              { icon: '😕', text: 'You have no idea where to start with SEO.' },
+              { icon: '🎯', text: 'You want a system that brings customers automatically.' },
+            ].map((item, i) => (
+              <Anim key={i} delay={i * 60}>
+                <div className="flex items-start gap-4 glass rounded-2xl p-5 hover:border-cyan-500/30 transition-all duration-300">
+                  <span className="text-2xl flex-shrink-0">{item.icon}</span>
+                  <p className="text-sm sm:text-base font-semibold text-slate-200 leading-relaxed">{item.text}</p>
+                </div>
+              </Anim>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <Divider label="What You'll Learn" />
+
+      {/* ── WHAT YOU LEARN ── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 cinema-border-top cinema-border-bottom"
+        style={{ background: 'linear-gradient(180deg, rgba(6,182,212,0.03) 0%, transparent 100%)' }}>
+        <div className="max-w-5xl mx-auto">
+          <Anim>
+            <div className="text-center mb-14">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500 mb-3 block">Inside the Webinar</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
+                6 Things You'll Walk Away With
+              </h2>
+              <p className="text-slate-400 text-base sm:text-lg font-semibold mt-3 max-w-xl mx-auto">
+                No theory. No fluff. Only what you can actually use tomorrow.
+              </p>
+            </div>
+          </Anim>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {LEARNS.map((l, i) => (
+              <Anim key={i} delay={i * 70}>
+                <div className="relative flex gap-5 rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:-translate-y-0.5 group"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.06), transparent)' }} />
+                  <div className="flex-shrink-0 text-4xl font-black text-white/8 leading-none select-none pt-0.5"
+                    style={{ color: 'rgba(6,182,212,0.12)', fontSize: '2.5rem' }}>
+                    {l.n}
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-black text-white mb-1.5">{l.head}</h3>
+                    <p className="text-sm text-slate-400 font-semibold leading-relaxed">{l.body}</p>
+                  </div>
+                </div>
+              </Anim>
+            ))}
+          </div>
+
+          {/* CTA after learns */}
+          <Anim delay={200}>
+            <div className="text-center mt-12">
+              <button onClick={scrollToForm}
+                className="cta-btn inline-block px-10 py-4 text-white font-black text-base rounded-2xl cursor-pointer tracking-wide uppercase">
+                I Want to Learn This — Register Free
+              </button>
+            </div>
+          </Anim>
+        </div>
+      </section>
+
+      <Divider label="Your Host" />
+
+      {/* ── ABOUT RAHUL (credibility) ── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <Anim>
+            <div className="rounded-3xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+                {/* Photo side */}
+                <div className="relative flex items-end justify-center overflow-hidden min-h-[320px]"
+                  style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.08), rgba(99,102,241,0.08))' }}>
+                  <div className="absolute bottom-0 w-64 h-32 bg-cyan-500/15 rounded-full blur-3xl" />
+                  <img
+                    src="/hero-image.png"
+                    alt="Rahul Medhe"
+                    className="relative z-10 h-80 w-auto object-contain object-bottom"
+                    style={{ filter: 'drop-shadow(0 -10px 40px rgba(6,182,212,0.2))' }}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+                    style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.02), transparent)' }} />
+                </div>
+
+                {/* Text side */}
+                <div className="p-8 sm:p-10 flex flex-col justify-center">
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500 mb-2">Your Host</p>
+                  <h2 className="text-3xl font-black text-white mb-1">Rahul Medhe</h2>
+                  <p className="text-base font-black text-[#FF6B35] mb-5">5+ Years in Digital Entrepreneurship</p>
                   <div className="flex flex-col gap-3">
                     {[
-                      {
-                        text: 'Google Search',
-                        icon: (
-                          <svg className="w-5 h-5" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                      'Helped 50+ local businesses rank on Page 1 of Google',
+                      'Founder of Scalify — a digital growth agency',
+                      'Trained 1,000+ entrepreneurs across India',
+                      'Featured speaker at business events in Maharashtra',
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full flex items-center justify-center"
+                          style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
+                          <svg className="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                           </svg>
-                        )
-                      },
-                      {
-                        text: 'Google Business Profile',
-                        icon: (
-                          <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M21.9 8.89l-1.05-4.37c-.22-.9-1-1.52-1.91-1.52H5.05c-.9 0-1.69.62-1.91 1.52L2.1 8.89c-.16.66.04 1.35.54 1.84.07.07.15.14.23.2V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-8.07c.08-.06.16-.13.23-.2.5-.49.7-1.18.54-1.84zM5.05 5h13.9l.96 4H4.09l.96-4zm12.95 14H6v-7h12v7zM8.5 13H11v4H8.5v-4z"/>
-                          </svg>
-                        )
-                      },
-                      {
-                        text: 'ChatGPT Search',
-                        icon: (
-                          <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l5.438-3.125M14.187 8.096L15 3l-5.438 3.125M6.062 12h11.876M12 6.062v11.876" />
-                          </svg>
-                        )
-                      },
-                      {
-                        text: 'Gemini Search',
-                        icon: (
-                          <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2c-.1 3.2-2.8 5.9-6 6 3.2.1 5.9 2.8 6 6 .1-3.2 2.8-5.9 6-6z" />
-                          </svg>
-                        )
-                      },
-                      {
-                        text: '& More AI Search',
-                        icon: (
-                          <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 10.742l1.64 8.2a1 1 0 001.936-.18L13.9 10.742" />
-                          </svg>
-                        )
-                      }
-                    ].map(b => (
-                      <div key={b.text} className="flex items-center gap-4 bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl px-5 py-3 transition-all duration-300">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center border border-white/10 shadow-inner">
-                          {b.icon}
                         </div>
-                        <span className="text-sm sm:text-base font-bold text-slate-100">{b.text}</span>
+                        <p className="text-sm text-slate-300 font-semibold leading-relaxed">{item}</p>
                       </div>
                     ))}
                   </div>
                 </div>
-              </AnimSection>
-
-              {/* IS THIS WEBINAR FOR YOU? */}
-              <AnimSection delay={160}>
-                <div className="premium-card rounded-3xl p-6 sm:p-8 shadow-xl">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-cyan-400 mb-6">
-                    IS THIS WEBINAR FOR YOU?
-                  </h3>
-                  <div className="flex flex-col gap-4">
-                    {[
-                      "Your website isn't generating enquiries.",
-                      "You're spending too much on ads.",
-                      "Your competitors rank above you.",
-                      "You want more organic leads.",
-                      "You want customers to find your business on Google & AI Search."
-                    ].map((text, idx) => (
-                      <div key={idx} className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-6.5 h-6.5 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mt-0.5">
-                          {CheckIcon}
-                        </div>
-                        <p className="text-slate-300 text-sm sm:text-base font-bold leading-relaxed">
-                          {text}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </AnimSection>
-
+              </div>
             </div>
-
-          </div>
+          </Anim>
         </div>
       </section>
 
-      {/* WHAT YOU'LL LEARN */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-900 border-b border-white/5">
-        <div className="max-w-4xl mx-auto">
-          <AnimSection>
-            <div className="text-center mb-16">
-              <span className="inline-flex items-center gap-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-                Inside The Webinar
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">What You'll Learn in 60 Minutes</h2>
-              <p className="text-slate-400 text-base sm:text-lg mt-4 max-w-xl mx-auto leading-relaxed">
-                No fluff. No theory. Just a proven framework you can apply immediately.
-              </p>
-            </div>
-          </AnimSection>
+      <Divider label="Exclusive Bonuses" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {LEARNS.map((l, i) => (
-              <AnimSection key={i} delay={i * 60}>
-                <div className="flex gap-4 items-start bg-slate-800/40 border border-white/5 hover:border-cyan-500/30 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 shadow-md shadow-black/10">
-                  {l.icon}
-                  <p className="text-sm sm:text-base font-bold text-slate-200 leading-relaxed">{l.text}</p>
-                </div>
-              </AnimSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 6 BONUSES */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-slate-900 border-b border-white/5">
+      {/* ── BONUSES ── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 cinema-border-top"
+        style={{ background: 'linear-gradient(180deg, rgba(99,102,241,0.04) 0%, transparent 100%)' }}>
         <div className="max-w-5xl mx-auto">
-          <AnimSection>
-            <div className="text-center mb-16">
-              <span className="inline-flex items-center gap-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-                🎁 Exclusive Bonuses
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white">6 Bonuses — All Yours For Free</h2>
-              <p className="text-slate-400 text-base sm:text-lg mt-4 leading-relaxed">
-                Worth <span className="text-[#FF6B35] font-black">₹13,500+</span> — Revealed inside the webinar
+          <Anim>
+            <div className="text-center mb-14">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500 mb-3 block">Only for Registrants</span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
+                6 Free Bonuses Worth{' '}
+                <span className="text-[#FF6B35]">₹13,500+</span>
+              </h2>
+              <p className="text-slate-400 text-base sm:text-lg font-semibold mt-3">
+                You get all of this just for showing up live.
               </p>
             </div>
-          </AnimSection>
+          </Anim>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {BONUSES.map((b, i) => (
-              <AnimSection key={i} delay={i * 60}>
-                <div className="h-full premium-card rounded-2xl p-6 relative overflow-hidden shadow-lg flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="text-3xl font-black text-white/10 leading-none">{b.num}</div>
-                      <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-black px-2.5 py-1 rounded-md">
-                        VALUE {b.value}
-                      </span>
-                    </div>
-                    <h4 className="text-base sm:text-lg font-black text-white mb-2 leading-tight">{b.title}</h4>
-                    <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-semibold">{b.desc}</p>
+              <Anim key={i} delay={i * 60}>
+                <div className="h-full flex flex-col rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 group"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <span className="text-4xl font-black leading-none select-none"
+                      style={{ color: 'rgba(6,182,212,0.15)', fontVariantNumeric: 'tabular-nums' }}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-lg"
+                      style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: '#22d3ee' }}>
+                      {b.value} VALUE
+                    </span>
                   </div>
+                  <h4 className="text-base font-black text-white mb-2">{b.title}</h4>
+                  <p className="text-sm text-slate-400 font-semibold leading-relaxed flex-1">{b.desc}</p>
                 </div>
-              </AnimSection>
+              </Anim>
             ))}
           </div>
         </div>
       </section>
 
-      {/* TRUST PILLARS BANNER */}
-      <section className="bg-slate-900 border-b border-white/5 py-8 px-4 sm:px-6 relative z-10 shadow-inner">
-        <div className="max-w-6xl mx-auto flex flex-wrap justify-around items-center gap-6 text-center">
-          {[
-            {
-              label: 'Proven Strategies That Work',
-              icon: (
-                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6" />
-                </svg>
-              )
-            },
-            {
-              label: 'Real Results for Local Businesses',
-              icon: (
-                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519" />
-                </svg>
-              )
-            },
-            {
-              label: 'Live Q&A Session',
-              icon: (
-                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM21.375 9.75a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM17.625 20.25a7.5 7.5 0 00-11.25 0" />
-                </svg>
-              )
-            },
-            {
-              label: 'Live Website Review & Audits',
-              icon: (
-                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.637 10.637z" />
-                </svg>
-              )
-            },
-          ].map(p => (
-            <div key={p.label} className="flex items-center gap-2.5">
-              {p.icon}
-              <span className="text-sm font-extrabold text-slate-300 tracking-tight">{p.label}</span>
+      <Divider />
+
+      {/* ── FINAL CTA ── */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <Anim>
+            <div className="text-center rounded-3xl py-14 px-8 relative overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(6,182,212,0.2)' }}>
+              {/* Background glow */}
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse at center, rgba(6,182,212,0.07) 0%, transparent 70%)' }} />
+
+              <div className="relative z-10">
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-500 mb-4">Don't Miss This</p>
+                <h2 className="text-3xl sm:text-4xl font-black text-white mb-3">
+                  Your Business Deserves to Be on Page 1
+                </h2>
+                <p className="text-slate-300 text-base sm:text-lg font-semibold mb-8 max-w-xl mx-auto leading-relaxed">
+                  Stop losing customers to competitors. This one webinar could change everything. And it's completely free.
+                </p>
+
+                <button onClick={scrollToForm}
+                  className="cta-btn inline-block px-12 py-5 text-white font-black text-lg rounded-2xl cursor-pointer tracking-wide uppercase shadow-2xl">
+                  🎟  Register Free Now
+                </button>
+
+                <div className="flex flex-wrap justify-center gap-5 mt-8">
+                  {[
+                    { icon: '📅', text: '2nd July 2026' },
+                    { icon: '🕓', text: '4:00 PM IST' },
+                    { icon: '🎁', text: '6 Free Bonuses' },
+                    { icon: '💯', text: '100% Free' },
+                  ].map(item => (
+                    <div key={item.text} className="flex items-center gap-2">
+                      <span>{item.icon}</span>
+                      <span className="text-sm font-bold text-slate-300">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          ))}
+          </Anim>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-slate-900 py-12 px-4 text-center relative z-10">
-        <p className="text-xs sm:text-sm text-slate-500 font-bold">© 2026 · SEO Webinar · All Rights Reserved</p>
-        <p className="text-[10px] text-slate-600 mt-2 font-bold uppercase tracking-wider">This webinar is 100% free. No hidden charges.</p>
+      {/* ── FOOTER ── */}
+      <footer className="py-10 px-4 text-center cinema-border-top"
+        style={{ background: 'rgba(255,255,255,0.01)' }}>
+        <p className="text-slate-500 text-xs font-bold">© 2026 · Scalify · All Rights Reserved</p>
+        <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest mt-2">This webinar is 100% free. No hidden charges.</p>
       </footer>
+
     </main>
   );
 }
