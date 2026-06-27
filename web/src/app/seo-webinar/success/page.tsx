@@ -47,7 +47,7 @@ export default function SeoWebinarSuccess() {
         </h1>
         
         <p className="text-base sm:text-lg text-slate-300 mb-8 leading-relaxed font-semibold">
-          Your seat is confirmed for the <span className="text-[#FF6B35] font-black">Free SEO Webinar</span> on <span className="text-white font-black">15th July 2026 at 7:00 PM IST</span>. We'll send details on WhatsApp.
+          Your seat is confirmed for the <span className="text-[#FF6B35] font-black">Free SEO Webinar</span> on <span className="text-white font-black">2nd July 2026 at 4:00 PM IST</span>. We'll send details on WhatsApp.
         </p>
 
         {/* WhatsApp Group CTA Card */}
@@ -71,7 +71,7 @@ export default function SeoWebinarSuccess() {
         <div className="flex flex-col gap-3 mb-8">
           {[
             { icon: '📩', text: 'Check WhatsApp for your confirmation message' },
-            { icon: '📅', text: 'Save the date: 15th July 2026, 7:00 PM IST' },
+            { icon: '📅', text: 'Save the date: 2nd July 2026, 4:00 PM IST' },
             { icon: '🎁', text: 'Your 6 bonuses will be shared inside the webinar' },
           ].map((item, i) => (
             <div
