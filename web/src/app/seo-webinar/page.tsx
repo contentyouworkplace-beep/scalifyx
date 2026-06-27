@@ -71,7 +71,7 @@ const LEARNS = [
   { n: '01', head: 'Why Your Competitors Rank Above You', body: 'We\'ll show you exactly what they\'re doing — and how to beat them in your own city.' },
   { n: '02', head: 'The 3-Step SEO Formula', body: 'A simple framework that works for any business in India, even if you\'ve never done SEO before.' },
   { n: '03', head: 'How to Pick the Right Keywords', body: 'Find what your customers are searching right now — and show up exactly when they need you.' },
-  { n: '04', head: 'What Google Wants in 2025', body: 'Most businesses get this wrong. We\'ll fix that in plain English — no jargon.' },
+  { n: '04', head: 'What Google Wants in 2026', body: 'Most businesses get this wrong. We\'ll fix that in plain English — no jargon.' },
   { n: '05', head: 'Turn Visitors into Paying Customers', body: 'Getting traffic is only half the job. Learn how to convert clicks into enquiries.' },
   { n: '06', head: 'Live Website Audit on Screen', body: 'Watch Rahul fix a real website live. You\'ll instantly see what to do for your own.' },
 ];
@@ -175,6 +175,25 @@ export default function SeoWebinarPage() {
             <p className="text-slate-300 text-lg sm:text-xl font-semibold max-w-2xl mx-auto leading-relaxed mt-4">
               A free 60-minute live webinar for business owners who are tired of being invisible on Google and want real customers — not just website traffic.
             </p>
+          </div>
+
+          {/* ── Date/Time ── */}
+          <div className="flex justify-center mb-5">
+            <div className="inline-flex items-center gap-3 glass rounded-2xl px-6 py-3 shadow-xl">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-cyan-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75" />
+                </svg>
+                <span className="text-white font-black text-sm sm:text-base">2nd July 2026</span>
+              </div>
+              <span className="text-white/20 font-black">·</span>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-cyan-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-white font-black text-sm sm:text-base">4:00 PM IST</span>
+              </div>
+            </div>
           </div>
 
           {/* ── Countdown ── */}
