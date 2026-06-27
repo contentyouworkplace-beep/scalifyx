@@ -503,7 +503,7 @@ export default function SeoWebinarPage() {
                   <p className="text-base font-black text-[#FF6B35] mb-5">5+ Years in Digital Entrepreneurship</p>
                   <div className="flex flex-col gap-3">
                     {[
-                      'Helped 50+ local businesses rank on Page 1 of Google',
+                      'Helped 300+ local businesses rank on Page 1 of Google',
                       'Founder of Scalify — a digital growth agency',
                       'Trained 1,000+ entrepreneurs across India',
                       'Featured speaker at business events in Maharashtra',
