@@ -493,15 +493,19 @@ export default function SeoWebinarPage() {
           </Anim>
 
           <div className="grid grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {['testimonial-1.mp4', 'testimonial-2.mp4'].map((file, i) => (
+            {[
+              { video: 'testimonial-1.mp4', poster: 'testimonial-1-thumb.jpg' },
+              { video: 'testimonial-2.mp4', poster: 'testimonial-2-thumb.jpg' },
+            ].map(({ video: file, poster }, i) => (
               <Anim key={i} delay={i * 80}>
                 <div className="relative rounded-2xl overflow-hidden bg-slate-800/60 border border-white/8"
                   style={{ aspectRatio: '9/16' }}>
                   <video
                     src={`/testimonials/${file}`}
+                    poster={`/testimonials/${poster}`}
                     controls
                     playsInline
-                    preload="metadata"
+                    preload="none"
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                   {/* Placeholder overlay shown while video loads or if missing */}
