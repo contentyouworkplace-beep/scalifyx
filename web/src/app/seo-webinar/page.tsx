@@ -272,7 +272,7 @@ export default function SeoWebinarPage() {
 
                   <div>
                     <label htmlFor="pain_point" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
-                      Your Biggest SEO Problem <span className="text-cyan-400">*</span>
+                      Your Biggest Problem in Lead Generation <span className="text-cyan-400">*</span>
                     </label>
                     <textarea
                       id="pain_point"
