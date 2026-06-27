@@ -249,7 +249,7 @@ export default function SeoWebinarPage() {
                   <p className="text-slate-400 text-sm font-semibold mt-1">Seats are filling fast. Register now — it's 100% free.</p>
                   <div className="mt-3 mx-auto max-w-xs bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-2.5">
                     <p className="text-red-400 text-[11px] font-bold leading-relaxed">
-                      ⚠ This webinar is <span className="uppercase">not</span> for freelancers or people working in digital marketing.
+                      ⚠ This webinar is <span className="uppercase">not</span> for people working in digital marketing.
                     </p>
                   </div>
                 </div>
