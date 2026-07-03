@@ -10,201 +10,124 @@ function fbq(...args: any[]) {
   }
 }
 
-function OfferCountdown() {
-  const [secondsLeft, setSecondsLeft] = useState<number>(3600);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const stored = sessionStorage.getItem('seo_offer_expiry');
-    let expiry: number;
-    if (stored) {
-      expiry = parseInt(stored);
-    } else {
-      expiry = Date.now() + 3600 * 1000;
-      sessionStorage.setItem('seo_offer_expiry', String(expiry));
-    }
-    const left = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
-    setSecondsLeft(left);
-    setMounted(true);
-
-    if (left <= 0) return;
-    const t = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((expiry - Date.now()) / 1000));
-      setSecondsLeft(remaining);
-      if (remaining <= 0) clearInterval(t);
-    }, 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  if (!mounted) return null;
-
-  const mins = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
-  const secs = String(secondsLeft % 60).padStart(2, '0');
-  const urgent = secondsLeft < 300;
-
-  if (secondsLeft <= 0) {
-    return (
-      <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 mb-4 text-center">
-        <p className="text-xs font-bold text-red-600">⏰ ₹1 booking offer has expired</p>
-        <p className="text-[11px] text-red-500 mt-0.5">Seats still available — Reserve slot to get ₹999 price</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`rounded-xl border px-4 py-2.5 mb-4 flex items-center justify-between ${urgent ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
-      <div>
-        <p className={`text-xs font-bold ${urgent ? 'text-red-700' : 'text-amber-800'}`}>
-          🔥 ₹1 booking offer expires in
-        </p>
-        <p className={`text-[10px] mt-0.5 ${urgent ? 'text-red-500' : 'text-amber-600'}`}>Price goes up after timer ends</p>
-      </div>
-      <div className={`font-mono text-2xl font-black tabular-nums ${urgent ? 'text-red-600' : 'text-amber-700'}`}>
-        {mins}:{secs}
-      </div>
-    </div>
-  );
-}
-
-const WHY_LEARN_SEO = [
+const WHY_AUDIT = [
   {
-    icon: '💸',
-    title: 'Agencies & Freelancers Are Burning Your Budget',
-    desc: 'You pay Rs. 5,000–15,000/month to someone you can\'t verify. No transparency, no results, no idea what they\'re even doing. When you know SEO yourself, you hold them accountable — or do it better yourself.',
+    icon: '👻',
+    title: 'You Might Be Invisible & Not Even Know It',
+    desc: 'Wrong Google Business Profile category, no schema markup, zero AI-search visibility — these silently kill your rankings. Most business owners never find out until a competitor overtakes them.',
   },
   {
-    icon: '🔍',
-    title: 'Google Is the New Word of Mouth',
-    desc: 'When someone needs a service, they don\'t ask a friend first — they Google it. If you\'re not showing up, that customer is going to your competitor. Every day without SEO is a day you\'re invisible.',
+    icon: '🤖',
+    title: 'Search Has Changed. Has Your Business?',
+    desc: 'People now ask ChatGPT, Google AI Overviews, and Perplexity for recommendations — not just Google. If your business isn\'t optimised for AEO & GEO, you\'re invisible to an entire generation of AI-driven search.',
   },
   {
-    icon: '📊',
-    title: 'See What\'s Actually Trending in Your Industry',
-    desc: 'SEO shows you exactly what your customers are searching for — right now. New services to offer, questions to answer, gaps your competitors are missing. It\'s free market research hiding in plain sight.',
+    icon: '📍',
+    title: 'Local Customers Search Locally First',
+    desc: 'A weak or unoptimised Google Business Profile means you lose the "near me" searches to competitors — even if your business is better. We\'ll show you exactly what\'s broken.',
   },
   {
-    icon: '⏹️',
-    title: 'Paid Ads Stop the Moment You Stop Paying',
-    desc: 'Google Ads, Meta Ads — the moment your budget runs out, traffic stops. SEO builds an asset. A page that ranks today keeps bringing customers for months, sometimes years — without spending another rupee.',
+    icon: '📱',
+    title: 'Social Media Without Strategy Is Just Noise',
+    desc: 'Posting isn\'t a strategy. We\'ll audit your Instagram, Facebook & LinkedIn presence and tell you what\'s actually driving customers versus what\'s just activity.',
   },
   {
-    icon: '🧠',
-    title: 'Only You Know Your Business Best',
-    desc: 'No agency or freelancer will ever understand your business the way you do. You know your customers, your services, your edge. When you learn SEO yourself, you execute on your vision — not someone else\'s guess at it.',
+    icon: '🆓',
+    title: 'This Costs You Nothing to Find Out',
+    desc: 'A paid audit from an agency can cost thousands. This is a genuine, no-strings 2-hour live audit — free, for any business in India, no purchase required.',
   },
   {
-    icon: '⚡',
-    title: 'You Can\'t Afford to Stay Dependent',
-    desc: 'Every time you need a change — a new page, updated content, a new city landing page — you\'re waiting on a freelancer or paying extra. When you understand SEO, you move fast, stay in control, and stop being at someone else\'s mercy.',
+    icon: '📋',
+    title: 'Walk Away With a Real Action Plan',
+    desc: 'Not vague advice. A prioritised, written list of exactly what to fix first — GBP, website, AEO, GEO, and social — so you know precisely what to do next.',
   },
 ];
 
-const MODULES = [
+const AUDIT_AREAS = [
   {
     number: '01',
-    title: 'SEO Foundation & How Google Works',
+    title: 'Google Business Profile',
     topics: [
-      'How search engines crawl & rank pages',
-      'Site structure & page hierarchy (H1–H3)',
-      'Speed optimization — images, CSS, lazy loading',
-      'HTTPS, SSL, and why it matters for ranking',
+      'Category, NAP consistency & completeness check',
+      'Review strategy & local reputation gaps',
+      'Local pack ranking — why competitors outrank you',
+      'Photos, posts & Q&A optimisation review',
     ],
   },
   {
     number: '02',
-    title: 'Technical SEO Setup',
+    title: 'Website SEO',
     topics: [
-      'Google Search Console — setup & verification',
-      'Google Analytics GA4 — install & track',
-      'XML Sitemap — create & submit',
-      'Robots.txt, canonical tags, crawl error fixes',
-      'Core Web Vitals — LCP, CLS, INP explained simply',
+      'Technical SEO health — speed, Core Web Vitals, crawlability',
+      'On-page SEO — titles, meta, headings, internal linking',
+      'Keyword & content gap analysis for your industry',
+      'Mobile experience & indexing issues',
     ],
   },
   {
     number: '03',
-    title: 'Keyword Research for Your Business',
+    title: 'AEO — Answer Engine Optimization',
     topics: [
-      'Finding the right keywords for your industry',
-      'Search intent — Informational vs Transactional',
-      'Keyword clustering — one cluster, one page',
-      'Long-tail keyword strategy for faster ranking',
-      'Free tools vs paid tools — what actually works',
+      'Is your content structured to be picked as a direct answer?',
+      'FAQ & schema markup review for answer boxes',
+      'Featured snippet & "People Also Ask" opportunities',
+      'Content clarity & question-first formatting',
     ],
   },
   {
     number: '04',
-    title: 'On-Page SEO — Optimise Every Page',
+    title: 'GEO — Generative Engine Optimization',
     topics: [
-      'Title tags & meta descriptions that get clicks',
-      'URL structure — clean, short, keyword-first',
-      'Image alt text, compression, internal linking',
-      'Schema markup — LocalBusiness, FAQ, Breadcrumbs',
-      'Content depth — how much to write & why',
+      'Visibility check across ChatGPT, Gemini & AI Overviews',
+      'Are AI engines citing or recommending your business?',
+      'Structured data & entity signals for AI comprehension',
+      'What to fix to get mentioned by name in AI answers',
     ],
   },
   {
     number: '05',
-    title: 'Local SEO & Google Business Profile',
+    title: 'Social Media Marketing',
     topics: [
-      'Google Business Profile — setup & full optimisation',
-      'NAP consistency — Name, Address, Phone everywhere',
-      'Local citations — JustDial, Sulekha, IndiaMart',
-      'City & area landing pages strategy',
-      'Getting reviews & managing your local reputation',
-    ],
-  },
-  {
-    number: '06',
-    title: 'Content Strategy & Link Building',
-    topics: [
-      'Pillar pages vs blog articles — what to write',
-      'FAQ sections that rank on Google',
-      'Guest posting & backlink basics',
-      'Competitor backlink gap analysis',
-    ],
-  },
-  {
-    number: '07',
-    title: 'Tracking, Reporting & AI Tools',
-    topics: [
-      'Search Console weekly review — what to check',
-      'Rank tracking setup — free tools',
-      'GA4 organic traffic & conversion reading',
-      'Using AI tools to speed up SEO tasks',
-      'Monthly SEO task priority review',
+      'Instagram, Facebook & LinkedIn presence audit',
+      'Content strategy — what\'s working, what\'s wasted effort',
+      'Engagement & conversion gaps in your current posts',
+      'Quick wins to turn followers into customers',
     ],
   },
 ];
 
 const FAQS = [
   {
-    q: 'Is this a recorded course or live?',
-    a: 'Live — one-on-one with the instructor over a video call. You can ask questions throughout, pause when needed, and get answers specific to your business.',
+    q: 'Is this audit really free?',
+    a: 'Yes — completely free. No hidden charges, no card required, no upsell obligation. We do this live, one-on-one, at zero cost to you.',
+  },
+  {
+    q: 'What exactly gets covered in 2 hours?',
+    a: 'Your Google Business Profile, Website SEO, AEO (Answer Engine Optimization), GEO (visibility in AI tools like ChatGPT & Google AI Overviews), and your Social Media presence — reviewed live, with specific findings for your business.',
+  },
+  {
+    q: 'Is this live or a recorded audit?',
+    a: 'Live — one-on-one with the auditor over a video call. You can ask questions throughout and get answers specific to your business.',
   },
   {
     q: 'What do I need before the session?',
-    a: 'Just a laptop and your website URL. If you don\'t have a website yet, that\'s okay too — we\'ll cover what you\'ll need when you\'re ready.',
+    a: 'Your website URL, Google Business Profile link, and social media handles if you have them. If something\'s missing, that\'s fine too — we\'ll cover what you need to set up.',
   },
   {
-    q: 'Will examples be from my industry?',
-    a: 'Yes. Before the session we\'ll ask about your business — what you do, who your customers are, which city you\'re in. Every example, keyword, and strategy during the class is explained in the context of YOUR business.',
+    q: 'Will the audit be relevant to my specific business?',
+    a: 'Yes. Before the session we\'ll ask about your business, your city, and your customers. Every finding during the audit is specific to your business — not generic advice.',
   },
   {
-    q: 'I\'m not technical. Is this too advanced for me?',
-    a: 'Not at all. This is designed for business owners and freelancers who want to learn SEO practically — no coding, no jargon. If you can use WhatsApp, you can follow this course.',
+    q: 'I\'m not technical. Will I understand it?',
+    a: 'Yes. This is designed for business owners, not developers. No jargon — everything is explained in plain terms with a clear action plan at the end.',
   },
   {
-    q: 'What does the 1 year support mean?',
-    a: 'After the session, you can WhatsApp us anytime you\'re stuck — whether it\'s a Google Search Console question, a keyword doubt, or something you forgot from the session. We\'ll reply.',
+    q: 'Will I be pitched something at the end?',
+    a: 'No obligation. You get a genuine, free audit and a written action plan. If you\'d ever like help implementing it, that\'s entirely your call — not a requirement.',
   },
   {
-    q: 'Is ₹999 the total fee?',
-    a: 'Yes. The total fee is ₹999 (you pay ₹1 today to book your seat, and the remaining ₹998 at the start of your session). It covers the full 4-hour session + 1 year of WhatsApp support. No hidden charges.',
-  },
-  {
-    q: 'Can I do this for my client\'s business?',
-    a: 'Absolutely. Many freelancers and agency owners take this to level up their SEO skills and deliver better results for clients.',
+    q: 'Can I book this for my client\'s business?',
+    a: 'Absolutely. Many freelancers and agency owners book this to get a second set of eyes on a client\'s online presence.',
   },
 ];
 
@@ -253,9 +176,9 @@ function FAQSection() {
 }
 
 const SLOTS = [
-  { key: 'morning', label: '10 AM – 2 PM' },
-  { key: 'afternoon', label: '3 PM – 7 PM' },
-  { key: 'evening', label: '7 PM – 11 PM' },
+  { key: 'morning', label: '10 AM – 12 PM' },
+  { key: 'afternoon', label: '3 PM – 5 PM' },
+  { key: 'evening', label: '7 PM – 9 PM' },
 ];
 
 function dateStr(d: Date) {
@@ -303,20 +226,10 @@ function getAvailabilityStyle(totalBooked: number) {
   return { dot: 'bg-green-500', text: 'text-green-600', label: 'Available', bg: 'bg-green-50 border-green-200' };
 }
 
-const loadRazorpay = (): Promise<boolean> =>
-  new Promise((resolve) => {
-    if ((window as unknown as Record<string, unknown>).Razorpay) return resolve(true);
-    const s = document.createElement('script');
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    s.onload = () => resolve(true);
-    s.onerror = () => resolve(false);
-    document.body.appendChild(s);
-  });
-
 function BookingFlow() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
-  const [form, setForm] = useState({ name: '', company: '', phone: '', bizType: '', website: '' });
+  const [form, setForm] = useState({ name: '', company: '', phone: '', bizType: '', city: '', website: '' });
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlot, setSelectedSlot] = useState('');
   const [realBookedSlots, setRealBookedSlots] = useState<string[]>([]);
@@ -327,7 +240,7 @@ function BookingFlow() {
 
   const fetchRealBookedSlots = useCallback(async (date: string) => {
     try {
-      const res = await fetch(`/api/seo-course/bookings?date=${date}`);
+      const res = await fetch(`/api/special-audit/bookings?date=${date}`);
       const data = await res.json();
       setRealBookedSlots(data.bookedSlots || []);
     } catch { setRealBookedSlots([]); }
@@ -345,10 +258,10 @@ function BookingFlow() {
     if (!form.bizType) { setError('Please select your business type.'); return; }
     setError('');
     fbq('track', 'Lead');
-    fetch('/api/seo-course/lead-capture', {
+    fetch('/api/special-audit/lead-capture', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: form.name, company: form.company, phone: form.phone, bizType: form.bizType, website: form.website }),
+      body: JSON.stringify({ name: form.name, company: form.company, phone: form.phone, bizType: form.bizType, city: form.city, website: form.website }),
     }).catch(() => {});
     setStep(2);
   }
@@ -359,7 +272,7 @@ function BookingFlow() {
     setSubmitting(true);
 
     try {
-      const res = await fetch('/api/seo-course/create-order', {
+      const res = await fetch('/api/special-audit/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, date: selectedDate, slot: selectedSlot }),
@@ -371,58 +284,8 @@ function BookingFlow() {
         return;
       }
 
-      const { orderId, bookingId, keyId, amount } = data;
-
-      // Fire Meta Pixel InitiateCheckout event
-      fbq('track', 'InitiateCheckout', { value: 1, currency: 'INR' });
-
-      const loaded = await loadRazorpay();
-      if (!loaded) {
-        setError('Payment gateway failed to load. Try again.');
-        setSubmitting(false);
-        return;
-      }
-
-      const rzp = new (window as any).Razorpay({
-        key: keyId,
-        amount,
-        currency: 'INR',
-        name: 'Scalify SEO Masterclass',
-        description: 'Seat Booking — ₹1',
-        order_id: orderId,
-        prefill: { name: form.name, contact: `+91${form.phone}` },
-        theme: { color: '#16A34A' },
-        handler: async (response: any) => {
-          try {
-            const verifyRes = await fetch('/api/seo-course/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                bookingId,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData.success) {
-              router.push(`/learn-seo/success?name=${encodeURIComponent(form.name)}&date=${selectedDate}&slot=${selectedSlot}`);
-            } else {
-              setError('Payment verified but booking failed. Please WhatsApp us at +91 6353583148.');
-              setSubmitting(false);
-            }
-          } catch {
-            setError('Payment verification failed. Please WhatsApp us.');
-            setSubmitting(false);
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            setSubmitting(false);
-          }
-        }
-      });
-      rzp.open();
+      fbq('track', 'Schedule');
+      router.push(`/special-audit/success?name=${encodeURIComponent(form.name)}&date=${selectedDate}&slot=${selectedSlot}`);
     } catch {
       setError('Something went wrong. Please try again.');
       setSubmitting(false);
@@ -463,12 +326,13 @@ function BookingFlow() {
             <option value="Agency">Agency / Marketing Team</option>
             <option value="Other">Other</option>
           </select>
+          <input type="text" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="Your city (optional)" className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm" />
           <input type="text" value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} placeholder="Your website URL (optional)" className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl px-4 py-3 text-[#0F172A] placeholder-[#9CA3AF] focus:outline-none focus:border-[#16A34A] transition-colors text-sm" />
           {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">{error}</div>}
           <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm shadow-lg shadow-green-100">
             Next — Pick Your Slot →
           </button>
-          <p className="text-center text-xs text-[#9CA3AF]">Pay ₹1 now · ₹999 total · remaining ₹998 paid at start</p>
+          <p className="text-center text-xs text-[#9CA3AF]">100% free — no payment, no card required</p>
         </form>
       )}
 
@@ -617,17 +481,17 @@ function BookingFlow() {
               onClick={handleConfirmBooking}
               className="flex-1 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Opening Payment...' : 'Pay ₹1 & Book Seat →'}
+              {submitting ? 'Booking...' : 'Book My Free Audit →'}
             </button>
           </div>
-          <p className="text-center text-xs text-[#9CA3AF] mt-2">Secure payment via Razorpay · Remaining ₹998 due at session start</p>
+          <p className="text-center text-xs text-[#9CA3AF] mt-2">No payment required — 100% free, instantly confirmed</p>
         </div>
       )}
     </div>
   );
 }
 
-export default function LearnSEOPage() {
+export default function SpecialAuditPage() {
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-[#0F172A] font-['Poppins',sans-serif]">
 
@@ -640,7 +504,7 @@ export default function LearnSEOPage() {
           href="#enrol"
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-sm font-semibold hover:opacity-90 transition shadow-md shadow-green-100"
         >
-          Book your Seat for ₹1
+          Book Free Audit
         </a>
       </nav>
 
@@ -655,27 +519,27 @@ export default function LearnSEOPage() {
           <div className="pt-6">
             <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-[#16A34A]/30 bg-[#16A34A]/8 text-[#16A34A] text-xs font-bold uppercase tracking-widest">
               <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse" />
-              Live · One-on-One · 5+ Years Expert
+              Live · One-on-One · 100% Free
             </div>
 
             <h1 className="text-5xl sm:text-6xl font-extrabold leading-[0.95] tracking-tight mb-6 text-[#0F172A]">
-              Learn SEO<br />
-              Built Around<br />
+              A Free Audit of<br />
+              Your Entire<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">
-                Your Business.
+                Online Presence.
               </span>
             </h1>
 
             <p className="text-base text-[#6B7280] leading-relaxed mb-8 max-w-md">
-              A 4-hour live masterclass taught with your business as the context — not generic theory. Every keyword, every strategy, every example is relevant to what <em>you</em> do.
+              A free 2-hour live, one-on-one audit for businesses across India — covering your Google Business Profile, Website SEO, AEO, GEO, and Social Media. Everything that decides whether customers find <em>you</em> or your competitor.
             </p>
 
             <div className="flex flex-col gap-3 mb-8">
               {[
-                'Taught by an expert with 5+ years in digital marketing & SEO',
-                'Local SEO + Google Business Profile covered in depth',
-                'Your business type, your city, your keywords — throughout',
-                '1 year WhatsApp support after the session',
+                'Audited live by an expert with 5+ years in digital marketing & SEO',
+                'Google Business Profile, Website SEO, AEO, GEO & Social — all covered',
+                '100% free — for any business, anywhere in India',
+                'Walk away with a written, prioritised action plan',
               ].map(t => (
                 <span key={t} className="flex items-center gap-2.5 text-sm text-[#374151]">
                   <span className="w-5 h-5 rounded-full bg-gradient-to-br from-[#16A34A] to-[#0EA5E9] flex items-center justify-center flex-shrink-0">
@@ -688,50 +552,49 @@ export default function LearnSEOPage() {
               ))}
             </div>
 
-            {/* Price pill */}
+            {/* Highlight pill */}
             <div className="inline-flex items-center gap-4 bg-white border border-[#E5E7EB] rounded-2xl px-6 py-4 shadow-sm">
               <div>
-                <div className="text-3xl font-extrabold text-[#16A34A]">₹999</div>
-                <div className="text-xs text-[#9CA3AF] mt-0.5">₹1 booking fee today</div>
+                <div className="text-3xl font-extrabold text-[#16A34A]">FREE</div>
+                <div className="text-xs text-[#9CA3AF] mt-0.5">No cost, ever</div>
               </div>
               <div className="w-px h-10 bg-[#E5E7EB]" />
               <div>
-                <div className="text-sm font-bold text-[#0F172A]">4 Hours</div>
-                <div className="text-xs text-[#9CA3AF]">Live session</div>
+                <div className="text-sm font-bold text-[#0F172A]">2 Hours</div>
+                <div className="text-xs text-[#9CA3AF]">Live audit</div>
               </div>
               <div className="w-px h-10 bg-[#E5E7EB]" />
               <div>
-                <div className="text-sm font-bold text-[#0F172A]">1 Year</div>
-                <div className="text-xs text-[#9CA3AF]">WhatsApp support</div>
+                <div className="text-sm font-bold text-[#0F172A]">5 Areas</div>
+                <div className="text-xs text-[#9CA3AF]">GBP, SEO, AEO, GEO, Social</div>
               </div>
             </div>
           </div>
 
           {/* Right — Booking Flow */}
           <div id="enrol" className="bg-white border border-[#E5E7EB] rounded-2xl p-6 lg:sticky lg:top-24 shadow-xl shadow-gray-100">
-            <h3 className="text-[#0F172A] text-lg font-bold mb-0.5">Book Your Seat</h3>
+            <h3 className="text-[#0F172A] text-lg font-bold mb-0.5">Book Your Free Audit</h3>
             <p className="text-[#9CA3AF] text-xs mb-4">Fill in your details & pick a slot — we'll confirm via WhatsApp</p>
-            <OfferCountdown />
             <BookingFlow />
           </div>
 
         </div>
       </section>
 
-      {/* Why Learning SEO Is Necessary */}
+      {/* Why Get Audited */}
       <section className="py-24 px-4 sm:px-6 border-t border-[#E5E7EB] bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">Why Now</p>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] text-[#0F172A]">
               Why Every Business Owner<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Needs to Learn SEO Today.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Needs an Audit Today.</span>
             </h2>
-            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">Not tomorrow. Not when the agency delivers. Now — because every day you don't understand SEO, someone else is taking your customers.</p>
+            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">Not tomorrow. Not after your next website update. Now — because every day you don't know what's broken, someone else is taking your customers.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-5">
-            {WHY_LEARN_SEO.map((item, i) => (
+            {WHY_AUDIT.map((item, i) => (
               <div key={i} className="flex gap-5 p-6 rounded-2xl border border-[#E5E7EB] bg-[#FAFAF7]">
                 <div className="text-3xl flex-shrink-0 mt-0.5">{item.icon}</div>
                 <div>
@@ -750,7 +613,7 @@ export default function LearnSEOPage() {
           <div className="text-center mb-16">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">Why This Works</p>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] text-[#0F172A]">
-              Not a generic course.<br />
+              Not a generic scan.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Built for your business.</span>
             </h2>
           </div>
@@ -760,17 +623,17 @@ export default function LearnSEOPage() {
               {
                 icon: '🎯',
                 title: 'Your Business as Context',
-                desc: 'Before the session, we learn about your industry, your city, and your customers. Every example during the masterclass is relevant to what you actually do — not some random demo business.',
+                desc: 'Before the session, we learn about your industry, your city, and your customers. Every finding during the audit is specific to what you actually do — not a generic automated report.',
               },
               {
                 icon: '👨‍💼',
                 title: '5+ Years of Real SEO Experience',
-                desc: 'Not a course reseller. Not a YouTuber. An expert who has ranked local businesses on Google across multiple industries — and knows what actually works in the Indian market.',
+                desc: 'Not an automated tool. Not a template report. An expert who has ranked local businesses on Google across multiple industries — and knows what actually works in the Indian market.',
               },
               {
-                icon: '💬',
-                title: '1 Year WhatsApp Support',
-                desc: 'The learning doesn\'t stop after 4 hours. Stuck on Search Console? Unsure about a keyword? Just WhatsApp us. For a full year after your session.',
+                icon: '📋',
+                title: 'A Real Action Plan, Not Just Findings',
+                desc: 'You don\'t just hear what\'s wrong — you leave with a prioritised, written list of exactly what to fix first across GBP, website, AEO, GEO, and social.',
               },
             ].map(c => (
               <div key={c.title} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAF7] p-7">
@@ -790,42 +653,42 @@ export default function LearnSEOPage() {
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">What You Get</p>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] text-[#0F172A]">
               Everything Included.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Nothing Hidden.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Completely Free.</span>
             </h2>
-            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">₹999 — total fee (pay ₹1 today to book). Here's exactly what you walk away with.</p>
+            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">No cost, no obligation. Here's exactly what you walk away with.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5">
             {[
               {
                 icon: '🎙️',
-                title: '4 Hour Live One-on-One Masterclass',
-                desc: 'Just you and the trainer. No batch, no crowd. Full attention on your questions and your business. 🗣️ Language: Hindi + Hinglish — easy to follow, no jargon.',
+                title: '2 Hour Live One-on-One Audit',
+                desc: 'Just you and the auditor. No batch, no crowd. Full attention on your business. 🗣️ Language: Hindi + Hinglish — easy to follow, no jargon.',
               },
               {
                 icon: '🎬',
                 title: 'Full Recording Yours to Keep',
-                desc: 'Can\'t remember something? Rewatch anytime. The complete 4-hour session recording is yours forever.',
+                desc: 'Can\'t remember something? Rewatch anytime. The complete session recording is yours to keep, free.',
               },
               {
                 icon: '📖',
-                title: 'Complete SEO Playbook',
-                desc: 'A structured document covering every strategy taught in the session. Your go-to reference after the class.',
+                title: 'Written Audit Report',
+                desc: 'A structured document covering every finding from the session — your reference for exactly what needs fixing.',
               },
               {
                 icon: '✅',
-                title: '50+ Step SEO Checklist',
-                desc: 'The exact checklist Scalify uses to rank local business websites. Tick it off one by one for your own site.',
+                title: 'Prioritised Action Plan',
+                desc: 'Not a wall of issues — a clear, ranked list of what to fix first across GBP, website, AEO, GEO & social.',
               },
               {
-                icon: '💬',
-                title: '1 Year WhatsApp Support',
-                desc: 'Stuck at any step after the session? Just message. We reply. For a full year — no extra charge.',
+                icon: '🆓',
+                title: 'Zero Cost, No Pitch',
+                desc: 'Genuinely free — no card, no hidden charge, no obligation to buy anything afterward.',
               },
               {
                 icon: '🎯',
-                title: 'Taught with Your Business in Mind',
-                desc: 'Before the session, we learn about your industry and city. Every example and strategy is relevant to what you actually do.',
+                title: 'Audited With Your Business in Mind',
+                desc: 'Before the session, we learn about your industry and city. Every finding is relevant to what you actually do.',
               },
             ].map((item, i) => (
               <div key={i} className="rounded-2xl border border-[#E5E7EB] bg-white p-7 shadow-sm hover:shadow-md hover:border-[#16A34A]/30 transition-all">
@@ -841,7 +704,7 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="inline-block px-10 py-4 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-base font-bold hover:opacity-90 transition shadow-lg shadow-green-100"
             >
-              Book your Seat for ₹1
+              Book Free Audit
             </a>
           </div>
         </div>
@@ -853,17 +716,17 @@ export default function LearnSEOPage() {
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">Who This Is For</p>
             <h2 className="text-4xl font-extrabold tracking-tight leading-[1.05] text-[#0F172A] mb-8">
-              You built the website.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Now get it found.</span>
+              Any business.<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Anywhere in India.</span>
             </h2>
             <div className="space-y-4">
               {[
                 { icon: '🏪', label: 'Small business owner doing your own marketing' },
-                { icon: '💼', label: 'Freelancer managing SEO for clients' },
+                { icon: '💼', label: 'Freelancer or agency wanting a second opinion for a client' },
                 { icon: '🌐', label: 'You have a website but aren\'t ranking on Google' },
-                { icon: '🤖', label: 'You use AI tools but aren\'t sure if it\'s working' },
+                { icon: '🤖', label: 'You\'re not sure if AI tools like ChatGPT even know your business exists' },
                 { icon: '📍', label: 'Local business wanting to show up on Google Maps' },
-                { icon: '📈', label: 'Tired of paying for ads — want organic traffic' },
+                { icon: '📱', label: 'Posting on social media but not seeing results' },
               ].map(item => (
                 <div key={item.label} className="flex items-center gap-3 p-4 rounded-xl border border-[#E5E7EB] bg-white">
                   <span className="text-xl flex-shrink-0">{item.icon}</span>
@@ -874,16 +737,17 @@ export default function LearnSEOPage() {
           </div>
           <div className="bg-white border border-[#E5E7EB] rounded-2xl p-8 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">What You Walk Away With</p>
-            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">₹999 — everything included</h3>
+            <h3 className="text-2xl font-extrabold text-[#0F172A] mb-6">Free — everything included</h3>
             <div className="space-y-4">
               {[
-                '4-hour live one-on-one session',
-                'Taught with your business type as context',
-                '50+ step SEO checklist (the full Scalify task list)',
-                'Local SEO & Google Profile strategy',
-                'AI tools for SEO — what to use & how',
-                'Pay ₹1 today, remaining ₹998 at session start',
-                '1 year WhatsApp support — ask anything, anytime',
+                '2-hour live one-on-one audit',
+                'Audited with your business type & city as context',
+                'Google Business Profile & Local SEO review',
+                'Website SEO — technical, on-page & content',
+                'AEO — is your content answer-ready?',
+                'GEO — visibility in ChatGPT, Gemini & AI Overviews',
+                'Social Media Marketing snapshot & quick wins',
+                'A written, prioritised action plan',
               ].map(item => (
                 <div key={item} className="flex items-start gap-3">
                   <span className="w-5 h-5 rounded-full bg-gradient-to-br from-[#16A34A] to-[#0EA5E9] flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -899,33 +763,33 @@ export default function LearnSEOPage() {
               href="#enrol"
               className="mt-8 w-full py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-[#16A34A] to-[#15803D] hover:opacity-90 transition flex items-center justify-center text-sm shadow-lg shadow-green-100"
             >
-              Book your Seat for ₹1
+              Book Free Audit
             </a>
           </div>
         </div>
       </section>
 
-      {/* Modules */}
+      {/* Audit Areas */}
       <section className="py-24 px-4 sm:px-6 border-t border-[#E5E7EB] bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">Course Curriculum</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">What We Audit</p>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] text-[#0F172A]">
-              7 Modules.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">50+ Steps. Zero Fluff.</span>
+              5 Areas.<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Zero Fluff.</span>
             </h2>
-            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">The same checklist Scalify uses to rank local business websites — now taught live, explained in the context of your business.</p>
+            <p className="mt-4 text-[#6B7280] max-w-xl mx-auto text-base">The same checklist Scalify uses to audit local business websites — now done live, in the context of your business.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            {MODULES.map(mod => (
-              <div key={mod.number} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAF7] p-7">
+            {AUDIT_AREAS.map(area => (
+              <div key={area.number} className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAF7] p-7">
                 <div className="flex items-center gap-3 mb-5">
-                  <span className="text-xs font-extrabold text-[#16A34A] bg-[#16A34A]/10 border border-[#16A34A]/20 rounded-lg px-2.5 py-1 tracking-widest">{mod.number}</span>
-                  <h3 className="text-[#0F172A] font-bold text-base leading-snug">{mod.title}</h3>
+                  <span className="text-xs font-extrabold text-[#16A34A] bg-[#16A34A]/10 border border-[#16A34A]/20 rounded-lg px-2.5 py-1 tracking-widest">{area.number}</span>
+                  <h3 className="text-[#0F172A] font-bold text-base leading-snug">{area.title}</h3>
                 </div>
                 <ul className="space-y-2.5">
-                  {mod.topics.map(t => (
+                  {area.topics.map(t => (
                     <li key={t} className="flex items-start gap-2.5 text-sm text-[#6B7280]">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] flex-shrink-0 mt-1.5" />
                       {t}
@@ -945,10 +809,10 @@ export default function LearnSEOPage() {
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#9CA3AF] mb-4">Proof It Works</p>
             <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05] text-[#0F172A]">
               This Is What<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">SEO Looks Like.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Good SEO Looks Like.</span>
             </h2>
             <p className="mt-4 text-[#6B7280] text-base max-w-2xl mx-auto">
-              Real Google Search Console results from businesses that used this exact SEO framework. This is what you'll learn to do for your own business.
+              Real Google Search Console results from businesses that fixed what our audits found. This is what's possible once you know what's broken.
             </p>
           </div>
 
@@ -1006,25 +870,25 @@ export default function LearnSEOPage() {
         </div>
         <div className="relative max-w-3xl mx-auto text-center">
           <h2 className="text-5xl sm:text-6xl font-extrabold leading-[0.95] tracking-tight mb-6 text-[#0F172A]">
-            Your competitor<br />is learning SEO.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Are you?</span>
+            Your competitor<br />just got audited.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#16A34A] to-[#0EA5E9]">Have you?</span>
           </h2>
           <p className="text-[#6B7280] text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-            4 hours. ₹999 total. Pay ₹1 today to book. 1 year of support. Everything you need to start ranking your business on Google — taught with your business in mind.
+            2 hours. Completely free. A live, one-on-one audit of your Google Business Profile, Website SEO, AEO, GEO & Social Media — taught with your business in mind.
           </p>
           <a
             href="#enrol"
             className="inline-block px-12 py-5 rounded-2xl bg-gradient-to-r from-[#16A34A] to-[#15803D] text-white text-lg font-extrabold hover:opacity-90 transition shadow-2xl shadow-green-100"
           >
-            Book your Seat for ₹1
+            Book Free Audit
           </a>
-          <p className="mt-4 text-sm text-[#9CA3AF]">₹999 total · pay ₹1 today, remaining ₹998 at start of session.</p>
+          <p className="mt-4 text-sm text-[#9CA3AF]">100% free · no card required · instantly confirmed.</p>
         </div>
       </section>
 
       {/* WhatsApp Floating Button */}
       <a
-        href="https://wa.me/916353583148?text=Hi%2C%20I%27m%20interested%20in%20the%20SEO%20Masterclass.%20Can%20you%20help%20me%3F"
+        href="https://wa.me/916353583148?text=Hi%2C%20I%27m%20interested%20in%20the%20Free%20Business%20Audit.%20Can%20you%20help%20me%3F"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 bg-[#25D366] text-white px-4 py-3 rounded-full shadow-2xl hover:bg-[#20BA5A] active:scale-95 transition-all group"
